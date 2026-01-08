@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Premium Calculator - Postal Life Insurance</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-container">
+        <div class="logo-area">
+          <div class="logo-text">PLI</div>
+        </div>
+        <button class="mobile-menu-btn" aria-label="Toggle navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <ul class="nav-links">
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#why">Why PLI</a></li>
+          <li><a href="index.html#products">Products</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="hero" style="min-height: 40vh; padding: 3rem 2rem">
+      <div class="hero-content">
+        <h1>Premium Calculator</h1>
+        <p class="hero-subtitle">Plan Your Future</p>
+        <p class="hero-desc">
+          Estimate your premiums and returns instantly with our easy-to-use
+          calculator w.e.f. April 2024 rates.
+        </p>
+      </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="section">
+      <div class="container">
+        <div class="calculator-wrapper">
+          <form id="premium-form" class="calculator-form">
+            <h2
+              class="section-title"
+              style="font-size: 1.8rem; margin-bottom: 1.5rem">
+              Calculate Your Premium
+            </h2>
+
+            <div class="form-group">
+              <label for="policyType">Policy Type</label>
+              <select id="policyType" required>
+                <option value="" disabled selected>Select a Policy</option>
+                <option value="WLA">Whole Life Assurance (Suraksha)</option>
+                <option value="EA">Endowment Assurance (Santosh)</option>
+                <option value="CWLA">Convertible Whole Life (Suvidha)</option>
+                <option value="AEA">Anticipated Endowment (Sumangal)</option>
+                <option value="JLEA">Joint Life (Yugal Suraksha)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="age">Age (Next Birthday)</label>
+              <input
+                type="number"
+                id="age"
+                min="19"
+                max="55"
+                placeholder="e.g., 30"
+                required />
+            </div>
+
+            <div class="form-group">
+              <label for="term">Policy Term (Years)</label>
+              <input
+                type="number"
+                id="term"
+                min="5"
+                max="40"
+                placeholder="e.g., 20"
+                required />
+            </div>
+
+            <div class="form-group">
+              <label for="sumAssured">Sum Assured (₹)</label>
+              <input
+                type="number"
+                id="sumAssured"
+                min="20000"
+                step="10000"
+                placeholder="e.g., 500000"
+                required />
+              <small style="color: #666; font-size: 0.8rem"
+                >Min: ₹20,000 | Max: ₹50 Lakhs</small
+              >
+            </div>
+
+            <button
+              type="submit"
+              class="cta-button"
+              style="width: 100%; border-radius: 8px">
+              Calculate Premium
+            </button>
+          </form>
+
+          <div id="result-card" class="result-card" style="display: none">
+            <h3>Estimated Premium</h3>
+            <div class="result-row">
+              <span>Monthly Premium:</span>
+              <span id="monthly-premium" class="amount">₹0</span>
+            </div>
+            <div class="result-row">
+              <span>Yearly Premium:</span>
+              <span id="yearly-premium" class="amount">₹0</span>
+            </div>
+
+            <div class="bonus-est">
+              <h4>Estimated Maturity Benefit</h4>
+              <p class="amount-large" id="maturity-benefit">₹0</p>
+              <p class="disclaimer">
+                * Includes estimated bonus based on current rates.
+              </p>
+            </div>
+
+            <div class="note">
+              <p>
+                <i class="ri-information-line"></i> Note: These are indicative
+                figures. Actual premium may vary slightly based on rebates and
+                taxes (if applicable).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-content">
+          <!-- Brand Column -->
+          <div class="footer-section brand-section">
+            <div class="footer-logo">PLI</div>
+            <p class="footer-desc">
+              Postal Life Insurance, serving the nation since 1884. Providing
+              financial security with sovereign guarantee.
+            </p>
+            <div class="social-links">
+              <a href="#" aria-label="Facebook"
+                ><i class="ri-facebook-fill"></i
+              ></a>
+              <a href="#" aria-label="Twitter"
+                ><i class="ri-twitter-x-line"></i
+              ></a>
+              <a href="#" aria-label="Instagram"
+                ><i class="ri-instagram-line"></i
+              ></a>
+              <a href="#" aria-label="LinkedIn"
+                ><i class="ri-linkedin-fill"></i
+              ></a>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="footer-section links-section">
+            <h3>Quick Links</h3>
+            <ul>
+              <li><a href="index.html#about">About Us</a></li>
+              <li><a href="index.html#products">Our Products</a></li>
+              <li><a href="index.html#why">Why Choose PLI</a></li>
+              <li><a href="index.html#contact">Contact Us</a></li>
+            </ul>
+          </div>
+
+          <!-- Resources -->
+          <div class="footer-section links-section">
+            <h3>Resources</h3>
+            <ul>
+              <li>
+                <a href="calculator.html" style="color: var(--accent-gold)"
+                  >Premium Calculator</a
+                >
+              </li>
+              <li><a href="#">Customer Guidelines</a></li>
+              <li><a href="#">Download Forms</a></li>
+              <li><a href="#">Bonus History</a></li>
+            </ul>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="footer-section contact-info-section">
+            <h3>Contact Us</h3>
+            <ul>
+              <li>
+                <i class="ri-map-pin-line"></i>
+                <span
+                  >Directorate of Postal Life Insurance,<br />Chanakyapuri, New
+                  Delhi - 110021</span
+                >
+              </li>
+              <li>
+                <i class="ri-phone-line"></i>
+                <a href="tel:18002666868">1800 266 6868</a>
+              </li>
+              <li>
+                <i class="ri-mail-line"></i>
+                <a href="mailto:pli@indiapost.gov.in">pli@indiapost.gov.in</a>
+              </li>
+              <li>
+                <i class="ri-global-line"></i>
+                <a href="https://pli.indiapost.gov.in" target="_blank"
+                  >pli.indiapost.gov.in</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; <span id="current-year">2024</span> Postal Life Insurance -
+            Government of India. All Rights Reserved.
+          </p>
+          <div class="footer-legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Disclaimer</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script src="script.js"></script>
+    <script src="calculator.js"></script>
+  </body>
+</html>
