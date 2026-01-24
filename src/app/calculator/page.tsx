@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 type PolicyType = 'WLA' | 'EA' | 'CWLA' | 'AEA' | 'JLEA' | '';
@@ -38,8 +39,6 @@ export default function CalculatorPage() {
     }
 
     // --- LOGIC PORTED FROM calculator.js ---
-
-    // Bonus Rate Lookup
     let bonusRate = 0;
     switch (policyType) {
       case 'WLA':
@@ -65,7 +64,6 @@ export default function CalculatorPage() {
     const annualBonus = bonusUnits * bonusRate;
     const totalBonus = annualBonus * term;
 
-    // Terminal Bonus
     let terminalBonus = 0;
     if (
       (policyType === 'EA' || policyType === 'WLA' || policyType === 'CWLA') &&
@@ -74,7 +72,6 @@ export default function CalculatorPage() {
       terminalBonus = Math.min((sumAssured / 10000) * 20, 1000);
     }
 
-    // Premium Interpolation
     const getMonthlyPremiumFor1Lakh = (type: string, t: number) => {
       const interpolate = (
         x1: number,
@@ -97,15 +94,11 @@ export default function CalculatorPage() {
         return 495;
       }
       if (type === 'CWLA' || type === 'WLA') {
-        // Recursive call for EA base, then scale
-        // We need to implement EA logic here directly or recursively.
-        // Let's copy EA logic for simplicity to avoid recursion issues if structure changes
         let eaPrem = 0;
         if (t <= 5) eaPrem = 1720;
         else if (t <= 10) eaPrem = interpolate(5, 1720, 10, 835, t);
         else if (t <= 20) eaPrem = interpolate(10, 835, 20, 395, t);
         else eaPrem = interpolate(20, 395, 30, 255, t);
-
         return eaPrem * 0.76;
       }
       return 0;
@@ -115,14 +108,13 @@ export default function CalculatorPage() {
     const saFactor = sumAssured / 100000;
     const grossMonthlyPremium = Math.ceil(basePrem1Lakh * saFactor);
 
-    // Rebate
     let monthlyRebate = 0;
     if (sumAssured >= 20000) {
       monthlyRebate = Math.floor(sumAssured / 20000);
     }
 
     const netMonthlyPremium = grossMonthlyPremium - monthlyRebate;
-    const finalPremium = netMonthlyPremium; // GST 0
+    const finalPremium = netMonthlyPremium;
 
     const maturityAmount = sumAssured + totalBonus + terminalBonus;
 
@@ -138,188 +130,216 @@ export default function CalculatorPage() {
   };
 
   return (
-    <main>
-      <section className="hero bg-gradient-to-br from-[var(--primary-red)] via-[#a82333] to-[var(--primary-dark)] text-white py-16 px-8 text-center min-h-[40vh] flex flex-col justify-center">
-        <div className="container-custom">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Premium Calculator
-          </h1>
-          <p className="text-xl md:text-2xl font-semibold text-[var(--accent-gold)] mb-2">
-            Plan Your Future
-          </p>
-          <p className="text-lg opacity-95">
-            Estimate your premiums and returns instantly with our easy-to-use
-            calculator w.e.f. April 2024 rates.
-          </p>
+    <main className="min-h-screen bg-[var(--bg-light)]">
+      {/* Header */}
+      <section className="bg-[var(--primary-dark)] text-white py-12 px-6">
+        <div className="container-custom flex flex-col md:flex-row items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Premium Calculator</h1>
+            <p className="opacity-80">
+              Plan your financial future with accuracy
+            </p>
+          </div>
+          <Link
+            href="/"
+            className="text-[var(--accent-gold)] hover:text-white transition-colors mt-4 md:mt-0 font-medium">
+            <i className="ri-arrow-left-line mr-2"></i> Back to Home
+          </Link>
         </div>
       </section>
 
-      <section className="py-16 px-8">
+      <section className="py-12 px-6">
         <div className="container-custom">
-          <div className="max-w-[600px] mx-auto">
-            <form
-              onSubmit={handleCalculate}
-              className="bg-white p-10 rounded-xl shadow-[0_8px_25px_rgba(0,0,0,0.08)]">
-              <h2 className="text-3xl text-[var(--primary-red)] mb-6 text-center relative after:content-[''] after:block after:w-20 after:h-1 after:bg-[var(--accent-gold)] after:mx-auto after:mt-2">
-                Calculate Your Premium
-              </h2>
-
-              <div className="mb-6">
-                <label className="block font-semibold mb-2 text-[var(--primary-dark)]">
-                  Policy Type
-                </label>
-                <select
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md focus:border-[var(--primary-red)] focus:ring-1 focus:ring-[var(--primary-red)] outline-none"
-                  value={formData.policyType}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      policyType: e.target.value as PolicyType,
-                    })
-                  }>
-                  <option value="" disabled>
-                    Select a Policy
-                  </option>
-                  <option value="WLA">Whole Life Assurance (Suraksha)</option>
-                  <option value="EA">Endowment Assurance (Santosh)</option>
-                  <option value="CWLA">Convertible Whole Life (Suvidha)</option>
-                  <option value="AEA">Anticipated Endowment (Sumangal)</option>
-                  <option value="JLEA">Joint Life (Yugal Suraksha)</option>
-                </select>
-              </div>
-
-              <div className="mb-6">
-                <label className="block font-semibold mb-2 text-[var(--primary-dark)]">
-                  Age (Next Birthday)
-                </label>
-                <input
-                  type="number"
-                  min="19"
-                  max="55"
-                  required
-                  placeholder="e.g., 30"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:border-[var(--primary-red)] focus:ring-1 focus:ring-[var(--primary-red)] outline-none"
-                  value={formData.age}
-                  onChange={(e) =>
-                    setFormData({ ...formData, age: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="block font-semibold mb-2 text-[var(--primary-dark)]">
-                  Policy Term (Years)
-                </label>
-                <input
-                  type="number"
-                  min="5"
-                  max="40"
-                  required
-                  placeholder="e.g., 20"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:border-[var(--primary-red)] focus:ring-1 focus:ring-[var(--primary-red)] outline-none"
-                  value={formData.term}
-                  onChange={(e) =>
-                    setFormData({ ...formData, term: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="block font-semibold mb-2 text-[var(--primary-dark)]">
-                  Sum Assured (₹)
-                </label>
-                <input
-                  type="number"
-                  min="20000"
-                  step="10000"
-                  required
-                  placeholder="e.g., 500000"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:border-[var(--primary-red)] focus:ring-1 focus:ring-[var(--primary-red)] outline-none"
-                  value={formData.sumAssured}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sumAssured: e.target.value })
-                  }
-                />
-                <small className="text-gray-500 text-sm mt-1 block">
-                  Min: ₹20,000 | Max: ₹50 Lakhs
-                </small>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[var(--accent-gold)] text-[var(--primary-dark)] py-4 rounded-lg font-bold text-lg hover:-translate-y-0.5 hover:shadow-lg transition-all">
-                Calculate Premium
-              </button>
-            </form>
-
-            {result && (
-              <div className="bg-gradient-to-br from-[var(--primary-dark)] to-[#2c3e50] text-white p-8 rounded-xl mt-8 shadow-2xl animate-[slideUp_0.5s_ease-out]">
-                <h3 className="text-[var(--accent-gold)] border-b border-white/10 pb-4 mb-6 text-xl font-bold">
-                  Estimated Premium
-                </h3>
-
-                <div className="flex justify-between items-center mb-4 text-lg">
-                  <span>Monthly Premium:</span>
-                  <span className="font-bold text-2xl">
-                    ₹{Math.ceil(result.monthlyPremium).toLocaleString()}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Calculator Form */}
+            <div className="lg:col-span-7">
+              <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                <h2 className="text-xl font-bold text-[var(--primary-dark)] mb-6 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-[var(--primary-red)] text-white flex items-center justify-center text-sm">
+                    1
                   </span>
-                </div>
-                <div className="flex justify-between items-center mb-4 text-lg">
-                  <span>Yearly Premium:</span>
-                  <span className="font-bold text-2xl">
-                    ₹{Math.ceil(result.yearlyPremium).toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-dashed border-white/20 text-sm text-[#ccc]">
-                  <div className="flex justify-between mb-2">
-                    <span>Gross Monthly:</span>{' '}
-                    <span>₹{result.grossMonthlyPremium}</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span>Rebate:</span>{' '}
-                    <span className="text-green-400">
-                      -₹{result.monthlyRebate}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span>Total Bonus:</span>{' '}
-                    <span className="text-[var(--accent-gold)]">
-                      +₹{result.totalBonus.toLocaleString()}
-                    </span>
-                  </div>
-                  {result.terminalBonus > 0 && (
-                    <div className="flex justify-between mb-2">
-                      <span>Terminal Bonus:</span>{' '}
-                      <span className="text-[#fea47f]">
-                        +₹{result.terminalBonus.toLocaleString()}
-                      </span>
+                  Enter Details
+                </h2>
+                <form onSubmit={handleCalculate} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-[var(--text-dark)] mb-2">
+                        Policy Type
+                      </label>
+                      <select
+                        required
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-[var(--primary-red)] focus:ring-2 focus:ring-[var(--primary-red)]/10 outline-none transition-all"
+                        value={formData.policyType}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            policyType: e.target.value as PolicyType,
+                          })
+                        }>
+                        <option value="">Select Policy</option>
+                        <option value="WLA">
+                          Whole Life Assurance (Suraksha)
+                        </option>
+                        <option value="EA">
+                          Endowment Assurance (Santosh)
+                        </option>
+                        <option value="CWLA">
+                          Convertible Whole Life (Suvidha)
+                        </option>
+                        <option value="AEA">
+                          Anticipated Endowment (Sumangal)
+                        </option>
+                        <option value="JLEA">
+                          Joint Life (Yugal Suraksha)
+                        </option>
+                      </select>
                     </div>
-                  )}
-                </div>
 
-                <div className="bg-white/10 p-6 rounded-lg mt-6 text-center">
-                  <h4 className="text-sm uppercase tracking-wider opacity-90 mb-2">
-                    Estimated Maturity Benefit
-                  </h4>
-                  <p className="text-4xl font-bold text-[var(--accent-gold)] my-2">
-                    ₹{result.maturityAmount.toLocaleString()}
-                  </p>
-                  <p className="text-xs opacity-70 italic">
-                    * Includes estimated bonus based on current rates.
-                  </p>
-                </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[var(--text-dark)] mb-2">
+                        My Age
+                      </label>
+                      <input
+                        type="number"
+                        min="19"
+                        max="55"
+                        required
+                        placeholder="Years"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-[var(--primary-red)] focus:ring-2 focus:ring-[var(--primary-red)]/10 outline-none transition-all"
+                        value={formData.age}
+                        onChange={(e) =>
+                          setFormData({ ...formData, age: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
 
-                <div className="mt-6 text-sm opacity-80 flex gap-2">
-                  <i className="ri-information-line"></i>
-                  <p>
-                    Note: These are indicative figures. Actual premium may vary
-                    slightly based on rebates and taxes.
-                  </p>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-[var(--text-dark)] mb-2">
+                        Policy Term
+                      </label>
+                      <input
+                        type="number"
+                        min="5"
+                        max="40"
+                        required
+                        placeholder="Years"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-[var(--primary-red)] focus:ring-2 focus:ring-[var(--primary-red)]/10 outline-none transition-all"
+                        value={formData.term}
+                        onChange={(e) =>
+                          setFormData({ ...formData, term: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[var(--text-dark)] mb-2">
+                        Sum Assured (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="20000"
+                        step="10000"
+                        required
+                        placeholder="Min ₹20,000"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-[var(--primary-red)] focus:ring-2 focus:ring-[var(--primary-red)]/10 outline-none transition-all"
+                        value={formData.sumAssured}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            sumAssured: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      className="w-full md:w-auto md:min-w-[200px] bg-[var(--primary-red)] text-white py-4 rounded-xl font-bold text-lg hover:-translate-y-1 hover:shadow-xl transition-all">
+                      Calculate Quote
+                    </button>
+                  </div>
+                </form>
               </div>
-            )}
+            </div>
+
+            {/* Result Section */}
+            <div className="lg:col-span-5">
+              {result ? (
+                <div className="bg-white rounded-2xl shadow-[var(--shadow-card-hover)] overflow-hidden animate-[fadeIn_0.5s_ease-out]">
+                  <div className="bg-[var(--primary-dark)] text-white p-6">
+                    <h3 className="text-lg font-medium opacity-90">
+                      Estimated Premium
+                    </h3>
+                    <div className="flex items-baseline gap-1 mt-2">
+                      <span className="text-4xl font-bold">
+                        ₹{Math.ceil(result.monthlyPremium).toLocaleString()}
+                      </span>
+                      <span className="text-sm">/ month</span>
+                    </div>
+                    <p className="text-sm mt-1 opacity-70">
+                      ₹{Math.ceil(result.yearlyPremium).toLocaleString()} / year
+                    </p>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="space-y-4 mb-6">
+                      <div className="flex justify-between text-sm py-2 border-b border-gray-100">
+                        <span className="text-[var(--text-light)]">
+                          Gross Monthly
+                        </span>
+                        <span className="font-medium">
+                          ₹{result.grossMonthlyPremium}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm py-2 border-b border-gray-100">
+                        <span className="text-[var(--text-light)]">
+                          Rebate Benefit
+                        </span>
+                        <span className="font-medium text-green-600">
+                          -₹{result.monthlyRebate}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm py-2 border-b border-gray-100 bg-orange-50/50 -mx-6 px-6">
+                        <span className="text-[var(--text-dark)] font-semibold">
+                          Total Bonus
+                        </span>
+                        <span className="font-bold text-[var(--primary-red)]">
+                          +₹{result.totalBonus.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[var(--bg-light)] p-5 rounded-xl text-center border border-[var(--accent-gold)]/20">
+                      <p className="text-sm text-[var(--text-light)] uppercase tracking-wider font-semibold mb-2">
+                        Maturity Benefit
+                      </p>
+                      <p className="text-3xl font-bold text-[var(--accent-gold)]">
+                        ₹{result.maturityAmount.toLocaleString()}
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-center text-gray-400 mt-6 mt-4">
+                      * Indicative figures. Actual returns may vary slightly.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full bg-white/50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center p-8 text-center min-h-[300px]">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400 text-2xl">
+                    <i className="ri-calculator-line"></i>
+                  </div>
+                  <h3 className="text-lg font-semibold text-[var(--text-light)]">
+                    No Calculation Yet
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-2 max-w-[200px]">
+                    Fill in the details to see your premium and returns.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>

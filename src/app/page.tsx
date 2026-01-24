@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
 export default function Home() {
@@ -9,15 +10,14 @@ export default function Home() {
     // Scroll Animation similar to script.js
     const observerOptions = {
       threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px',
+      rootMargin: '0px 0px -50px 0px',
     };
 
     scrollObserver.current = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           (entry.target as HTMLElement).style.animation =
-            'fadeIn 0.6s ease-in-out forwards';
-          (entry.target as HTMLElement).style.opacity = '1';
+            'fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards';
         }
       });
     }, observerOptions);
@@ -41,93 +41,144 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-[var(--bg-light)]">
       {/* Hero Section */}
-      <section className="hero bg-gradient-to-br from-[var(--primary-red)] via-[#a82333] to-[var(--primary-dark)] text-white py-32 px-8 text-center">
-        <div className="container-custom">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-md">
+      <section className="relative bg-gradient-to-br from-[#d9233b] via-[#9e1c2e] to-[#1a202c] text-white py-32 md:py-40 px-6 overflow-hidden">
+        {/* Abstract Background Element */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white opacity-5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[var(--accent-gold)] opacity-10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
+
+        <div className="container-custom relative z-10 text-center flex flex-col items-center">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight drop-shadow-lg">
             Postal Life Insurance
           </h1>
-          <p className="text-2xl md:text-3xl font-semibold text-[var(--accent-gold)] mb-2">
-            Insuring Lives, Assuring Happiness Since 1884
+          <p className="text-2xl md:text-3xl font-medium text-[var(--accent-gold)] mb-4 tracking-wide uppercase">
+            Insuring Lives, Assuring Happiness
           </p>
-          <p className="text-xl opacity-95 mb-8 leading-relaxed max-w-3xl mx-auto">
-            India&apos;s Oldest Life Insurer | Sovereign Guarantee | High Bonus
-            | Low Premium
-            <br />
-            <strong>Guaranteed by President of India</strong>
+          <div className="h-1 w-24 bg-[var(--accent-gold)] rounded-full mb-8"></div>
+
+          <p className="text-lg md:text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
+            Experience the trust of India&apos;s oldest life insurer.{' '}
+            <br className="hidden md:block" />
+            Backed by a{' '}
+            <span className="font-semibold text-white">
+              Sovereign Guarantee
+            </span>{' '}
+            from the Government of India.
           </p>
-          <button
-            onClick={() => scrollToSection('about')}
-            className="inline-block bg-[var(--accent-gold)] text-[var(--primary-dark)] py-4 px-10 rounded-full font-bold text-lg hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(212,175,55,0.4)] transition-all cursor-pointer">
-            Learn More
-          </button>
+
+          <div className="flex flex-col md:flex-row gap-6">
+            <button
+              onClick={() => scrollToSection('about')}
+              className="btn-primary shadow-lg shadow-black/20">
+              Discover More
+            </button>
+            <Link
+              href="/calculator"
+              className="bg-transparent border-2 border-[var(--accent-gold)] text-[var(--accent-gold)] py-3 px-8 rounded-full font-bold text-lg hover:bg-[var(--accent-gold)] hover:text-[var(--primary-dark)] hover:-translate-y-1 transition-all duration-300">
+              Calculate Premium
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="py-16 md:py-24 px-8" id="about">
+      <section className="py-20 md:py-24 px-6 relative" id="about">
         <div className="container-custom">
-          <h2 className="section-title">About Postal Life Insurance</h2>
-          <div className="mt-12 animate-on-scroll">
-            <p className="text-[1.1rem] text-[var(--text-light)] leading-loose mb-6">
-              Postal Life Insurance (PLI), introduced in 1884, is the oldest
-              life insurance scheme in India. Backed by the Government of India,
-              PLI offers a unique combination of financial security, attractive
-              bonuses, and affordable premiums, making it one of the most
-              reliable insurance products in the country.
-            </p>
-            <div className="bg-[var(--accent-gold)] text-white p-8 rounded-xl mt-8 shadow-lg">
-              <h3 className="text-2xl font-bold mb-2 text-white mt-0">
-                Key Highlight: GST-Free Premiums (Effective 22.09.2025)
-              </h3>
-              <p className="mb-0 text-white">
-                No GST is applicable on PLI premiums, making PLI policies even
-                more economical compared to other life insurance products.
-              </p>
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-[var(--shadow-card)] border border-gray-100 animate-on-scroll">
+            <h2 className="section-title !mb-8">Heritage Meets Modernity</h2>
+            <div className="flex flex-col md:flex-row gap-12 items-center">
+              <div className="flex-1">
+                <p className="text-lg text-[var(--text-dark)] leading-loose mb-6 font-light">
+                  Established in{' '}
+                  <strong className="text-[var(--primary-red)]">1884</strong>,
+                  Postal Life Insurance (PLI) is the oldest and most trusted
+                  life insurance provider in the country. Unlike commercial
+                  insurers, we operate with a primary goal of welfare, offering
+                  distinct advantages like low premiums and high bonus rates.
+                </p>
+                <p className="text-lg text-[var(--text-light)] leading-loose">
+                  Your policy is secured by the sovereign guarantee of the
+                  Government of India, ensuring your investment is 100% safe.
+                </p>
+              </div>
+              <div className="flex-1 w-full">
+                <div className="bg-gradient-to-br from-[var(--primary-dark)] to-slate-800 text-white p-8 rounded-2xl shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                  <h3 className="text-2xl font-bold mb-4 text-[var(--accent-gold)] border-b border-white/10 pb-4">
+                    Why is it cheaper?
+                  </h3>
+                  <p className="mb-4 opacity-90">
+                    Operations are managed through the existing postal network,
+                    significantly reducing administrative costs. These savings
+                    are passed directly to you as{' '}
+                    <strong>Higher Bonuses</strong>.
+                  </p>
+                  <div className="bg-[var(--accent-gold)]/20 p-4 rounded-lg border border-[var(--accent-gold)]/30 mt-6">
+                    <span className="block text-sm uppercase tracking-wider text-[var(--accent-gold)] font-bold mb-1">
+                      Update
+                    </span>
+                    <p className="text-sm font-medium">
+                      Effective 22.09.2025, PLI premiums are{' '}
+                      <span className="text-white bg-[var(--primary-red)] px-2 py-0.5 rounded text-xs ml-1">
+                        GST FREE
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why Choose PLI */}
-      <section className="py-16 md:py-24 px-8 bg-[var(--bg-light)]" id="why">
+      {/* Features Grid */}
+      <section className="py-20 px-6 bg-white" id="why">
         <div className="container-custom">
-          <h2 className="section-title">Why Choose Postal Life Insurance?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+          <h2 className="section-title">The PLI Advantage</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
             {[
               {
-                title: '🛡️ Sovereign Guarantee',
-                desc: "All PLI policies are fully backed by the Government of India, ensuring complete safety of policyholders' funds.",
+                icon: 'ri-shield-check-fill',
+                title: 'Sovereign Guarantee',
+                desc: '100% security of capital and returns, backed by the Union Government.',
               },
               {
-                title: '💰 Low Premium, High Bonus',
-                desc: 'Operated through the extensive postal network with minimal administrative costs, allowing higher benefits to customers.',
+                icon: 'ri-money-diamond-circle-fill',
+                title: 'Low Premium, High Bonus',
+                desc: 'Unmatched returns compared to any other insurer in the market.',
               },
               {
-                title: '📈 Consistently High Bonus',
-                desc: 'PLI regularly declares bonus rates that are higher than many commercial life insurers.',
+                icon: 'ri-bar-chart-grouped-fill',
+                title: 'Consistently High Bonus',
+                desc: 'We consistently declare higher bonus rates due to low operational costs.',
               },
               {
-                title: '💳 Tax Benefits',
-                desc: 'Premiums eligible for deduction under Section 80C. Maturity & death benefits tax-free under Section 10(10D).',
+                icon: 'ri-percent-line',
+                title: 'Tax Benefits',
+                desc: 'Tax exemptions under Sec 80C (Premium) and Sec 10(10D) (Maturity).',
               },
               {
-                title: '🆓 GST-Free Premiums',
-                desc: 'No GST applicable on PLI premiums since 22.09.2025, making it more economical than other insurers.',
+                icon: 'ri-hand-coin-fill',
+                title: 'GST-Free Premiums',
+                desc: 'Save flat 18% instantly compared to private insurers. Full value for money.',
               },
               {
-                title: '🎯 Systematic Investment',
-                desc: 'Small investments towards big goals without any risk. Transparent and reliable returns.',
+                icon: 'ri-safe-2-fill',
+                title: 'Systematic Investment',
+                desc: "A disciplined way to build a corpus for retirement or child's education.",
               },
             ].map((item, index) => (
               <div
                 key={index}
-                className="feature-card bg-white p-8 rounded-xl shadow-md border-l-4 border-[var(--primary-red)] hover:-translate-y-2 hover:shadow-xl transition-all animate-on-scroll">
-                <h3 className="text-xl font-bold text-[var(--primary-red)] mb-4">
+                className="group p-8 rounded-2xl bg-[var(--bg-light)] border border-transparent hover:border-[var(--accent-gold)] hover:bg-white card-hover relative overflow-hidden animate-on-scroll">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--accent-gold)] opacity-5 rounded-bl-full group-hover:opacity-10 transition-opacity"></div>
+                <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-md mb-6 text-[var(--primary-red)] text-2xl group-hover:bg-[var(--primary-red)] group-hover:text-white transition-colors duration-300">
+                  <i className={item.icon}></i>
+                </div>
+                <h3 className="text-xl font-bold text-[var(--primary-dark)] mb-3">
                   {item.title}
                 </h3>
-                <p className="text-[var(--text-light)] text-[0.95rem]">
+                <p className="text-[var(--text-light)] text-[0.95rem] leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -136,69 +187,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Eligibility Section */}
-      <section className="py-16 md:py-24 px-8 bg-white">
+      {/* Eligibility Section - Clean Modern List */}
+      <section className="py-20 px-6 bg-[var(--bg-light)]">
         <div className="container-custom">
-          <h2 className="section-title">Who Is Eligible for PLI?</h2>
-          <p className="text-center text-[var(--text-light)] mb-8">
-            PLI coverage is available to a wide range of employees and
-            professionals
+          <h2 className="section-title">Who Can Apply?</h2>
+          <p className="text-center text-[var(--text-light)] max-w-2xl mx-auto mb-16">
+            Previously exclusive to postal employees, PLI is now available to a
+            wide range of professionals and employees across India.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                title: 'Government & Public Sector',
+                title: 'Government Sector',
+                icon: 'ri-building-2-line',
                 items: [
-                  'Central & State Government employees',
-                  'Defence and Paramilitary Forces',
-                  'Local Bodies and Autonomous Bodies',
-                  'Nationalized & Commercial Banks',
-                  'Reserve Bank of India',
-                  'Public Sector Undertakings (PSUs)',
+                  'Central & State Govt.',
+                  'Defense & Paramilitary',
+                  'PSUs & Banks',
+                  'Local Bodies',
                 ],
               },
               {
-                title: 'Institutions',
+                title: 'Education',
+                icon: 'ri-book-open-line',
                 items: [
-                  'Government-aided Educational Institutions',
-                  'AICTE/CBSE Accredited Institutions',
-                  'Recognized Educational Bodies',
+                  'Govt. Aided Schools',
+                  'Universities',
+                  'AICTE/CBSE/NAAC Inst.',
+                  'Private School Staff',
                 ],
               },
               {
-                title: 'Private Sector (Listed Companies)',
+                title: 'Private Sector',
+                icon: 'ri-briefcase-4-line',
                 items: [
-                  'NSE/BSE Listed Companies',
-                  'IT, Banking, Pharma, Energy',
-                  'Manufacturing & Other Sectors',
+                  'NSE/BSE Listed Co.',
+                  'IT & Banking',
+                  'Manufacturing',
+                  'Joint Ventures',
                 ],
               },
               {
                 title: 'Professionals',
+                icon: 'ri-stethoscope-line',
                 items: [
-                  'Doctors, Engineers, CAs',
-                  'Company Secretaries',
-                  'Architects, Lawyers, Journalists',
-                  'Bankers, Management Consultants',
-                  'Nurses, Paramedical Staff',
-                  'ITI/AMIE/Graduate/Diploma Holders',
+                  'Doctors & Engineers',
+                  'CAs & Architects',
+                  'Lawyers & Bankers',
+                  'Diploma Holders',
                 ],
               },
             ].map((category, idx) => (
               <div
                 key={idx}
-                className="bg-[var(--bg-light)] p-6 rounded-lg border-t-[3px] border-[var(--primary-red)] animate-on-scroll">
-                <h4 className="text-[var(--primary-red)] font-bold mb-4 text-lg">
-                  {category.title}
-                </h4>
-                <ul className="list-none pl-0">
+                className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100/50 animate-on-scroll hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                  <i
+                    className={`${category.icon} text-2xl text-[var(--primary-red)]`}></i>
+                  <h4 className="text-[var(--primary-dark)] font-bold text-lg leading-tight">
+                    {category.title}
+                  </h4>
+                </div>
+                <ul className="space-y-3">
                   {category.items.map((item, i) => (
                     <li
                       key={i}
-                      className="py-2 pl-6 relative text-[var(--text-light)] text-sm">
-                      <span className="absolute left-0 text-[var(--primary-red)] font-bold">
-                        ✓
-                      </span>
+                      className="flex items-start gap-3 text-[var(--text-light)] text-sm font-medium">
+                      <i className="ri-check-line text-green-500 mt-0.5 font-bold"></i>
                       {item}
                     </li>
                   ))}
@@ -210,114 +265,86 @@ export default function Home() {
       </section>
 
       {/* Products Section */}
-      <section
-        className="py-16 md:py-24 px-8 bg-[var(--bg-light)]"
-        id="products">
+      <section className="py-20 md:py-24 px-6 bg-white" id="products">
         <div className="container-custom">
-          <h2 className="section-title">Our Product Suite</h2>
+          <h2 className="section-title">Our Premium Product Suite</h2>
 
-          <div className="bg-white p-8 rounded-xl mt-8 mb-8 shadow-md border-l-4 border-[var(--accent-gold)] animate-on-scroll">
-            <h3 className="text-[var(--primary-red)] mb-4 font-bold text-xl">
-              Sum Assured Limits
-            </h3>
-            <p className="my-2">
-              <strong>Minimum:</strong> ₹20,000
-            </p>
-            <p className="my-2">
-              <strong>Maximum:</strong> ₹50,00,000 (including existing PLI/RPLI
-              policies)
-            </p>
+          <div className="lg:max-w-4xl mx-auto bg-gradient-to-r from-[var(--primary-dark)] to-slate-800 text-white rounded-2xl p-6 md:p-10 mb-16 shadow-xl flex flex-col md:flex-row justify-between items-center gap-8 animate-on-scroll">
+            <div className="text-center md:text-left">
+              <span className="text-[var(--accent-gold)] uppercase tracking-widest text-xs font-bold mb-2 block">
+                Coverage Limits
+              </span>
+              <h3 className="text-2xl md:text-3xl font-bold">
+                Sum Assured Flexibility
+              </h3>
+            </div>
+            <div className="flex gap-8 md:gap-16 text-center">
+              <div>
+                <p className="text-sm opacity-60 mb-1">Minimum</p>
+                <p className="text-2xl md:text-4xl font-bold text-[var(--accent-gold)]">
+                  ₹20K
+                </p>
+              </div>
+              <div className="w-[1px] bg-white/10"></div>
+              <div>
+                <p className="text-sm opacity-60 mb-1">Maximum</p>
+                <p className="text-2xl md:text-4xl font-bold text-[var(--accent-gold)]">
+                  ₹50L
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 title: 'Suraksha',
-                sub: 'Whole Life Assurance (WLA)',
-                features: [
-                  'Lifelong protection with wealth creation',
-                  'Premium payable for limited period',
-                  'Matures at age 80 or on death',
-                  'High bonus earning potential',
-                  'Loan facility after 4 years',
-                ],
+                sub: 'Whole Life Assurance',
+                color: 'from-blue-600 to-blue-800',
               },
               {
                 title: 'Santosh',
-                sub: 'Endowment Assurance (EA)',
-                features: [
-                  'Ideal for retirement and planned savings',
-                  'Lump sum of Sum Assured + Bonus at maturity',
-                  'Loan available after 3 years',
-                  'Policy with profit',
-                  'Guaranteed returns on maturity',
-                ],
+                sub: 'Endowment Assurance',
+                color: 'from-green-600 to-green-800',
               },
               {
                 title: 'Suvidha',
-                sub: 'Convertible Whole Life (CWLA)',
-                features: [
-                  'Suitable for young earners',
-                  'Lower initial premium',
-                  'Convert to Endowment after 5 years',
-                  'Loan admissible on conditions',
-                  'Rising income flexibility',
-                ],
+                sub: 'Convertible Whole Life',
+                color: 'from-purple-600 to-purple-800',
               },
               {
                 title: 'Sumangal',
-                sub: 'Anticipated Endowment (AEA)',
-                features: [
-                  'Money-back policy with periodic payouts',
-                  'Interim survival benefits during term',
-                  'Full Sum Assured on death (anytime)',
-                  'No loan or surrender facility',
-                  'Regular income stream',
-                ],
+                sub: 'Anticipated Endowment',
+                color: 'from-orange-500 to-red-600',
               },
               {
                 title: 'Yugal Suraksha',
-                sub: 'Joint Life Endowment (JLEA)',
-                features: [
-                  'Joint coverage for spouses',
-                  'Single policy premium',
-                  'Payable on first death or maturity',
-                  'Loan available after 3 years',
-                  'Combined security for couples',
-                ],
+                sub: 'Joint Life Assurance',
+                color: 'from-pink-600 to-rose-700',
               },
               {
                 title: 'Bal Jeevan Bima',
                 sub: 'Children Policy',
-                features: [
-                  'Financial security for children',
-                  'Coverage up to 2 children',
-                  'Premium waiver on parent&apos;s death',
-                  'Educational funds assistance',
-                  'Future-proof investment',
-                ],
+                color: 'from-teal-500 to-cyan-700',
               },
             ].map((prod, idx) => (
               <div
                 key={idx}
-                className="product-card bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-2 transition-all animate-on-scroll">
-                <div className="bg-gradient-to-br from-[var(--primary-red)] to-[#a82333] text-white p-6">
-                  <h3 className="text-xl font-bold m-0">{prod.title}</h3>
-                  <p className="m-0 mt-2 opacity-90 text-sm">{prod.sub}</p>
-                </div>
+                className="group relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 animate-on-scroll">
+                <div className={`h-2 bg-gradient-to-r ${prod.color}`}></div>
                 <div className="p-8">
-                  <ul className="list-none p-0">
-                    {prod.features.map((feat, i) => (
-                      <li
-                        key={i}
-                        className="py-2 pl-6 relative text-[var(--text-light)] text-[0.95rem]">
-                        <span className="absolute left-0 text-[var(--primary-red)] font-bold">
-                          →
-                        </span>
-                        {feat}
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="text-2xl font-bold text-[var(--primary-dark)] mb-1">
+                    {prod.title}
+                  </h3>
+                  <p className="text-sm text-[var(--primary-red)] font-semibold uppercase tracking-wide mb-6">
+                    {prod.sub}
+                  </p>
+                  <Link
+                    href="/calculator"
+                    className="inline-flex items-center text-sm font-bold text-[var(--text-light)] group-hover:text-[var(--primary-red)] transition-colors">
+                    Check Premium{' '}
+                    <i className="ri-arrow-right-line ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -325,236 +352,66 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Age Eligibility */}
-      <section className="py-16 md:py-24 px-8 bg-[var(--bg-light)]">
+      {/* Bonus Rates Table */}
+      <section className="py-20 px-6 bg-[var(--bg-light)]">
         <div className="container-custom">
-          <h2 className="section-title">Age Eligibility (At Next Birthday)</h2>
-          <div className="overflow-x-auto mt-6 rounded-lg shadow-sm animate-on-scroll bg-white">
-            <table className="w-full min-w-[600px] border-collapse">
+          <h2 className="section-title">High Bonus Rates</h2>
+          <div className="max-w-4xl mx-auto overflow-hidden bg-white rounded-2xl shadow-lg animate-on-scroll">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr>
-                  <th className="bg-gradient-to-br from-[var(--primary-red)] to-[#a82333] text-white p-5 text-left font-semibold">
-                    Policy Type
-                  </th>
-                  <th className="bg-gradient-to-br from-[var(--primary-red)] to-[#a82333] text-white p-5 text-left font-semibold">
-                    Eligible Age Range
+                <tr className="bg-[var(--primary-dark)] text-white">
+                  <th className="p-5 font-semibold">Policy Type</th>
+                  <th className="p-5 font-semibold text-right">
+                    Bonus per ₹1,000 SA
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-[var(--text-dark)] divide-y divide-gray-100">
                 {[
-                  ['Endowment Assurance (EA)', '19 – 55 years'],
-                  ['Convertible Whole Life (CWLA)', '19 – 50 years'],
-                  ['Whole Life Assurance (WLA)', '19 – 55 years'],
-                  ['20-Year AEA (Sumangal)', '18 – 40 years'],
-                  ['15-Year AEA (Sumangal)', '18 – 45 years'],
-                  ['Yugal Suraksha (JLEA)', '21 – 45 years'],
-                  ['Children Policy (Bal Jeevan Bima)', '05 – 20 years'],
-                ].map(([type, range], i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="p-4 pl-6 text-[var(--text-light)]">
-                      {type}
-                    </td>
-                    <td className="p-4 pl-6 text-[var(--text-light)]">
-                      {range}
+                  { name: 'Whole Life Assurance (Suraksha)', rate: '₹76' },
+                  { name: 'Endowment Assurance (Santosh)', rate: '₹52' },
+                  { name: 'Anticipated Endowment (Sumangal)', rate: '₹48' },
+                  { name: 'Convertible Whole Life (Suvidha)', rate: '₹76' },
+                ].map((row, i) => (
+                  <tr key={i} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-5 font-medium">{row.name}</td>
+                    <td className="p-5 text-right font-bold text-[var(--primary-red)]">
+                      {row.rate}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
-
-      {/* Bonus Rates */}
-      <section className="py-16 md:py-24 px-8 bg-white">
-        <div className="container-custom">
-          <h2 className="section-title">Current Bonus Rates</h2>
-          <p className="text-center text-[var(--text-light)] mb-8">
-            Declared by Government of India
+          <p className="text-center text-sm text-[var(--text-light)] mt-6 italic">
+            * Bonus rates are subject to revision by GoI.
           </p>
-          <div className="overflow-x-auto mt-8 rounded-lg shadow-md animate-on-scroll">
-            <table className="w-full min-w-[600px] border-collapse">
-              <thead>
-                <tr>
-                  <th className="bg-gradient-to-br from-[var(--primary-red)] to-[#a82333] text-white p-5 text-left font-semibold">
-                    Policy Type
-                  </th>
-                  <th className="bg-gradient-to-br from-[var(--primary-red)] to-[#a82333] text-white p-5 text-left font-semibold">
-                    Bonus Rate
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  [
-                    'Whole Life Assurance (Suraksha)',
-                    '₹76 per ₹1,000 Sum Assured',
-                  ],
-                  [
-                    'Endowment Assurance (Santosh)',
-                    '₹52 per ₹1,000 Sum Assured',
-                  ],
-                  [
-                    'Anticipated Endowment (Sumangal)',
-                    '₹48 per ₹1,000 Sum Assured',
-                  ],
-                ].map(([type, rate], i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="p-4 pl-6 font-bold text-[var(--text-light)]">
-                      {type}
-                    </td>
-                    <td className="p-4 pl-6 font-bold text-[var(--text-light)]">
-                      {rate}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </section>
 
-      {/* Key Facilities */}
-      <section className="py-16 md:py-24 px-8 bg-[var(--bg-light)]">
-        <div className="container-custom">
-          <h2 className="section-title">Key Facilities</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {[
-              {
-                icon: '💳',
-                title: 'Digital Payments',
-                desc: 'Online premium payment through UPI, Debit Card, Credit Card, and Net Banking.',
-              },
-              {
-                icon: '💸',
-                title: 'Loan Facility',
-                desc: 'Available at 10% interest with half-yearly compounding on eligible policies.',
-              },
-              {
-                icon: '🌍',
-                title: 'Portability',
-                desc: 'Policy portability across India. Claim maturity benefits from anywhere in the country.',
-              },
-              {
-                icon: '♻️',
-                title: 'Policy Revival',
-                desc: 'Revival of lapsed policies permitted up to two times. Flexible terms available.',
-              },
-              {
-                icon: '📋',
-                title: 'Nomination Services',
-                desc: 'Nomination and assignment facilities with unlimited changes allowed as needed.',
-              },
-              {
-                icon: '⚡',
-                title: 'Quick Settlement',
-                desc: 'Maturity and death claims settled promptly, generally within 30 days of submission.',
-              },
-            ].map((fac, i) => (
-              <div
-                key={i}
-                className="feature-card bg-white p-8 rounded-xl shadow-md border-l-4 border-[var(--primary-red)] hover:-translate-y-2 hover:shadow-xl transition-all animate-on-scroll">
-                <h3 className="text-xl font-bold text-[var(--primary-red)] mb-4 flex items-center gap-2">
-                  <span>{fac.icon}</span> {fac.title}
-                </h3>
-                <p className="text-[var(--text-light)] text-[0.95rem]">
-                  {fac.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Documents Required */}
-      <section className="py-16 md:py-24 px-8 bg-white">
-        <div className="container-custom">
-          <h2 className="section-title">Documents Required for New Policy</h2>
-          <div className="max-w-[700px] mx-auto mt-12 animate-on-scroll">
-            <div className="bg-white border-l-4 border-[var(--primary-red)] p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <ul className="list-none p-0">
-                {[
-                  'Duly filled proposal form',
-                  'Proof of age (Birth Certificate, Passport, Driving License)',
-                  'Identity & address proof (PAN Card, Aadhar, Voter ID)',
-                  'Income proof (Salary slips, IT returns, bank statements)',
-                  'Medical reports (where applicable for higher sum assured)',
-                ].map((doc, i) => (
-                  <li
-                    key={i}
-                    className="py-3 pl-8 relative text-[var(--text-light)]">
-                    <span className="absolute left-0 text-[var(--primary-red)] font-bold">
-                      ✓
-                    </span>
-                    {doc}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
+      {/* CTA Section */}
       <section
-        className="py-16 md:py-24 px-8 bg-[var(--bg-light)] text-center"
+        className="py-24 px-6 bg-[var(--primary-red)] text-white text-center"
         id="contact">
-        <div className="container-custom">
-          <h2 className="section-title">Contact & Assistance</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            <div className="bg-white p-8 rounded-xl shadow-md animate-on-scroll">
-              <h4 className="text-[var(--primary-red)] mb-4 text-xl font-bold">
-                📱 Toll-Free Helpline
-              </h4>
-              <a
-                href="tel:1800266686"
-                className="text-[var(--primary-red)] font-bold text-lg hover:underline">
-                1800 266 6868
-              </a>
-              <p className="mt-4 text-[var(--text-light)] text-sm">
-                Available 24/7 for assistance
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-xl shadow-md animate-on-scroll">
-              <h4 className="text-[var(--primary-red)] mb-4 text-xl font-bold">
-                🌐 Official Website
-              </h4>
-              <a
-                href="https://pli.indiapost.gov.in"
-                target="_blank"
-                className="text-[var(--primary-red)] font-bold text-lg hover:underline">
-                pli.indiapost.gov.in
-              </a>
-              <p className="mt-4 text-[var(--text-light)] text-sm">
-                For policy information and updates
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-xl shadow-md animate-on-scroll">
-              <h4 className="text-[var(--primary-red)] mb-4 text-xl font-bold">
-                🏤 Visit Us
-              </h4>
-              <p className="m-0 text-[var(--text-light)]">
-                Nearest Head Post Office or Sub Post Office
-              </p>
-              <p className="mt-4 text-[var(--text-light)] text-sm">
-                Available across India
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-[var(--accent-gold)] text-white p-8 rounded-xl mt-12 shadow-md animate-on-scroll">
-            <h3 className="text-white text-2xl font-bold mt-0 mb-2">
-              For Rural Areas
-            </h3>
-            <p className="text-white mb-0">
-              Rural Postal Life Insurance (RPLI) offers similar benefits with a
-              maximum Sum Assured of ₹10 Lakhs, tailored for rural residents.
-            </p>
+        <div className="container-custom max-w-4xl">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8">
+            Secure Your Future Today
+          </h2>
+          <p className="text-xl opacity-90 mb-10 leading-relaxed">
+            Join millions of satisfied customers who trust Postal Life Insurance
+            for their financial security. Get a quote in seconds.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link
+              href="/calculator"
+              className="bg-white text-[var(--primary-red)] py-4 px-10 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+              Calculate Premium
+            </Link>
+            <a
+              href="#contact"
+              className="bg-transparent border-2 border-white text-white py-4 px-10 rounded-full font-bold text-lg hover:bg-white/10 transition-all">
+              Locate Post Office
+            </a>
           </div>
         </div>
       </section>
