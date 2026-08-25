@@ -168,12 +168,13 @@ export default function CalculatorPage() {
   }
 
   const handleCustomSumAssuredChange = (val: string) => {
-    setCustomSumAssured(val)
-    const num = parseInt(val, 10)
+    setCustomSumAssured(val);
+    const num = parseInt(val, 10);
     if (!isNaN(num) && num >= 20000) {
-      setSumAssured(num)
+      const maxAllowed = policyType === 'CHILDREN' ? 300000 : 5000000;
+      setSumAssured(Math.min(num, maxAllowed));
     }
-  }
+  };
 
   const handleResetForm = () => {
     setPolicyType('ENDOWMENT')
@@ -726,11 +727,18 @@ export default function CalculatorPage() {
 
                   {/* 4. Sum Assured */}
                   <div>
-                    <label className="block text-sm font-semibold text-(--text-dark) mb-2">
-                      Sum Assured (₹)
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-semibold text-(--text-dark)">
+                        Sum Assured (₹)
+                      </label>
+                      {policyType === 'CHILDREN' && (
+                        <span className="text-[0.68rem] font-bold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">
+                          Max Limit: ₹3 Lakhs
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {SUM_ASSURED_PRESETS.map((val) => (
+                      {SUM_ASSURED_PRESETS.filter((val) => policyType !== 'CHILDREN' || val <= 300000).map((val) => (
                         <button
                           key={val}
                           type="button"
@@ -748,15 +756,16 @@ export default function CalculatorPage() {
                     <input
                       type="number"
                       min="20000"
+                      max={policyType === 'CHILDREN' ? 300000 : 5000000}
                       step="1000"
                       value={customSumAssured}
                       onChange={(e) => handleCustomSumAssuredChange(e.target.value)}
-                      placeholder="Enter Sum Assured (min ₹20,000)"
+                      placeholder={policyType === 'CHILDREN' ? "Enter Sum Assured (max ₹3,00,000)" : "Enter Sum Assured (min ₹20,000)"}
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:border-(--primary-red) outline-none"
                     />
                     <p className="text-[0.75rem] text-(--text-light) mt-1">
                       Current Selection:{' '}
-                      <strong className="text-(--primary-dark)">{formatINR(sumAssured)}</strong>
+                      <strong className="text-(--primary-dark)">{formatINR(Math.min(sumAssured, policyType === 'CHILDREN' ? 300000 : 5000000))}</strong>
                     </p>
                   </div>
 
