@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateAge, calculateDurationAndMaturityAge, calculateEffectiveAge } from '../age-calculator';
+import { calculateAge, calculateEffectiveAge } from '../age-calculator';
 import { calculatePLIQuotation } from '../calculator';
 import { predictMonthlyPremium } from '../premium-model';
 
@@ -31,7 +31,41 @@ describe('PLI Calculation Engine Test Suite (6 Policy Types & Continuous Model)'
     });
   });
 
-  describe('Whole Life Assurance (Suraksha & Suvidha) Ceasing Age Rules', () => {
+  describe('Convertible Whole Life Assurance (Suvidha) Conversion Rules', () => {
+    it('should calculate unconverted Suvidha using Whole Life rules (₹76 bonus rate)', () => {
+      const quote = calculatePLIQuotation({
+        policyType: 'CONVERTIBLE_WHOLE_LIFE',
+        age: 30,
+        sumAssured: 100000,
+        isConverted: false,
+        premiumCeasingAge: 60,
+      });
+
+      expect(quote.conversionStatus).toBe('UNCONVERTED');
+      expect(quote.bonusRate).toBe(76);
+      expect(quote.bonusAccrualDuration).toBe(50); // 80 - 30
+      expect(quote.totalBonus).toBe(76 * 100 * 50); // 380,000
+    });
+
+    it('should calculate converted Suvidha using Endowment rules (₹52 bonus rate)', () => {
+      const quote = calculatePLIQuotation({
+        policyType: 'CONVERTIBLE_WHOLE_LIFE',
+        age: 30,
+        sumAssured: 100000,
+        isConverted: true,
+        duration: 20,
+      });
+
+      expect(quote.conversionStatus).toBe('CONVERTED');
+      expect(quote.bonusRate).toBe(52); // Switches to Endowment bonus rate
+      expect(quote.duration).toBe(20);
+      expect(quote.totalBonus).toBe(52 * 100 * 20); // 104,000
+      expect(quote.terminalBonus).toBe(200); // Terminal bonus for 20 yrs
+      expect(quote.maturityAmount).toBe(100000 + 104000 + 200); // 204,200
+    });
+  });
+
+  describe('Whole Life Assurance (Suraksha) Ceasing Age Rules', () => {
     it('should calculate Whole Life premiums for ceasing age 60, 58, 55 with bonus accruing to age 80', () => {
       // Age 30, SA ₹1L, Ceasing Age 60 (Term 30)
       const quote60 = calculatePLIQuotation({

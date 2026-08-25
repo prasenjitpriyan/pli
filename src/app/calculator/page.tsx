@@ -35,6 +35,9 @@ export default function CalculatorPage() {
   // Whole Life Premium Ceasing Age Option (55, 58, 60)
   const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60);
 
+  // Convertible Whole Life (Suvidha) Conversion Toggle
+  const [isConverted, setIsConverted] = useState<boolean>(false);
+
   // Spouse Details Option for Single Life Policies
   const [includeSpouse, setIncludeSpouse] = useState<boolean>(false);
   const [spouseDob, setSpouseDob] = useState<string>('');
@@ -90,9 +93,10 @@ export default function CalculatorPage() {
       secondLifeAge: policyType === 'JOINT_LIFE' ? secondLifeAge : undefined,
       childAge: policyType === 'CHILDREN' ? childAge : undefined,
       premiumCeasingAge:
-        policyType === 'WHOLE_LIFE' || policyType === 'CONVERTIBLE_WHOLE_LIFE'
+        (policyType === 'WHOLE_LIFE' || policyType === 'CONVERTIBLE_WHOLE_LIFE') && !isConverted
           ? premiumCeasingAge
           : undefined,
+      isConverted: policyType === 'CONVERTIBLE_WHOLE_LIFE' ? isConverted : undefined,
       sumAssured,
       maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
       duration: termInputMode === 'DURATION' ? duration : undefined,
@@ -109,6 +113,7 @@ export default function CalculatorPage() {
     secondLifeAge,
     childAge,
     premiumCeasingAge,
+    isConverted,
     sumAssured,
     termInputMode,
     maturityAge,
@@ -186,6 +191,7 @@ export default function CalculatorPage() {
     setSecondLifeAge(28);
     setChildAge(5);
     setPremiumCeasingAge(60);
+    setIsConverted(false);
     setIncludeSpouse(false);
     setSpouseDob('');
     setSpouseAge(28);
@@ -317,7 +323,7 @@ export default function CalculatorPage() {
                                 {config.code}
                               </span>
                               <span className="text-[0.65rem] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                Bonus ₹{config.bonusRate}/₹1k
+                                Bonus ₹{key === 'CONVERTIBLE_WHOLE_LIFE' && isConverted ? 52 : config.bonusRate}/₹1k
                               </span>
                             </div>
                             <p className="text-xs font-bold text-(--text-dark) truncate">
@@ -331,6 +337,96 @@ export default function CalculatorPage() {
                       })}
                     </div>
                   </div>
+
+                  {/* Convertible Whole Life (Suvidha) Special Option Card */}
+                  {policyType === 'CONVERTIBLE_WHOLE_LIFE' && (
+                    <div className="p-4 bg-purple-50/50 border border-purple-200 rounded-xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-bold text-purple-900 flex items-center gap-1.5">
+                          <i className="ri-swap-box-line text-purple-600 text-base"></i>
+                          Suvidha Conversion Option (At 5-Year Mark)
+                        </label>
+                        <span className="text-[0.65rem] font-bold bg-purple-200 text-purple-900 px-2 py-0.5 rounded-full">
+                          Conversion Window: 5–6 Yrs
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsConverted(false)}
+                          className={`p-3 rounded-lg text-left border-2 transition-all ${
+                            !isConverted
+                              ? 'border-purple-600 bg-white shadow-xs'
+                              : 'border-slate-200 bg-purple-50/30 hover:bg-white'
+                          }`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-xs text-purple-950">Option A: Unconverted</span>
+                            <span className="text-[0.65rem] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                              Bonus ₹76/₹1k
+                            </span>
+                          </div>
+                          <p className="text-[0.72rem] text-slate-600">
+                            Remains Whole Life (Suraksha). Pays out at age 80 or death. Lower fixed premium.
+                          </p>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsConverted(true)}
+                          className={`p-3 rounded-lg text-left border-2 transition-all ${
+                            isConverted
+                              ? 'border-purple-600 bg-white shadow-xs'
+                              : 'border-slate-200 bg-purple-50/30 hover:bg-white'
+                          }`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-xs text-purple-950">Option B: Converted to Endowment</span>
+                            <span className="text-[0.65rem] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                              Bonus ₹52/₹1k
+                            </span>
+                          </div>
+                          <p className="text-[0.72rem] text-slate-600">
+                            Converts to Santosh (Endowment) after 5 yrs without medical re-exam. Pays out at chosen maturity age.
+                          </p>
+                        </button>
+                      </div>
+
+                      {/* Suvidha Conversion Feature Breakdown */}
+                      <div className="overflow-x-auto text-[0.72rem] border border-purple-100 rounded-lg bg-white p-3">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-purple-100 text-purple-950 font-bold">
+                              <th className="pb-1.5">Feature</th>
+                              <th className="pb-1.5">Unconverted (Whole Life)</th>
+                              <th className="pb-1.5">Converted (Endowment)</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-purple-50 text-slate-700">
+                            <tr>
+                              <td className="py-1 font-semibold text-purple-900">Primary Goal</td>
+                              <td>Pure Lifelong Protection</td>
+                              <td>Savings + Life Protection</td>
+                            </tr>
+                            <tr>
+                              <td className="py-1 font-semibold text-purple-900">Payout Time</td>
+                              <td>At age 80 or death</td>
+                              <td>At chosen maturity age (35–60)</td>
+                            </tr>
+                            <tr>
+                              <td className="py-1 font-semibold text-purple-900">Bonus Rate</td>
+                              <td className="font-bold text-emerald-700">₹76 per ₹1,000 SA</td>
+                              <td className="font-bold text-amber-700">₹52 per ₹1,000 SA</td>
+                            </tr>
+                            <tr>
+                              <td className="py-1 font-semibold text-purple-900">Medical Checkup</td>
+                              <td>None Required</td>
+                              <td>No Fresh Medical Re-exam</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 2. Effective Date */}
                   <div>
@@ -530,8 +626,8 @@ export default function CalculatorPage() {
                     </div>
                   )}
 
-                  {/* Whole Life Ceasing Age Selector */}
-                  {(policyType === 'WHOLE_LIFE' || policyType === 'CONVERTIBLE_WHOLE_LIFE') && (
+                  {/* Whole Life Ceasing Age Selector (When Unconverted) */}
+                  {(policyType === 'WHOLE_LIFE' || (policyType === 'CONVERTIBLE_WHOLE_LIFE' && !isConverted)) && (
                     <div className="p-4 bg-amber-50/40 border border-amber-200 rounded-xl space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-bold text-amber-900">
@@ -561,7 +657,7 @@ export default function CalculatorPage() {
                       </p>
                       <div className="flex gap-2 text-[0.65rem] font-semibold text-emerald-800">
                         <span className="bg-emerald-100 px-2 py-0.5 rounded">Loan after 4 yrs</span>
-                        <span className="bg-emerald-100 px-2 py-0.5 rounded">Surrender after 3 yrs</span>
+                        <span className="bg-emerald-100 px-2 py-0.5 rounded">Surrender after 3 yrs (5 yrs for bonus)</span>
                       </div>
                     </div>
                   )}
@@ -600,8 +696,8 @@ export default function CalculatorPage() {
                     </p>
                   </div>
 
-                  {/* 5. Policy Term / Maturity Age (Hide for Whole Life as ceasing age controls duration) */}
-                  {policyType !== 'WHOLE_LIFE' && policyType !== 'CONVERTIBLE_WHOLE_LIFE' && (
+                  {/* 5. Policy Term / Maturity Age (Show when not Unconverted Whole Life) */}
+                  {(policyType !== 'WHOLE_LIFE' && (policyType !== 'CONVERTIBLE_WHOLE_LIFE' || isConverted)) && (
                     <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-4">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-bold text-(--primary-dark)">

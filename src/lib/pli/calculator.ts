@@ -36,7 +36,17 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     childAge: input.childAge,
   });
 
-  // 3. Whole Life Premium Ceasing Age & Duration Logic
+  // 3. Conversion Status for Convertible Whole Life Assurance (Suvidha)
+  const isConverted =
+    input.policyType === 'CONVERTIBLE_WHOLE_LIFE' && Boolean(input.isConverted);
+  const conversionStatus =
+    input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+      ? isConverted
+        ? 'CONVERTED'
+        : 'UNCONVERTED'
+      : undefined;
+
+  // 4. Whole Life vs Converted Endowment Duration & Ceasing Age Logic
   let premiumCeasingAge: number | undefined = undefined;
   let premiumPaymentDuration: number | undefined = undefined;
   let bonusAccrualDuration: number | undefined = undefined;
@@ -45,8 +55,9 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
   let maturityAge: number;
 
   if (
-    input.policyType === 'WHOLE_LIFE' ||
-    input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+    (input.policyType === 'WHOLE_LIFE' ||
+      input.policyType === 'CONVERTIBLE_WHOLE_LIFE') &&
+    !isConverted
   ) {
     premiumCeasingAge = input.premiumCeasingAge ?? 60;
     premiumPaymentDuration = Math.max(1, premiumCeasingAge - effectiveAge);
@@ -65,51 +76,60 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     maturityAge = durationRes.maturityAge;
   }
 
-  // 4. Bonus Calculation (Bonus Accrues for bonusAccrualDuration for Whole Life, duration for others)
+  // 5. Bonus Calculation
+  // Converted Suvidha uses Endowment bonus rate (52), Unconverted uses Whole Life rate (76)
   const bonusDuration = bonusAccrualDuration ?? duration;
-  const { bonusRate, annualBonus, totalBonus } = calculateBonus(
+  let { bonusRate, annualBonus, totalBonus } = calculateBonus(
     input.policyType,
     input.sumAssured,
     bonusDuration
   );
 
-  // 5. Mathematical Premium Engine Prediction (Using Premium Payment Duration)
+  if (isConverted) {
+    bonusRate = 52; // Switches to Endowment bonus rate
+    annualBonus = (input.sumAssured / 1000) * bonusRate;
+    totalBonus = annualBonus * duration;
+  }
+
+  // 6. Mathematical Premium Engine Prediction
+  // Converted Suvidha uses ENDOWMENT premium model curve
+  const targetModelPolicy = isConverted ? 'ENDOWMENT' : input.policyType;
   const modelPrediction = predictMonthlyPremium({
-    policyType: input.policyType,
+    policyType: targetModelPolicy,
     effectiveAge,
     duration,
     sumAssured: input.sumAssured,
     ageRate: input.ageRate,
   });
 
-  // 6. Policy-Aware Rebate
+  // 7. Policy-Aware Rebate
   const rebate = calculateRebate({
     policyType: input.policyType,
     sumAssured: input.sumAssured,
     overrideRebate: input.rebate,
   });
 
-  // 7. Tax / GST Calculation
+  // 8. Tax / GST Calculation
   const tax = calculateTax(
     modelPrediction.scaledGrossPremium,
     input.gstRate
   );
 
-  // 8. Net Premium Calculation
+  // 9. Net Premium Calculation
   const netMonthlyPremium =
     modelPrediction.scaledGrossPremium - rebate + tax;
 
-  // 9. Total Premium Paid Calculation (Stopped at premiumCeasingAge for Whole Life)
+  // 10. Total Premium Paid Calculation
   const totalPremiumPaid = netMonthlyPremium * 12 * duration;
 
-  // 10. Terminal Bonus
+  // 11. Terminal Bonus
   const terminalBonus = calculateTerminalBonus({
-    policyType: input.policyType,
+    policyType: isConverted ? 'ENDOWMENT' : input.policyType,
     sumAssured: input.sumAssured,
     duration,
   });
 
-  // 11. Periodic Survival Benefits (Anticipated Endowment / Sumangal Money-Back Schedule)
+  // 12. Periodic Survival Benefits (Anticipated Endowment / Sumangal Money-Back Schedule)
   let survivalBenefits: SurvivalBenefitPayout[] | undefined = undefined;
   let finalMaturityPayout: number = input.sumAssured + totalBonus + terminalBonus;
 
@@ -189,42 +209,43 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
   // Total maturity / return amount across entire lifecycle
   const maturityAmount = input.sumAssured + totalBonus + terminalBonus;
 
-  // 12. Transparent Step-by-Step Breakdown Log
+  // 13. Transparent Step-by-Step Breakdown Log
   const breakdown: CalculationStep[] = [
     {
-      title: '1. Policy Model & Effective Age',
+      title: '1. Policy Model & Conversion Status',
       formula:
-        input.policyType === 'JOINT_LIFE'
+        input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? 'Suvidha Policy Option (Conversion Window: 5-6 Years from Inception)'
+          : input.policyType === 'JOINT_LIFE'
           ? 'Effective Age = (First Age + Second Age) / 2'
           : 'Effective Age = Current Completed Age',
       values:
-        input.policyType === 'JOINT_LIFE'
-          ? `First Life (${input.firstLifeAge ?? age}) + Second Life (${input.secondLifeAge ?? 28}) / 2`
-          : `Age ${effectiveAge}`,
+        input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? `Status: ${isConverted ? 'Converted to Endowment Assurance (Santosh)' : 'Unconverted (Left as Whole Life - Suraksha)'}`
+          : `Effective Age ${effectiveAge}`,
       result: `${effectiveAge} years`,
       note: `Selected Policy: ${policyConfig.name} (${policyConfig.code})`,
     },
     {
       title: '2. Premium Payment Term & Bonus Accumulation',
       formula:
-        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+        (input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE') && !isConverted
           ? 'Premium Term = Ceasing Age - Entry Age | Bonus Term = 80 - Entry Age'
           : 'Duration = Target Maturity Age - Effective Age',
       values:
-        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+        (input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE') && !isConverted
           ? `Ceasing Age ${premiumCeasingAge} (${duration} yrs payment) | Bonus Accrual until Age 80 (${bonusDuration} yrs)`
           : `Maturity Age (${maturityAge}) - Effective Age (${effectiveAge})`,
-      result:
-        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
-          ? `Pay for ${duration} yrs | Accrue bonus for ${bonusDuration} yrs`
-          : `${duration} years`,
+      result: `${duration} years`,
     },
     {
       title: '3. Declared Bonus Rate & Annual Bonus',
       formula: '(Sum Assured / 1,000) × Bonus Rate',
       values: `(${formatINR(input.sumAssured)} / 1,000) × ₹${bonusRate}`,
       result: `${formatINR(annualBonus)} / year`,
-      note: `Declared bonus rate is ₹${bonusRate} per ₹1,000 SA`,
+      note: isConverted
+        ? 'Converted Suvidha uses Endowment bonus rate of ₹52 per ₹1,000 SA'
+        : `Bonus rate is ₹${bonusRate} per ₹1,000 SA`,
     },
     {
       title: '4. Total Accrued Bonus',
@@ -261,32 +282,19 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
       formula: 'Net Monthly Premium × 12 × Premium Payment Duration',
       values: `${formatINR(netMonthlyPremium)} × 12 × ${duration} years`,
       result: formatINR(totalPremiumPaid),
-      note:
-        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
-          ? `Premium payments cease at age ${premiumCeasingAge}`
-          : undefined,
     },
     {
-      title: '9. Periodic Survival / Maturity Schedule',
+      title: '9. Maturity Benefit & Facilities',
       formula:
         input.policyType === 'ANTICIPATED_ENDOWMENT'
           ? `3 Payouts of 20% SA + Final 40% SA + Total Bonus at Maturity (${duration} yrs)`
           : 'Full Sum Assured + Accumulated Bonuses at Maturity',
-      values:
-        input.policyType === 'ANTICIPATED_ENDOWMENT'
-          ? `3 Survival Payouts of ${formatINR(input.sumAssured * 0.2)} each`
-          : `Full Sum Assured (${formatINR(input.sumAssured)})`,
-      result:
-        input.policyType === 'ANTICIPATED_ENDOWMENT'
-          ? `Final Maturity Payout: ${formatINR(finalMaturityPayout)}`
-          : formatINR(maturityAmount),
-      note:
-        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
-          ? 'Paid upon reaching Age 80 or to nominee upon earlier death'
-          : undefined,
+      values: `Sum Assured (${formatINR(input.sumAssured)}) + Total Bonus (${formatINR(totalBonus)})`,
+      result: formatINR(maturityAmount),
+      note: 'Loan facility available after 4 yrs | Surrender allowed after 3 yrs (5 yrs for bonus)',
     },
     {
-      title: '10. Total Overall Returns & Maturity Benefit',
+      title: '10. Total Overall Returns',
       formula: 'Sum Assured + Total Accrued Bonus + Terminal Bonus',
       values: `${formatINR(input.sumAssured)} + ${formatINR(totalBonus)} + ${formatINR(terminalBonus)}`,
       result: formatINR(maturityAmount),
@@ -308,6 +316,8 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     premiumCeasingAge,
     premiumPaymentDuration,
     bonusAccrualDuration,
+    isConverted,
+    conversionStatus,
 
     maturityAge,
     duration,

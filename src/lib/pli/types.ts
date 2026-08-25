@@ -26,6 +26,9 @@ export interface PLIInput {
 
   // Whole Life Ceasing Age (55, 58, 60)
   premiumCeasingAge?: number;
+
+  // Convertible Whole Life Option (Suvidha conversion to Endowment)
+  isConverted?: boolean;
   
   spouseDateOfBirth?: string; // YYYY-MM-DD
   spouseAge?: number;
@@ -69,6 +72,8 @@ export interface PLIQuotationResult {
   premiumCeasingAge?: number;
   premiumPaymentDuration?: number;
   bonusAccrualDuration?: number;
+  isConverted?: boolean;
+  conversionStatus?: 'CONVERTED' | 'UNCONVERTED';
   maturityAge: number;
   duration: number;
   
