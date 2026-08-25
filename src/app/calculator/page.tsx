@@ -1,76 +1,72 @@
-'use client';
+'use client'
 
 import {
   calculateAge,
   calculatePLIQuotation,
   formatINR,
+  PLIQuotationResult,
   POLICY_CONFIG,
   PolicyType,
-  PLIQuotationResult,
-} from '@/lib/pli';
-import Link from 'next/link';
-import { useMemo, useState } from 'react';
+} from '@/lib/pli'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
 
-const SUM_ASSURED_PRESETS = [100000, 200000, 500000, 1000000, 5000000];
+const SUM_ASSURED_PRESETS = [100000, 200000, 500000, 1000000, 5000000]
 
 export default function CalculatorPage() {
   // Form State
-  const [policyType, setPolicyType] = useState<PolicyType>('ENDOWMENT');
-  const [effectiveDate, setEffectiveDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
-  
+  const [policyType, setPolicyType] = useState<PolicyType>('ENDOWMENT')
+  const [effectiveDate, setEffectiveDate] = useState<string>(new Date().toISOString().split('T')[0])
+
   // Single Life Age Input Options
-  const [ageInputMode, setAgeInputMode] = useState<'DOB' | 'AGE'>('DOB');
-  const [dateOfBirth, setDateOfBirth] = useState<string>('2005-01-15');
-  const [manualAge, setManualAge] = useState<number>(30);
+  const [ageInputMode, setAgeInputMode] = useState<'DOB' | 'AGE'>('DOB')
+  const [dateOfBirth, setDateOfBirth] = useState<string>('2005-01-15')
+  const [manualAge, setManualAge] = useState<number>(30)
 
   // Joint Life Inputs
-  const [firstLifeAge, setFirstLifeAge] = useState<number>(30);
-  const [secondLifeAge, setSecondLifeAge] = useState<number>(28);
+  const [firstLifeAge, setFirstLifeAge] = useState<number>(30)
+  const [secondLifeAge, setSecondLifeAge] = useState<number>(28)
 
   // Children Policy Inputs
-  const [childAge, setChildAge] = useState<number>(5);
+  const [childAge, setChildAge] = useState<number>(5)
 
   // Whole Life Premium Ceasing Age Option (55, 58, 60)
-  const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60);
+  const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60)
 
   // Convertible Whole Life (Suvidha) Conversion Toggle
-  const [isConverted, setIsConverted] = useState<boolean>(false);
+  const [isConverted, setIsConverted] = useState<boolean>(false)
 
   // Spouse Details Option for Single Life Policies
-  const [includeSpouse, setIncludeSpouse] = useState<boolean>(false);
-  const [spouseDob, setSpouseDob] = useState<string>('');
-  const [spouseAge, setSpouseAge] = useState<number>(28);
+  const [includeSpouse, setIncludeSpouse] = useState<boolean>(false)
+  const [spouseDob, setSpouseDob] = useState<string>('')
+  const [spouseAge, setSpouseAge] = useState<number>(28)
 
   // Sum Assured State
-  const [sumAssured, setSumAssured] = useState<number>(100000);
-  const [customSumAssured, setCustomSumAssured] = useState<string>('100000');
+  const [sumAssured, setSumAssured] = useState<number>(100000)
+  const [customSumAssured, setCustomSumAssured] = useState<string>('100000')
 
   // Term / Duration Input Options
-  const [termInputMode, setTermInputMode] = useState<'MATURITY_AGE' | 'DURATION'>(
-    'MATURITY_AGE'
-  );
-  const [maturityAge, setMaturityAge] = useState<number>(50);
-  const [duration, setDuration] = useState<number>(20);
+  const [termInputMode, setTermInputMode] = useState<'MATURITY_AGE' | 'DURATION'>('MATURITY_AGE')
+  const [maturityAge, setMaturityAge] = useState<number>(50)
+  const [duration, setDuration] = useState<number>(20)
 
   // UI Expansion & Modal States
-  const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
-  const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
+  const [showBreakdown, setShowBreakdown] = useState<boolean>(false)
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false)
 
   // Derived Completed Age
   const computedAge = useMemo(() => {
     if (policyType === 'CHILDREN') {
-      return childAge;
+      return childAge
     }
     if (policyType === 'JOINT_LIFE') {
-      return Math.floor((firstLifeAge + secondLifeAge) / 2);
+      return Math.floor((firstLifeAge + secondLifeAge) / 2)
     }
     if (ageInputMode === 'DOB' && dateOfBirth) {
-      const { age } = calculateAge(dateOfBirth, effectiveDate);
-      return age;
+      const { age } = calculateAge(dateOfBirth, effectiveDate)
+      return age
     }
-    return manualAge;
+    return manualAge
   }, [
     policyType,
     childAge,
@@ -80,7 +76,7 @@ export default function CalculatorPage() {
     dateOfBirth,
     effectiveDate,
     manualAge,
-  ]);
+  ])
 
   // Quotation Calculation Result
   const quotationResult: PLIQuotationResult = useMemo(() => {
@@ -102,7 +98,7 @@ export default function CalculatorPage() {
       duration: termInputMode === 'DURATION' ? duration : undefined,
       spouseDateOfBirth: includeSpouse && spouseDob ? spouseDob : undefined,
       spouseAge: includeSpouse ? spouseAge : undefined,
-    });
+    })
   }, [
     policyType,
     effectiveDate,
@@ -121,7 +117,7 @@ export default function CalculatorPage() {
     includeSpouse,
     spouseDob,
     spouseAge,
-  ]);
+  ])
 
   // Comparison Results Across All 6 Policies
   const comparisonResults = useMemo(() => {
@@ -132,7 +128,7 @@ export default function CalculatorPage() {
       'ANTICIPATED_ENDOWMENT',
       'CHILDREN',
       'JOINT_LIFE',
-    ];
+    ]
 
     return policies.map((p) =>
       calculatePLIQuotation({
@@ -144,14 +140,12 @@ export default function CalculatorPage() {
         secondLifeAge: p === 'JOINT_LIFE' ? secondLifeAge : undefined,
         childAge: p === 'CHILDREN' ? childAge : undefined,
         premiumCeasingAge:
-          p === 'WHOLE_LIFE' || p === 'CONVERTIBLE_WHOLE_LIFE'
-            ? premiumCeasingAge
-            : undefined,
+          p === 'WHOLE_LIFE' || p === 'CONVERTIBLE_WHOLE_LIFE' ? premiumCeasingAge : undefined,
         sumAssured,
         maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
         duration: termInputMode === 'DURATION' ? duration : undefined,
       })
-    );
+    )
   }, [
     effectiveDate,
     ageInputMode,
@@ -165,49 +159,49 @@ export default function CalculatorPage() {
     termInputMode,
     maturityAge,
     duration,
-  ]);
+  ])
 
   // Input Handlers
   const handleSumAssuredPreset = (value: number) => {
-    setSumAssured(value);
-    setCustomSumAssured(value.toString());
-  };
+    setSumAssured(value)
+    setCustomSumAssured(value.toString())
+  }
 
   const handleCustomSumAssuredChange = (val: string) => {
-    setCustomSumAssured(val);
-    const num = parseInt(val, 10);
+    setCustomSumAssured(val)
+    const num = parseInt(val, 10)
     if (!isNaN(num) && num >= 20000) {
-      setSumAssured(num);
+      setSumAssured(num)
     }
-  };
+  }
 
   const handleResetForm = () => {
-    setPolicyType('ENDOWMENT');
-    setEffectiveDate(new Date().toISOString().split('T')[0]);
-    setAgeInputMode('DOB');
-    setDateOfBirth('2005-01-15');
-    setManualAge(30);
-    setFirstLifeAge(30);
-    setSecondLifeAge(28);
-    setChildAge(5);
-    setPremiumCeasingAge(60);
-    setIsConverted(false);
-    setIncludeSpouse(false);
-    setSpouseDob('');
-    setSpouseAge(28);
-    setSumAssured(100000);
-    setCustomSumAssured('100000');
-    setTermInputMode('MATURITY_AGE');
-    setMaturityAge(50);
-    setDuration(20);
-    setShowBreakdown(false);
-  };
+    setPolicyType('ENDOWMENT')
+    setEffectiveDate(new Date().toISOString().split('T')[0])
+    setAgeInputMode('DOB')
+    setDateOfBirth('2005-01-15')
+    setManualAge(30)
+    setFirstLifeAge(30)
+    setSecondLifeAge(28)
+    setChildAge(5)
+    setPremiumCeasingAge(60)
+    setIsConverted(false)
+    setIncludeSpouse(false)
+    setSpouseDob('')
+    setSpouseAge(28)
+    setSumAssured(100000)
+    setCustomSumAssured('100000')
+    setTermInputMode('MATURITY_AGE')
+    setMaturityAge(50)
+    setDuration(20)
+    setShowBreakdown(false)
+  }
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
-      window.print();
+      window.print()
     }
-  };
+  }
 
   return (
     <main className="min-h-screen bg-(--bg-light) pb-20 print:bg-white print:pb-0">
@@ -218,7 +212,9 @@ export default function CalculatorPage() {
             background: white !important;
             color: black !important;
           }
-          nav, footer, .no-print {
+          nav,
+          footer,
+          .no-print {
             display: none !important;
           }
           .print-only {
@@ -250,7 +246,8 @@ export default function CalculatorPage() {
           </div>
           <Link
             href="/"
-            className="inline-flex items-center text-(--accent-gold) hover:text-white font-medium transition-colors">
+            className="inline-flex items-center text-(--accent-gold) hover:text-white font-medium transition-colors"
+          >
             <i className="ri-arrow-left-line mr-2 text-lg"></i> Back to Overview
           </Link>
         </div>
@@ -265,7 +262,9 @@ export default function CalculatorPage() {
               Estimated PLI Calculation Notice
             </h4>
             <p className="text-amber-800 text-xs md:text-sm mt-0.5 leading-relaxed">
-              This calculator uses a formula-based estimation model derived from reference PLI quotation data. It is not an official PLI quotation. Actual PLI premium and benefits are subject to applicable official PLI rules and rates.
+              This calculator uses a formula-based estimation model derived from reference PLI
+              quotation data. It is not an official PLI quotation. Actual PLI premium and benefits
+              are subject to applicable official PLI rules and rates.
             </p>
           </div>
         </div>
@@ -294,7 +293,8 @@ export default function CalculatorPage() {
                   <button
                     onClick={handleResetForm}
                     type="button"
-                    className="text-xs text-slate-500 hover:text-(--primary-red) flex items-center gap-1 font-medium transition-colors">
+                    className="text-xs text-slate-500 hover:text-(--primary-red) flex items-center gap-1 font-medium transition-colors"
+                  >
                     <i className="ri-refresh-line"></i> Reset Form
                   </button>
                 </div>
@@ -307,8 +307,8 @@ export default function CalculatorPage() {
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {(Object.keys(POLICY_CONFIG) as PolicyType[]).map((key) => {
-                        const config = POLICY_CONFIG[key];
-                        const isSelected = policyType === key;
+                        const config = POLICY_CONFIG[key]
+                        const isSelected = policyType === key
                         return (
                           <div
                             key={key}
@@ -317,13 +317,18 @@ export default function CalculatorPage() {
                               isSelected
                                 ? 'border-(--primary-red) bg-red-50/30 shadow-xs'
                                 : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-                            }`}>
+                            }`}
+                          >
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-bold text-xs text-(--primary-dark)">
                                 {config.code}
                               </span>
                               <span className="text-[0.65rem] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                Bonus ₹{key === 'CONVERTIBLE_WHOLE_LIFE' && isConverted ? 52 : config.bonusRate}/₹1k
+                                Bonus ₹
+                                {key === 'CONVERTIBLE_WHOLE_LIFE' && isConverted
+                                  ? 52
+                                  : config.bonusRate}
+                                /₹1k
                               </span>
                             </div>
                             <p className="text-xs font-bold text-(--text-dark) truncate">
@@ -333,7 +338,7 @@ export default function CalculatorPage() {
                               {config.description}
                             </p>
                           </div>
-                        );
+                        )
                       })}
                     </div>
                   </div>
@@ -359,15 +364,19 @@ export default function CalculatorPage() {
                             !isConverted
                               ? 'border-purple-600 bg-white shadow-xs'
                               : 'border-slate-200 bg-purple-50/30 hover:bg-white'
-                          }`}>
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-xs text-purple-950">Option A: Unconverted</span>
+                            <span className="font-bold text-xs text-purple-950">
+                              Option A: Unconverted
+                            </span>
                             <span className="text-[0.65rem] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
                               Bonus ₹76/₹1k
                             </span>
                           </div>
                           <p className="text-[0.72rem] text-slate-600">
-                            Remains Whole Life (Suraksha). Pays out at age 80 or death. Lower fixed premium.
+                            Remains Whole Life (Suraksha). Pays out at age 80 or death. Lower fixed
+                            premium.
                           </p>
                         </button>
 
@@ -378,15 +387,19 @@ export default function CalculatorPage() {
                             isConverted
                               ? 'border-purple-600 bg-white shadow-xs'
                               : 'border-slate-200 bg-purple-50/30 hover:bg-white'
-                          }`}>
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-xs text-purple-950">Option B: Converted to Endowment</span>
+                            <span className="font-bold text-xs text-purple-950">
+                              Option B: Converted to Endowment
+                            </span>
                             <span className="text-[0.65rem] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
                               Bonus ₹52/₹1k
                             </span>
                           </div>
                           <p className="text-[0.72rem] text-slate-600">
-                            Converts to Santosh (Endowment) after 5 yrs without medical re-exam. Pays out at chosen maturity age.
+                            Converts to Santosh (Endowment) after 5 yrs without medical re-exam.
+                            Pays out at chosen maturity age.
                           </p>
                         </button>
                       </div>
@@ -418,7 +431,9 @@ export default function CalculatorPage() {
                               <td className="font-bold text-amber-700">₹52 per ₹1,000 SA</td>
                             </tr>
                             <tr>
-                              <td className="py-1 font-semibold text-purple-900">Medical Checkup</td>
+                              <td className="py-1 font-semibold text-purple-900">
+                                Medical Checkup
+                              </td>
                               <td>None Required</td>
                               <td>No Fresh Medical Re-exam</td>
                             </tr>
@@ -488,19 +503,25 @@ export default function CalculatorPage() {
                       </div>
                     </div>
                   ) : policyType === 'CHILDREN' ? (
-                    <div className="p-4 bg-blue-50/20 border border-blue-100 rounded-xl space-y-4">
-                      <label className="text-sm font-bold text-(--primary-dark) block">
-                        Children Policy Parameters (Bal Jeevan Bima)
-                      </label>
+                    <div className="p-4 bg-blue-50/30 border border-blue-200 rounded-xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-bold text-blue-950 flex items-center gap-1.5">
+                          <i className="ri-heart-pulse-line text-blue-600 text-base"></i>
+                          Children Policy Parameters (Bal Jeevan Bima)
+                        </label>
+                        <span className="text-[0.65rem] font-bold bg-blue-200 text-blue-900 px-2 py-0.5 rounded-full">
+                          Max SA: ₹3 Lakhs
+                        </span>
+                      </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-(--text-dark) mb-1">
-                            Child Completed Age (5 - 12 Years)
+                            Child Completed Age (5 – 20 Years)
                           </label>
                           <input
                             type="number"
                             min="5"
-                            max="12"
+                            max="20"
                             value={childAge}
                             onChange={(e) => setChildAge(parseInt(e.target.value, 10) || 5)}
                             className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
@@ -511,9 +532,38 @@ export default function CalculatorPage() {
                             Declared Bonus Rate
                           </label>
                           <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-emerald-600">
-                            ₹52 per ₹1,000 SA
+                            ₹52 per ₹1,000 SA (Santosh Rate)
                           </div>
                         </div>
+                      </div>
+
+                      {/* Bal Jeevan Bima Key Guidelines Callout */}
+                      <div className="p-3 bg-white border border-blue-100 rounded-lg space-y-2 text-[0.72rem] text-slate-700">
+                        <p className="font-bold text-blue-900 flex items-center gap-1">
+                          <i className="ri-shield-user-line text-blue-600"></i> Premium Waiver
+                          Benefit & Rules:
+                        </p>
+                        <ul className="list-disc pl-4 space-y-1 leading-relaxed">
+                          <li>
+                            <strong>Premium Waiver:</strong> If the parent passes away during the
+                            term, all future premiums are waived. Policy stays active until
+                            maturity, and full SA + accrued bonus is paid to the child.
+                          </li>
+                          <li>
+                            <strong>Parent Eligibility:</strong> Parent (proposer) must be 45 years
+                            old and hold an active PLI policy (Suraksha or Santosh).
+                          </li>
+                          <li>
+                            <strong>Limits:</strong> Maximum ₹3 Lakhs SA (or equal to parent&apos;s
+                            SA, whichever is less). Max 2 children per family. No medical exam
+                            required for child.
+                          </li>
+                          <li>
+                            <strong>No Loan / Surrender:</strong> Cannot be borrowed against or
+                            surrendered. Paid-up option available after 5 years of continuous
+                            payments.
+                          </li>
+                        </ul>
                       </div>
                     </div>
                   ) : (
@@ -530,7 +580,8 @@ export default function CalculatorPage() {
                               ageInputMode === 'DOB'
                                 ? 'bg-white text-(--primary-dark) shadow-xs'
                                 : 'text-slate-600'
-                            }`}>
+                            }`}
+                          >
                             Option A: Date of Birth
                           </button>
                           <button
@@ -540,7 +591,8 @@ export default function CalculatorPage() {
                               ageInputMode === 'AGE'
                                 ? 'bg-white text-(--primary-dark) shadow-xs'
                                 : 'text-slate-600'
-                            }`}>
+                            }`}
+                          >
                             Option B: Current Age
                           </button>
                         </div>
@@ -589,9 +641,12 @@ export default function CalculatorPage() {
                         <button
                           type="button"
                           onClick={() => setIncludeSpouse(!includeSpouse)}
-                          className="text-xs text-(--primary-red) font-semibold hover:underline flex items-center gap-1">
+                          className="text-xs text-(--primary-red) font-semibold hover:underline flex items-center gap-1"
+                        >
                           <i className={includeSpouse ? 'ri-subtract-line' : 'ri-add-line'}></i>
-                          {includeSpouse ? 'Remove Spouse Details' : '+ Add Spouse Details (Optional)'}
+                          {includeSpouse
+                            ? 'Remove Spouse Details'
+                            : '+ Add Spouse Details (Optional)'}
                         </button>
 
                         {includeSpouse && (
@@ -627,7 +682,8 @@ export default function CalculatorPage() {
                   )}
 
                   {/* Whole Life Ceasing Age Selector (When Unconverted) */}
-                  {(policyType === 'WHOLE_LIFE' || (policyType === 'CONVERTIBLE_WHOLE_LIFE' && !isConverted)) && (
+                  {(policyType === 'WHOLE_LIFE' ||
+                    (policyType === 'CONVERTIBLE_WHOLE_LIFE' && !isConverted)) && (
                     <div className="p-4 bg-amber-50/40 border border-amber-200 rounded-xl space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-bold text-amber-900">
@@ -647,17 +703,23 @@ export default function CalculatorPage() {
                               premiumCeasingAge === ageVal
                                 ? 'bg-(--primary-red) text-white shadow-xs'
                                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-                            }`}>
+                            }`}
+                          >
                             Age {ageVal} ({ageVal - computedAge} yrs pay)
                           </button>
                         ))}
                       </div>
                       <p className="text-[0.7rem] text-slate-600 leading-relaxed">
-                        💡 Premium payments cease at age <strong>{premiumCeasingAge}</strong> ({quotationResult.premiumPaymentDuration} yrs), while life cover and bonuses continue to accumulate until age <strong>80</strong> ({quotationResult.bonusAccrualDuration} yrs).
+                        💡 Premium payments cease at age <strong>{premiumCeasingAge}</strong> (
+                        {quotationResult.premiumPaymentDuration} yrs), while life cover and bonuses
+                        continue to accumulate until age <strong>80</strong> (
+                        {quotationResult.bonusAccrualDuration} yrs).
                       </p>
                       <div className="flex gap-2 text-[0.65rem] font-semibold text-emerald-800">
                         <span className="bg-emerald-100 px-2 py-0.5 rounded">Loan after 4 yrs</span>
-                        <span className="bg-emerald-100 px-2 py-0.5 rounded">Surrender after 3 yrs (5 yrs for bonus)</span>
+                        <span className="bg-emerald-100 px-2 py-0.5 rounded">
+                          Surrender after 3 yrs (5 yrs for bonus)
+                        </span>
                       </div>
                     </div>
                   )}
@@ -677,7 +739,8 @@ export default function CalculatorPage() {
                             sumAssured === val
                               ? 'bg-(--primary-red) text-white shadow-xs'
                               : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                          }`}>
+                          }`}
+                        >
                           {val >= 100000 ? `₹${val / 100000} Lakh` : formatINR(val)}
                         </button>
                       ))}
@@ -692,112 +755,119 @@ export default function CalculatorPage() {
                       className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:border-(--primary-red) outline-none"
                     />
                     <p className="text-[0.75rem] text-(--text-light) mt-1">
-                      Current Selection: <strong className="text-(--primary-dark)">{formatINR(sumAssured)}</strong>
+                      Current Selection:{' '}
+                      <strong className="text-(--primary-dark)">{formatINR(sumAssured)}</strong>
                     </p>
                   </div>
 
                   {/* 5. Policy Term / Maturity Age (Show when not Unconverted Whole Life) */}
-                  {(policyType !== 'WHOLE_LIFE' && (policyType !== 'CONVERTIBLE_WHOLE_LIFE' || isConverted)) && (
-                    <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-4">
-                      <div className="flex items-center justify-between">
-                        <label className="text-sm font-bold text-(--primary-dark)">
-                          Policy Duration Parameter
-                        </label>
-                        <div className="flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
-                          <button
-                            type="button"
-                            onClick={() => setTermInputMode('MATURITY_AGE')}
-                            className={`px-3 py-1 rounded-md transition-all ${
-                              termInputMode === 'MATURITY_AGE'
-                                ? 'bg-white text-(--primary-dark) shadow-xs'
-                                : 'text-slate-600'
-                            }`}>
-                            Maturity Age
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setTermInputMode('DURATION')}
-                            className={`px-3 py-1 rounded-md transition-all ${
-                              termInputMode === 'DURATION'
-                                ? 'bg-white text-(--primary-dark) shadow-xs'
-                                : 'text-slate-600'
-                            }`}>
-                            Duration (Years)
-                          </button>
-                        </div>
-                      </div>
-
-                      {termInputMode === 'MATURITY_AGE' ? (
-                        <div className="space-y-3">
-                          <div className="flex flex-wrap gap-1.5">
-                            {[35, 40, 45, 50, 55, 58, 60].map((mAge) => (
-                              <button
-                                key={mAge}
-                                type="button"
-                                disabled={mAge <= computedAge}
-                                onClick={() => setMaturityAge(mAge)}
-                                className={`px-2.5 py-1 rounded text-xs font-bold transition-all ${
-                                  mAge <= computedAge
-                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                    : maturityAge === mAge
-                                    ? 'bg-(--primary-red) text-white shadow-xs'
-                                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-                                }`}>
-                                Age {mAge}
-                              </button>
-                            ))}
+                  {policyType !== 'WHOLE_LIFE' &&
+                    (policyType !== 'CONVERTIBLE_WHOLE_LIFE' || isConverted) && (
+                      <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-4">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-bold text-(--primary-dark)">
+                            Policy Duration Parameter
+                          </label>
+                          <div className="flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
+                            <button
+                              type="button"
+                              onClick={() => setTermInputMode('MATURITY_AGE')}
+                              className={`px-3 py-1 rounded-md transition-all ${
+                                termInputMode === 'MATURITY_AGE'
+                                  ? 'bg-white text-(--primary-dark) shadow-xs'
+                                  : 'text-slate-600'
+                              }`}
+                            >
+                              Maturity Age
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTermInputMode('DURATION')}
+                              className={`px-3 py-1 rounded-md transition-all ${
+                                termInputMode === 'DURATION'
+                                  ? 'bg-white text-(--primary-dark) shadow-xs'
+                                  : 'text-slate-600'
+                              }`}
+                            >
+                              Duration (Years)
+                            </button>
                           </div>
+                        </div>
+
+                        {termInputMode === 'MATURITY_AGE' ? (
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              {[35, 40, 45, 50, 55, 58, 60].map((mAge) => (
+                                <button
+                                  key={mAge}
+                                  type="button"
+                                  disabled={mAge <= computedAge}
+                                  onClick={() => setMaturityAge(mAge)}
+                                  className={`px-2.5 py-1 rounded text-xs font-bold transition-all ${
+                                    mAge <= computedAge
+                                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                      : maturityAge === mAge
+                                        ? 'bg-(--primary-red) text-white shadow-xs'
+                                        : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  Age {mAge}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                                  Target Maturity Age
+                                </label>
+                                <input
+                                  type="number"
+                                  min={computedAge + 5}
+                                  max="80"
+                                  value={maturityAge}
+                                  onChange={(e) =>
+                                    setMaturityAge(parseInt(e.target.value, 10) || 50)
+                                  }
+                                  className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                                  Calculated Policy Duration
+                                </label>
+                                <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
+                                  {quotationResult.duration} Years
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                               <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                                Target Maturity Age
+                                Policy Duration (Years)
                               </label>
                               <input
                                 type="number"
-                                min={computedAge + 5}
-                                max="80"
-                                value={maturityAge}
-                                onChange={(e) => setMaturityAge(parseInt(e.target.value, 10) || 50)}
+                                min="5"
+                                max="55"
+                                value={duration}
+                                onChange={(e) => setDuration(parseInt(e.target.value, 10) || 20)}
                                 className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
                               />
                             </div>
                             <div>
                               <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                                Calculated Policy Duration
+                                Calculated Maturity Age
                               </label>
                               <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                                {quotationResult.duration} Years
+                                {quotationResult.maturityAge} Years Old
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                              Policy Duration (Years)
-                            </label>
-                            <input
-                              type="number"
-                              min="5"
-                              max="55"
-                              value={duration}
-                              onChange={(e) => setDuration(parseInt(e.target.value, 10) || 20)}
-                              className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                              Calculated Maturity Age
-                            </label>
-                            <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                              {quotationResult.maturityAge} Years Old
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    )}
                 </form>
               </div>
             </div>
@@ -818,10 +888,12 @@ export default function CalculatorPage() {
                           quotationResult.confidenceScore >= 95
                             ? 'bg-emerald-500 text-white'
                             : quotationResult.confidenceScore >= 80
-                            ? 'bg-amber-500 text-slate-900'
-                            : 'bg-orange-500 text-white'
-                        }`}>
-                        {quotationResult.confidenceScore}% Confidence | {quotationResult.premiumSource === 'REFERENCE' ? 'Reference' : 'Estimated'}
+                              ? 'bg-amber-500 text-slate-900'
+                              : 'bg-orange-500 text-white'
+                        }`}
+                      >
+                        {quotationResult.confidenceScore}% Confidence |{' '}
+                        {quotationResult.premiumSource === 'REFERENCE' ? 'Reference' : 'Estimated'}
                       </span>
                     </div>
 
@@ -833,7 +905,8 @@ export default function CalculatorPage() {
                     </div>
 
                     <p className="text-xs text-slate-300 mt-2">
-                      Annualized Net Premium: <strong>{formatINR(quotationResult.netMonthlyPremium * 12)}</strong>
+                      Annualized Net Premium:{' '}
+                      <strong>{formatINR(quotationResult.netMonthlyPremium * 12)}</strong>
                     </p>
                   </div>
 
@@ -885,7 +958,8 @@ export default function CalculatorPage() {
 
                     <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-(--text-light)">
-                        Total Accrued Bonus ({quotationResult.bonusAccrualDuration ?? quotationResult.duration} yrs)
+                        Total Accrued Bonus (
+                        {quotationResult.bonusAccrualDuration ?? quotationResult.duration} yrs)
                       </span>
                       <span className="font-semibold text-emerald-600">
                         +{formatINR(quotationResult.totalBonus)}
@@ -902,34 +976,43 @@ export default function CalculatorPage() {
                     )}
 
                     {/* Money-Back Periodic Survival Benefits Schedule for Sumangal */}
-                    {quotationResult.survivalBenefits && quotationResult.survivalBenefits.length > 0 && (
-                      <div className="mt-4 p-4 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
-                            <i className="ri-hand-coin-line text-emerald-600 text-sm"></i>
-                            Periodic Survival Benefits (Money Back)
-                          </span>
-                          <span className="text-[0.65rem] font-bold bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
-                            60% SA Periodic
-                          </span>
-                        </div>
-                        <div className="space-y-1.5 text-xs">
-                          {quotationResult.survivalBenefits.map((b, idx) => (
-                            <div key={idx} className="flex justify-between py-1 border-b border-emerald-100/70">
-                              <span className="text-slate-700 font-medium">{b.description}</span>
-                              <span className="font-bold text-emerald-700">{formatINR(b.amount)}</span>
-                            </div>
-                          ))}
-                          <div className="flex justify-between py-1.5 font-bold text-slate-900 pt-2 border-t border-emerald-200">
-                            <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
-                            <span className="text-(--primary-red)">{formatINR(quotationResult.finalMaturityPayout ?? 0)}</span>
+                    {quotationResult.survivalBenefits &&
+                      quotationResult.survivalBenefits.length > 0 && (
+                        <div className="mt-4 p-4 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                              <i className="ri-hand-coin-line text-emerald-600 text-sm"></i>
+                              Periodic Survival Benefits (Money Back)
+                            </span>
+                            <span className="text-[0.65rem] font-bold bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
+                              60% SA Periodic
+                            </span>
                           </div>
+                          <div className="space-y-1.5 text-xs">
+                            {quotationResult.survivalBenefits.map((b, idx) => (
+                              <div
+                                key={idx}
+                                className="flex justify-between py-1 border-b border-emerald-100/70"
+                              >
+                                <span className="text-slate-700 font-medium">{b.description}</span>
+                                <span className="font-bold text-emerald-700">
+                                  {formatINR(b.amount)}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between py-1.5 font-bold text-slate-900 pt-2 border-t border-emerald-200">
+                              <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
+                              <span className="text-(--primary-red)">
+                                {formatINR(quotationResult.finalMaturityPayout ?? 0)}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-[0.68rem] text-slate-500 italic mt-1">
+                            * Survival payouts do not reduce the final death or maturity payout.
+                            Full cover remains active.
+                          </p>
                         </div>
-                        <p className="text-[0.68rem] text-slate-500 italic mt-1">
-                          * Survival payouts do not reduce the final death or maturity payout. Full cover remains active.
-                        </p>
-                      </div>
-                    )}
+                      )}
 
                     {/* Maturity Highlight Box */}
                     <div className="bg-linear-to-br from-amber-50 to-orange-50/50 p-5 rounded-xl border border-amber-200 text-center mt-4">
@@ -940,7 +1023,11 @@ export default function CalculatorPage() {
                         {formatINR(quotationResult.maturityAmount)}
                       </span>
                       <p className="text-[0.7rem] text-slate-500 mt-1">
-                        Sum Assured ({formatINR(quotationResult.sumAssured)}) + Bonus ({formatINR(quotationResult.totalBonus)}) {quotationResult.terminalBonus > 0 ? `+ Terminal Bonus (${formatINR(quotationResult.terminalBonus)})` : ''}
+                        Sum Assured ({formatINR(quotationResult.sumAssured)}) + Bonus (
+                        {formatINR(quotationResult.totalBonus)}){' '}
+                        {quotationResult.terminalBonus > 0
+                          ? `+ Terminal Bonus (${formatINR(quotationResult.terminalBonus)})`
+                          : ''}
                       </p>
                     </div>
 
@@ -948,7 +1035,8 @@ export default function CalculatorPage() {
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-[0.72rem] mt-3">
                       <div className="flex items-center justify-between font-bold text-slate-800">
                         <span className="flex items-center gap-1">
-                          <i className="ri-shield-check-line text-emerald-600"></i> Policy Facilities & Tax Benefits
+                          <i className="ri-shield-check-line text-emerald-600"></i> Policy
+                          Facilities & Tax Benefits
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 font-medium text-slate-700">
@@ -979,13 +1067,15 @@ export default function CalculatorPage() {
                     <button
                       onClick={() => setIsCompareModalOpen(true)}
                       type="button"
-                      className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5">
+                      className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5"
+                    >
                       <i className="ri-scales-3-line text-amber-600"></i> Compare 6 Policies
                     </button>
                     <button
                       onClick={handlePrint}
                       type="button"
-                      className="flex-1 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5">
+                      className="flex-1 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5"
+                    >
                       <i className="ri-printer-line"></i> Print / Download PDF
                     </button>
                   </div>
@@ -996,12 +1086,15 @@ export default function CalculatorPage() {
                   <button
                     onClick={() => setShowBreakdown(!showBreakdown)}
                     type="button"
-                    className="w-full p-4 text-left font-bold text-sm text-(--primary-dark) flex items-center justify-between hover:bg-slate-50">
+                    className="w-full p-4 text-left font-bold text-sm text-(--primary-dark) flex items-center justify-between hover:bg-slate-50"
+                  >
                     <span className="flex items-center gap-2">
                       <i className="ri-calculator-line text-(--primary-red)"></i>
                       How was this calculated?
                     </span>
-                    <i className={showBreakdown ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}></i>
+                    <i
+                      className={showBreakdown ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
+                    ></i>
                   </button>
 
                   {showBreakdown && (
@@ -1040,12 +1133,14 @@ export default function CalculatorPage() {
                   PLI 6-Policy Options Comparison
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Effective Age {computedAge} years | Sum Assured {formatINR(sumAssured)} | Payment Term {quotationResult.duration} years
+                  Effective Age {computedAge} years | Sum Assured {formatINR(sumAssured)} | Payment
+                  Term {quotationResult.duration} years
                 </p>
               </div>
               <button
                 onClick={() => setIsCompareModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200">
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200"
+              >
                 <i className="ri-close-line text-lg"></i>
               </button>
             </div>
@@ -1066,12 +1161,19 @@ export default function CalculatorPage() {
                   {comparisonResults.map((item, idx) => (
                     <tr
                       key={idx}
-                      className={item.policyType === policyType ? 'bg-amber-50 font-semibold' : 'hover:bg-slate-50'}>
+                      className={
+                        item.policyType === policyType
+                          ? 'bg-amber-50 font-semibold'
+                          : 'hover:bg-slate-50'
+                      }
+                    >
                       <td className="p-3">
                         <div className="font-bold text-(--primary-dark)">{item.policyName}</div>
                         <div className="text-[0.7rem] text-slate-500">Code: {item.policyCode}</div>
                       </td>
-                      <td className="p-3 text-right font-medium text-slate-700">₹{item.bonusRate} / ₹1k</td>
+                      <td className="p-3 text-right font-medium text-slate-700">
+                        ₹{item.bonusRate} / ₹1k
+                      </td>
                       <td className="p-3 text-right font-bold text-(--primary-red)">
                         {formatINR(item.netMonthlyPremium)}
                       </td>
@@ -1091,7 +1193,8 @@ export default function CalculatorPage() {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setIsCompareModalOpen(false)}
-                className="py-2 px-6 bg-(--primary-dark) text-white rounded-lg text-xs font-bold">
+                className="py-2 px-6 bg-(--primary-dark) text-white rounded-lg text-xs font-bold"
+              >
                 Close Comparison
               </button>
             </div>
@@ -1099,5 +1202,5 @@ export default function CalculatorPage() {
         </div>
       )}
     </main>
-  );
+  )
 }

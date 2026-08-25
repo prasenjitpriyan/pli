@@ -45,14 +45,14 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     code: 'CHILDREN',
     bonusRate: 52,
     minSumAssured: 20000,
-    maxSumAssured: 1000000,
+    maxSumAssured: 300000, // Max ₹3 Lakhs (or equal to parent's SA)
     minAge: 5,
-    maxAge: 12,
+    maxAge: 20, // Child entry age 5 to 20 years
     minTerm: 5,
     maxTerm: 20,
-    loanYears: null,
-    surrenderYears: 3,
-    description: 'Provides insurance cover for children of PLI policyholders with high bonus benefits.',
+    loanYears: null, // No loan facility available
+    surrenderYears: null, // No surrender option (Paid-Up after 5 years)
+    description: 'Provides insurance cover for children of PLI policyholders with premium waiver benefit.',
   },
   CONVERTIBLE_WHOLE_LIFE: {
     name: 'Convertible Whole Life Assurance (Suvidha)',
