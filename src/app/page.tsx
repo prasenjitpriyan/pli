@@ -267,93 +267,76 @@ export default function Home() {
       {/* Products Section */}
       <section className="py-20 md:py-24 px-6 bg-white" id="products">
         <div className="container-custom">
-          <h2 className="section-title">Our Premium Product Suite</h2>
+          <h2 className="section-title">Our Premium Insurance Schemes (PLI & RPLI)</h2>
 
-          <div className="lg:max-w-4xl mx-auto bg-linear-to-r from-(--primary-dark) to-slate-800 text-white rounded-2xl p-6 md:p-10 mb-16 shadow-xl flex flex-col md:flex-row justify-between items-center gap-8 animate-on-scroll">
-            <div className="text-center md:text-left">
-              <span className="text-(--accent-gold) uppercase tracking-widest text-xs font-bold mb-2 block">
-                Coverage Limits
-              </span>
-              <h3 className="text-2xl md:text-3xl font-bold">
-                Sum Assured Flexibility
-              </h3>
+          {/* PLI Section */}
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+              <div>
+                <h3 className="text-2xl font-bold text-(--primary-dark)">Postal Life Insurance (PLI)</h3>
+                <p className="text-sm text-slate-500">For Govt/PSU/School staff, defense & professionals | Max SA ₹50 Lakhs</p>
+              </div>
+              <Link href="/calculator?scheme=pli" className="text-sm font-bold text-(--primary-red) hover:underline">
+                Open PLI Calculator →
+              </Link>
             </div>
-            <div className="flex gap-8 md:gap-16 text-center">
-              <div>
-                <p className="text-sm opacity-60 mb-1">Minimum</p>
-                <p className="text-2xl md:text-4xl font-bold text-(--accent-gold)">
-                  ₹20K
-                </p>
-              </div>
-              <div className="w-px bg-white/10"></div>
-              <div>
-                <p className="text-sm opacity-60 mb-1">Maximum</p>
-                <p className="text-2xl md:text-4xl font-bold text-(--accent-gold)">
-                  ₹50L
-                </p>
-              </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { title: 'Suraksha', sub: 'Whole Life Assurance', slug: 'suraksha', scheme: 'pli', color: 'from-blue-600 to-blue-800' },
+                { title: 'Santosh', sub: 'Endowment Assurance', slug: 'santosh', scheme: 'pli', color: 'from-green-600 to-green-800' },
+                { title: 'Suvidha', sub: 'Convertible Whole Life', slug: 'suvidha', scheme: 'pli', color: 'from-purple-600 to-purple-800' },
+                { title: 'Sumangal', sub: 'Anticipated Endowment', slug: 'sumangal', scheme: 'pli', color: 'from-orange-500 to-red-600' },
+                { title: 'Yugal Suraksha', sub: 'Joint Life Assurance', slug: 'yugal-suraksha', scheme: 'pli', color: 'from-pink-600 to-rose-700' },
+                { title: 'Bal Jeevan Bima', sub: 'Children Policy', slug: 'bal-jeevan-bima', scheme: 'pli', color: 'from-teal-500 to-cyan-700' },
+              ].map((prod, idx) => (
+                <div key={idx} className="group relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                  <div className={`h-2 bg-linear-to-r ${prod.color}`}></div>
+                  <div className="p-6">
+                    <h4 className="text-xl font-bold text-(--primary-dark) mb-1">{prod.title}</h4>
+                    <p className="text-xs text-(--primary-red) font-semibold uppercase tracking-wide mb-4">{prod.sub}</p>
+                    <Link href={`/calculator?scheme=${prod.scheme}&policy=${prod.slug}`} className="inline-flex items-center text-xs font-bold text-(--text-light) group-hover:text-(--primary-red) transition-colors">
+                      Calculate Premium <i className="ri-arrow-right-line ml-1.5 transform group-hover:translate-x-1 transition-transform"></i>
+                    </Link>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Suraksha',
-                sub: 'Whole Life Assurance',
-                slug: 'suraksha',
-                color: 'from-blue-600 to-blue-800',
-              },
-              {
-                title: 'Santosh',
-                sub: 'Endowment Assurance',
-                slug: 'santosh',
-                color: 'from-green-600 to-green-800',
-              },
-              {
-                title: 'Suvidha',
-                sub: 'Convertible Whole Life',
-                slug: 'suvidha',
-                color: 'from-purple-600 to-purple-800',
-              },
-              {
-                title: 'Sumangal',
-                sub: 'Anticipated Endowment',
-                slug: 'sumangal',
-                color: 'from-orange-500 to-red-600',
-              },
-              {
-                title: 'Yugal Suraksha',
-                sub: 'Joint Life Assurance',
-                slug: 'yugal-suraksha',
-                color: 'from-pink-600 to-rose-700',
-              },
-              {
-                title: 'Bal Jeevan Bima',
-                sub: 'Children Policy',
-                slug: 'bal-jeevan-bima',
-                color: 'from-teal-500 to-cyan-700',
-              },
-            ].map((prod, idx) => (
-              <div
-                key={idx}
-                className="group relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 animate-on-scroll">
-                <div className={`h-2 bg-linear-to-r ${prod.color}`}></div>
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-(--primary-dark) mb-1">
-                    {prod.title}
-                  </h3>
-                  <p className="text-sm text-(--primary-red) font-semibold uppercase tracking-wide mb-6">
-                    {prod.sub}
-                  </p>
-                  <Link
-                    href={`/calculator?policy=${prod.slug}`}
-                    className="inline-flex items-center text-sm font-bold text-(--text-light) group-hover:text-(--primary-red) transition-colors">
-                    Check Premium{' '}
-                    <i className="ri-arrow-right-line ml-2 transform group-hover:translate-x-1 transition-transform"></i>
-                  </Link>
-                </div>
+          {/* RPLI Section */}
+          <div>
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+              <div>
+                <h3 className="text-2xl font-bold text-emerald-950">Rural Postal Life Insurance (RPLI)</h3>
+                <p className="text-sm text-slate-500">For rural residents, farmers, artisans & workers | Max SA ₹10 Lakhs</p>
               </div>
-            ))}
+              <Link href="/calculator?scheme=rpli" className="text-sm font-bold text-emerald-700 hover:underline">
+                Open RPLI Calculator →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { title: 'Gram Suraksha', sub: 'RPLI Whole Life Assurance', slug: 'gram-suraksha', scheme: 'rpli', color: 'from-emerald-600 to-teal-800' },
+                { title: 'Gram Suvidha', sub: 'RPLI Convertible Whole Life', slug: 'gram-suvidha', scheme: 'rpli', color: 'from-purple-600 to-indigo-800' },
+                { title: 'Gram Santosh', sub: 'RPLI Endowment Assurance', slug: 'gram-santosh', scheme: 'rpli', color: 'from-amber-600 to-yellow-700' },
+                { title: 'Gram Priya', sub: '10-Yr Short Term Money Back', slug: 'gram-priya', scheme: 'rpli', color: 'from-rose-500 to-red-700' },
+                { title: 'Gram Sumangal', sub: 'RPLI Anticipated Endowment', slug: 'gram-sumangal', scheme: 'rpli', color: 'from-orange-500 to-amber-700' },
+                { title: 'Bal Jeevan Bima', sub: 'RPLI Children Policy', slug: 'bal-jeevan-bima', scheme: 'rpli', color: 'from-teal-500 to-cyan-700' },
+              ].map((prod, idx) => (
+                <div key={idx} className="group relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                  <div className={`h-2 bg-linear-to-r ${prod.color}`}></div>
+                  <div className="p-6">
+                    <h4 className="text-xl font-bold text-emerald-950 mb-1">{prod.title}</h4>
+                    <p className="text-xs text-emerald-700 font-semibold uppercase tracking-wide mb-4">{prod.sub}</p>
+                    <Link href={`/calculator?scheme=${prod.scheme}&policy=${prod.slug}`} className="inline-flex items-center text-xs font-bold text-slate-600 group-hover:text-emerald-700 transition-colors">
+                      Calculate RPLI Premium <i className="ri-arrow-right-line ml-1.5 transform group-hover:translate-x-1 transition-transform"></i>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
