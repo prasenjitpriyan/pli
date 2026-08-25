@@ -43,6 +43,13 @@ export interface CalculationStep {
   note?: string;
 }
 
+export interface SurvivalBenefitPayout {
+  year: number;
+  percentage: number;
+  description: string;
+  amount: number;
+}
+
 export interface PLIQuotationResult {
   policyType: PolicyType;
   policyName: string;
@@ -80,6 +87,8 @@ export interface PLIQuotationResult {
 
   // Terminal Bonus & Maturity
   terminalBonus: number;
+  survivalBenefits?: SurvivalBenefitPayout[];
+  finalMaturityPayout?: number;
   maturityAmount: number;
 
   // Transparency & Confidence Flags

@@ -9,7 +9,12 @@ import { predictMonthlyPremium } from './premium-model';
 import { calculateRebate } from './rebate-calculator';
 import { calculateTax } from './tax-calculator';
 import { calculateTerminalBonus } from './terminal-bonus';
-import { CalculationStep, PLIInput, PLIQuotationResult } from './types';
+import {
+  CalculationStep,
+  PLIInput,
+  PLIQuotationResult,
+  SurvivalBenefitPayout,
+} from './types';
 import { formatINR } from './utils';
 
 export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
@@ -82,7 +87,84 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     duration,
   });
 
-  // 11. Maturity Amount
+  // 11. Periodic Survival Benefits (Anticipated Endowment / Sumangal Money-Back Schedule)
+  let survivalBenefits: SurvivalBenefitPayout[] | undefined = undefined;
+  let finalMaturityPayout: number = input.sumAssured + totalBonus + terminalBonus;
+
+  if (input.policyType === 'ANTICIPATED_ENDOWMENT') {
+    survivalBenefits = [];
+    if (duration === 15) {
+      survivalBenefits.push(
+        {
+          year: 6,
+          percentage: 20,
+          description: '1st Survival Benefit (End of 6th Year)',
+          amount: input.sumAssured * 0.2,
+        },
+        {
+          year: 9,
+          percentage: 20,
+          description: '2nd Survival Benefit (End of 9th Year)',
+          amount: input.sumAssured * 0.2,
+        },
+        {
+          year: 12,
+          percentage: 20,
+          description: '3rd Survival Benefit (End of 12th Year)',
+          amount: input.sumAssured * 0.2,
+        }
+      );
+    } else if (duration === 20) {
+      survivalBenefits.push(
+        {
+          year: 8,
+          percentage: 20,
+          description: '1st Survival Benefit (End of 8th Year)',
+          amount: input.sumAssured * 0.2,
+        },
+        {
+          year: 12,
+          percentage: 20,
+          description: '2nd Survival Benefit (End of 12th Year)',
+          amount: input.sumAssured * 0.2,
+        },
+        {
+          year: 16,
+          percentage: 20,
+          description: '3rd Survival Benefit (End of 16th Year)',
+          amount: input.sumAssured * 0.2,
+        }
+      );
+    } else {
+      const y1 = Math.round(duration * 0.4);
+      const y2 = Math.round(duration * 0.6);
+      const y3 = Math.round(duration * 0.8);
+      survivalBenefits.push(
+        {
+          year: y1,
+          percentage: 20,
+          description: `1st Survival Benefit (End of Year ${y1})`,
+          amount: input.sumAssured * 0.2,
+        },
+        {
+          year: y2,
+          percentage: 20,
+          description: `2nd Survival Benefit (End of Year ${y2})`,
+          amount: input.sumAssured * 0.2,
+        },
+        {
+          year: y3,
+          percentage: 20,
+          description: `3rd Survival Benefit (End of Year ${y3})`,
+          amount: input.sumAssured * 0.2,
+        }
+      );
+    }
+
+    finalMaturityPayout = input.sumAssured * 0.4 + totalBonus + terminalBonus;
+  }
+
+  // Total maturity / return amount across entire lifecycle
   const maturityAmount = input.sumAssured + totalBonus + terminalBonus;
 
   // 12. Transparent Step-by-Step Breakdown Log
@@ -150,19 +232,31 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
       result: formatINR(totalPremiumPaid),
     },
     {
-      title: '9. Terminal Bonus Calculation',
+      title: '9. Periodic Survival Benefits Schedule',
       formula:
-        input.policyType === 'ENDOWMENT' && duration >= 20
-          ? 'MIN((Sum Assured / 10,000) × 20, 1,000)'
-          : 'Not Applicable for this policy type / term',
-      values: `Sum Assured ${formatINR(input.sumAssured)}, Duration ${duration} years`,
-      result: formatINR(terminalBonus),
-      note: terminalBonus > 0 ? 'Terminal bonus capped at max ₹1,000' : undefined,
+        input.policyType === 'ANTICIPATED_ENDOWMENT'
+          ? `3 Payouts of 20% SA + Final 40% SA + Total Bonus at Maturity (${duration} yrs)`
+          : 'Standard Maturity Benefit (100% SA + Total Bonus)',
+      values:
+        input.policyType === 'ANTICIPATED_ENDOWMENT'
+          ? `3 Survival Payouts of ${formatINR(input.sumAssured * 0.2)} each (Total 60% SA = ${formatINR(input.sumAssured * 0.6)})`
+          : `Full Sum Assured (${formatINR(input.sumAssured)})`,
+      result:
+        input.policyType === 'ANTICIPATED_ENDOWMENT'
+          ? `Final Maturity Payout: ${formatINR(finalMaturityPayout)}`
+          : formatINR(maturityAmount),
+      note:
+        input.policyType === 'ANTICIPATED_ENDOWMENT'
+          ? 'Periodic survival benefits do NOT reduce the full death or maturity payout'
+          : undefined,
     },
     {
-      title: '10. Estimated Maturity Amount',
-      formula: 'Sum Assured + Total Bonus + Terminal Bonus',
-      values: `${formatINR(input.sumAssured)} + ${formatINR(totalBonus)} + ${formatINR(terminalBonus)}`,
+      title: '10. Total Overall Returns & Benefits',
+      formula: 'Total Periodic Benefits + Final Maturity Payout',
+      values:
+        input.policyType === 'ANTICIPATED_ENDOWMENT'
+          ? `Survival Benefits (${formatINR(input.sumAssured * 0.6)}) + Final Maturity Payout (${formatINR(finalMaturityPayout)})`
+          : `Sum Assured (${formatINR(input.sumAssured)}) + Bonus (${formatINR(totalBonus)})`,
       result: formatINR(maturityAmount),
     },
   ];
@@ -200,6 +294,8 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     totalPremiumPaid,
 
     terminalBonus,
+    survivalBenefits,
+    finalMaturityPayout,
     maturityAmount,
 
     isEstimated: !modelPrediction.isExactReference,

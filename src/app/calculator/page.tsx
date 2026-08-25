@@ -729,6 +729,36 @@ export default function CalculatorPage() {
                       </div>
                     )}
 
+                    {/* Money-Back Periodic Survival Benefits Schedule for Sumangal */}
+                    {quotationResult.survivalBenefits && quotationResult.survivalBenefits.length > 0 && (
+                      <div className="mt-4 p-4 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                            <i className="ri-hand-coin-line text-emerald-600 text-sm"></i>
+                            Periodic Survival Benefits (Money Back)
+                          </span>
+                          <span className="text-[0.65rem] font-bold bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
+                            60% SA Periodic
+                          </span>
+                        </div>
+                        <div className="space-y-1.5 text-xs">
+                          {quotationResult.survivalBenefits.map((b, idx) => (
+                            <div key={idx} className="flex justify-between py-1 border-b border-emerald-100/70">
+                              <span className="text-slate-700 font-medium">{b.description}</span>
+                              <span className="font-bold text-emerald-700">{formatINR(b.amount)}</span>
+                            </div>
+                          ))}
+                          <div className="flex justify-between py-1.5 font-bold text-slate-900 pt-2 border-t border-emerald-200">
+                            <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
+                            <span className="text-(--primary-red)">{formatINR(quotationResult.finalMaturityPayout ?? 0)}</span>
+                          </div>
+                        </div>
+                        <p className="text-[0.68rem] text-slate-500 italic mt-1">
+                          * Survival payouts do not reduce the final death or maturity payout. Full cover remains active.
+                        </p>
+                      </div>
+                    )}
+
                     {/* Maturity Highlight Box */}
                     <div className="bg-linear-to-br from-amber-50 to-orange-50/50 p-5 rounded-xl border border-amber-200 text-center mt-4">
                       <span className="text-xs uppercase tracking-wider text-amber-800 font-bold block mb-1">

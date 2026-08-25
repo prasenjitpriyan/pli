@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { calculateAge, calculateDurationAndMaturityAge, calculateEffectiveAge } from '../age-calculator';
 import { calculatePLIQuotation } from '../calculator';
 import { predictMonthlyPremium } from '../premium-model';
-import { calculateTerminalBonus } from '../terminal-bonus';
 
 describe('PLI Calculation Engine Test Suite (6 Policy Types & Continuous Model)', () => {
   describe('Age and Effective Age Derivations', () => {
@@ -54,6 +53,63 @@ describe('PLI Calculation Engine Test Suite (6 Policy Types & Continuous Model)'
       });
       expect(quote.rebate).toBe(5);
       expect(quote.netMonthlyPremium).toBe(395); // 400 - 5
+    });
+  });
+
+  describe('Anticipated Endowment (Sumangal) Survival Benefits Schedule', () => {
+    it('should generate exact survival benefits schedule for 15-Year AEA Policy', () => {
+      const quote = calculatePLIQuotation({
+        policyType: 'ANTICIPATED_ENDOWMENT',
+        age: 30,
+        sumAssured: 100000,
+        duration: 15,
+      });
+
+      expect(quote.survivalBenefits).toBeDefined();
+      expect(quote.survivalBenefits).toHaveLength(3);
+      expect(quote.survivalBenefits![0]).toEqual({
+        year: 6,
+        percentage: 20,
+        description: '1st Survival Benefit (End of 6th Year)',
+        amount: 20000,
+      });
+      expect(quote.survivalBenefits![1]).toEqual({
+        year: 9,
+        percentage: 20,
+        description: '2nd Survival Benefit (End of 9th Year)',
+        amount: 20000,
+      });
+      expect(quote.survivalBenefits![2]).toEqual({
+        year: 12,
+        percentage: 20,
+        description: '3rd Survival Benefit (End of 12th Year)',
+        amount: 20000,
+      });
+
+      // Total bonus = 48 * 100 * 15 = 72,000
+      // Final maturity payout = 40% SA (40,000) + Total Bonus (72,000) = 112,000
+      expect(quote.finalMaturityPayout).toBe(112000);
+      expect(quote.maturityAmount).toBe(172000); // Total lifecycle returns = 60k + 112k = 172,000
+    });
+
+    it('should generate exact survival benefits schedule for 20-Year AEA Policy', () => {
+      const quote = calculatePLIQuotation({
+        policyType: 'ANTICIPATED_ENDOWMENT',
+        age: 30,
+        sumAssured: 100000,
+        duration: 20,
+      });
+
+      expect(quote.survivalBenefits).toBeDefined();
+      expect(quote.survivalBenefits).toHaveLength(3);
+      expect(quote.survivalBenefits![0].year).toBe(8);
+      expect(quote.survivalBenefits![1].year).toBe(12);
+      expect(quote.survivalBenefits![2].year).toBe(16);
+
+      // Total bonus = 48 * 100 * 20 = 96,000
+      // Final maturity payout = 40% SA (40,000) + Total Bonus (96,000) = 136,000
+      expect(quote.finalMaturityPayout).toBe(136000);
+      expect(quote.maturityAmount).toBe(196000); // Total lifecycle returns = 60k + 136k = 196,000
     });
   });
 
