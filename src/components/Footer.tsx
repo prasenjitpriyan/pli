@@ -75,23 +75,25 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
+                  href="https://share.google/NHDWnZ0xIYZgnilIi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--accent-gold)] hover:underline hover:translate-x-1 transition-all inline-flex items-center gap-1 font-bold">
+                  <i className="ri-google-fill"></i> Google Business Profile
+                </a>
+              </li>
+              <li>
+                <a
                   href="/calculator"
-                  className="text-[var(--accent-gold)] hover:translate-x-1 transition-all inline-block">
+                  className="text-white hover:text-[var(--accent-gold)] hover:translate-x-1 transition-all inline-block font-semibold">
                   Premium Calculator
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="#rates"
                   className="text-[#ccc] hover:text-[var(--accent-gold)] hover:translate-x-1 transition-all inline-block">
-                  Customer Guidelines
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#ccc] hover:text-[var(--accent-gold)] hover:translate-x-1 transition-all inline-block">
-                  Download Forms
+                  Declared Bonus Rates
                 </a>
               </li>
               <li>

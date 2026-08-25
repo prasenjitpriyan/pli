@@ -1,13 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { calculatePliQuote, formatINR, mapToCanonicalPolicy } from '../lib/pli';
+import { calculateRpliQuote, mapToCanonicalRpliPolicy } from '../lib/rpli';
 
 export default function Home() {
   const scrollObserver = useRef<IntersectionObserver | null>(null);
 
+  // Quick Calculator Preview Widget State
+  const [previewScheme, setPreviewScheme] = useState<'PLI' | 'RPLI'>('PLI');
+  const [previewPolicy, setPreviewPolicy] = useState<string>('SANTOSH');
+  const [previewAge, setPreviewAge] = useState<number>(30);
+  const [previewSumAssured, setPreviewSumAssured] = useState<number>(500000);
+
   useEffect(() => {
-    // Scroll Animation similar to script.js
+    // Intersection Observer for scroll animations
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px',
@@ -24,7 +32,7 @@ export default function Home() {
 
     const elements = document.querySelectorAll('.animate-on-scroll');
     elements.forEach((el) => {
-      (el as HTMLElement).style.opacity = '0'; // Initial state
+      (el as HTMLElement).style.opacity = '0';
       scrollObserver.current?.observe(el);
     });
 
@@ -40,89 +48,289 @@ export default function Home() {
     }
   };
 
+  // Quick Calculator Preview Calculation
+  const previewQuote = useMemo(() => {
+    if (previewScheme === 'RPLI') {
+      return calculateRpliQuote({
+        scheme: 'RPLI',
+        policyType: mapToCanonicalRpliPolicy(previewPolicy),
+        age: previewAge,
+        sumAssured: Math.min(previewSumAssured, 1000000),
+        duration: previewPolicy.includes('PRIYA') ? 10 : 20,
+      });
+    }
+    return calculatePliQuote({
+      policyType: mapToCanonicalPolicy(previewPolicy),
+      age: previewAge,
+      sumAssured: Math.min(previewSumAssured, 5000000),
+      duration: 20,
+    });
+  }, [previewScheme, previewPolicy, previewAge, previewSumAssured]);
+
   return (
     <main className="min-h-screen bg-(--bg-light)">
-      {/* Hero Section */}
-      <section className="relative bg-linear-to-br from-primary-red via-[#9e1c2e] to-primary-dark text-white py-32 md:py-40 px-6 overflow-hidden">
-        {/* Abstract Background Element */}
+      {/* 1. HERO SECTION */}
+      <section className="relative bg-linear-to-br from-primary-red via-[#9e1c2e] to-primary-dark text-white py-24 md:py-32 px-6 overflow-hidden">
+        {/* Glowing Ambient Background Elements */}
         <div className="absolute top-0 right-0 w-150 h-150 bg-white opacity-5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-100 h-100 bg-(--accent-gold) opacity-10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
 
-        <div className="container-custom relative z-10 text-center flex flex-col items-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight drop-shadow-lg">
-            Postal Life Insurance
-          </h1>
-          <p className="text-2xl md:text-3xl font-medium text-(--accent-gold) mb-4 tracking-wide uppercase">
-            Insuring Lives, Assuring Happiness
-          </p>
-          <div className="h-1 w-24 bg-(--accent-gold) rounded-full mb-8"></div>
+        <div className="container-custom relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Content Column */}
+            <div className="lg:col-span-7 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold text-(--accent-gold) uppercase tracking-widest mb-6">
+                <i className="ri-verified-badge-fill text-base"></i>
+                <span>Sovereign Guarantee • Government of India • Est. 1884</span>
+              </div>
 
-          <p className="text-lg md:text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
-            Experience the trust of India&apos;s oldest life insurer.{' '}
-            <br className="hidden md:block" />
-            Backed by a{' '}
-            <span className="font-semibold text-white">
-              Sovereign Guarantee
-            </span>{' '}
-            from the Government of India.
-          </p>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight leading-tight drop-shadow-md">
+                Postal & Rural Postal Life Insurance
+              </h1>
 
-          <div className="flex flex-col md:flex-row gap-6">
-            <button
-              onClick={() => scrollToSection('about')}
-              className="btn-primary shadow-lg shadow-black/20">
-              Discover More
-            </button>
-            <Link
-              href="/calculator"
-              className="bg-transparent border-2 border-(--accent-gold) text-(--accent-gold) py-3 px-8 rounded-full font-bold text-lg hover:bg-(--accent-gold) hover:text-(--primary-dark) hover:-translate-y-1 transition-all duration-300">
-              Calculate Premium
-            </Link>
+              <p className="text-xl md:text-2xl font-semibold text-(--accent-gold) mb-6 tracking-wide">
+                Insuring Lives, Assuring Happiness with High Bonuses & 0% GST
+              </p>
+
+              <p className="text-base md:text-lg opacity-90 mb-8 leading-relaxed font-light max-w-2xl mx-auto lg:mx-0">
+                Experience India&apos;s oldest and highest-yielding life insurance scheme. Enjoy maximum returns, lowest premiums, full tax exemption under Sec 80C & Sec 10(10D), backed 100% by the Union Government.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
+                <Link
+                  href="/calculator"
+                  className="bg-(--accent-gold) text-(--primary-dark) py-3.5 px-8 rounded-full font-bold text-lg hover:bg-yellow-400 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                  <i className="ri-calculator-line text-xl"></i> Instant Premium Calculator
+                </Link>
+                <button
+                  onClick={() => scrollToSection('products')}
+                  className="bg-white/10 backdrop-blur-md border-2 border-white/30 text-white py-3.5 px-8 rounded-full font-bold text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-2">
+                  Explore PLI & RPLI Schemes <i className="ri-arrow-down-line text-lg"></i>
+                </button>
+              </div>
+
+              {/* Stat Highlights Bar */}
+              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/15 max-w-xl mx-auto lg:mx-0 text-center lg:text-left">
+                <div>
+                  <p className="text-2xl md:text-3xl font-extrabold text-(--accent-gold)">₹76/₹1k</p>
+                  <p className="text-xs text-white/80 font-medium">Max Declared Bonus</p>
+                </div>
+                <div>
+                  <p className="text-2xl md:text-3xl font-extrabold text-white">0% GST</p>
+                  <p className="text-xs text-white/80 font-medium">100% Tax Savings</p>
+                </div>
+                <div>
+                  <p className="text-2xl md:text-3xl font-extrabold text-(--accent-gold)">100%</p>
+                  <p className="text-xs text-white/80 font-medium">Sovereign Capital Safety</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Quick-Calculator Preview Card */}
+            <div className="lg:col-span-5">
+              <div className="bg-white text-slate-900 rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20 relative">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                  <span className="text-xs font-bold uppercase tracking-wider text-(--primary-red) flex items-center gap-1.5">
+                    <i className="ri-flashlight-fill text-amber-500"></i> Quick Premium Estimator
+                  </span>
+                  <span className="text-[0.68rem] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                    Live Calculation
+                  </span>
+                </div>
+
+                {/* Scheme Toggle */}
+                <div className="grid grid-cols-2 gap-2 mb-4 bg-slate-100 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPreviewScheme('PLI');
+                      setPreviewPolicy('SANTOSH');
+                    }}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                      previewScheme === 'PLI'
+                        ? 'bg-(--primary-red) text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}>
+                    PLI (Urban/Govt)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPreviewScheme('RPLI');
+                      setPreviewPolicy('GRAM_SANTOSH');
+                    }}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                      previewScheme === 'RPLI'
+                        ? 'bg-emerald-700 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}>
+                    RPLI (Rural)
+                  </button>
+                </div>
+
+                <div className="space-y-4 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Select Policy</label>
+                    <select
+                      value={previewPolicy}
+                      onChange={(e) => setPreviewPolicy(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none">
+                      {previewScheme === 'PLI' ? (
+                        <>
+                          <option value="SANTOSH">Santosh — Endowment Assurance</option>
+                          <option value="SURAKSHA">Suraksha — Whole Life Assurance</option>
+                          <option value="SUVIDHA">Suvidha — Convertible Whole Life</option>
+                          <option value="SUMANGAL">Sumangal — Anticipated Endowment</option>
+                          <option value="YUGAL_SURAKSHA">Yugal Suraksha — Joint Life</option>
+                          <option value="BAL_JEEVAN_BIMA">Bal Jeevan Bima — Children Policy</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="GRAM_SANTOSH">Gram Santosh — RPLI Endowment</option>
+                          <option value="GRAM_SURAKSHA">Gram Suraksha — RPLI Whole Life</option>
+                          <option value="GRAM_SUVIDHA">Gram Suvidha — RPLI Convertible</option>
+                          <option value="GRAM_PRIYA">Gram Priya — 10-Yr Money Back</option>
+                          <option value="GRAM_SUMANGAL">Gram Sumangal — RPLI Anticipated</option>
+                          <option value="BAL_JEEVAN_BIMA">Bal Jeevan Bima — RPLI Children</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Age (Years)</label>
+                      <input
+                        type="number"
+                        min="19"
+                        max="55"
+                        value={previewAge}
+                        onChange={(e) => setPreviewAge(parseInt(e.target.value, 10) || 30)}
+                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Sum Assured (₹)</label>
+                      <input
+                        type="number"
+                        step="50000"
+                        min="10000"
+                        max={previewScheme === 'RPLI' ? 1000000 : 5000000}
+                        value={previewSumAssured}
+                        onChange={(e) => setPreviewSumAssured(parseInt(e.target.value, 10) || 500000)}
+                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Calculated Quote Output Preview */}
+                  <div className="p-4 bg-linear-to-br from-slate-900 to-slate-800 text-white rounded-2xl space-y-2 mt-4 shadow-md">
+                    <div className="flex justify-between items-center text-slate-300">
+                      <span>Monthly Base Premium:</span>
+                      <span className="font-bold text-amber-400 text-lg">
+                        {formatINR(previewQuote.netMonthlyPremium)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-300">
+                      <span>Declared Bonus Rate:</span>
+                      <span className="font-semibold text-emerald-400">
+                        ₹{previewQuote.bonusRate} / ₹1,000 SA
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-300 border-t border-white/10 pt-2 font-bold">
+                      <span>Est. Maturity Benefit:</span>
+                      <span className="text-white text-base">
+                        {formatINR(previewQuote.maturityAmount)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/calculator?scheme=${previewScheme.toLowerCase()}&policy=${previewPolicy.toLowerCase().replace('_', '-')}`}
+                    className="w-full py-3 bg-(--primary-red) hover:bg-red-700 text-white font-bold rounded-xl text-center block text-xs transition-colors shadow-md">
+                    Customize Full Quotation & Audit Trace →
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
+      {/* 2. ABOUT & HERITAGE SECTION */}
       <section className="py-20 md:py-24 px-6 relative" id="about">
         <div className="container-custom">
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-(--shadow-card) border border-gray-100 animate-on-scroll">
-            <h2 className="section-title mb-8!">Heritage Meets Modernity</h2>
-            <div className="flex flex-col md:flex-row gap-12 items-center">
-              <div className="flex-1">
-                <p className="text-lg text-(--text-dark) leading-loose mb-6 font-light">
-                  Established in{' '}
-                  <strong className="text-(--primary-red)">1884</strong>,
-                  Postal Life Insurance (PLI) is the oldest and most trusted
-                  life insurance provider in the country. Unlike commercial
-                  insurers, we operate with a primary goal of welfare, offering
-                  distinct advantages like low premiums and high bonus rates.
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-(--shadow-card) border border-slate-100 animate-on-scroll">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-3 h-3 rounded-full bg-(--primary-red)"></span>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-(--primary-red)">
+                Legacy of Trust & Sovereign Assurance
+              </span>
+            </div>
+            <h2 className="section-title mb-8 text-left">140+ Years of Financial Security</h2>
+
+            <div className="flex flex-col lg:flex-row gap-12 items-center">
+              <div className="flex-1 space-y-5">
+                <p className="text-base md:text-lg text-(--text-dark) leading-relaxed">
+                  Established on <strong className="text-(--primary-red)">1st February 1884</strong>, Postal Life Insurance (PLI) is the oldest life insurer in India. Originally introduced as a welfare scheme for Post Office employees, it has expanded to cover central and state government staff, defense personnel, public sector employees, educational institution staff, professionals, and rural citizens under Rural Postal Life Insurance (RPLI).
                 </p>
-                <p className="text-lg text-(--text-light) leading-loose">
-                  Your policy is secured by the sovereign guarantee of the
-                  Government of India, ensuring your investment is 100% safe.
+
+                <p className="text-base text-slate-600 leading-relaxed">
+                  Unlike commercial life insurance companies, PLI & RPLI operate with an ultra-low administrative cost ratio because services are delivered through the extensive network of over 1.5 Lakh post offices across India. These administrative cost savings are directly passed on to policyholders as <strong>the highest bonus rates in the insurance industry</strong>.
                 </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
+                    <i className="ri-shield-keyhole-line text-emerald-600 text-2xl shrink-0 mt-1"></i>
+                    <div>
+                      <h4 className="font-bold text-emerald-950 text-sm">Sovereign Guarantee</h4>
+                      <p className="text-xs text-emerald-800 mt-0.5">100% capital & returns guaranteed by the Union Government of India under PLI rules.</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl flex items-start gap-3">
+                    <i className="ri-percent-line text-purple-600 text-2xl shrink-0 mt-1"></i>
+                    <div>
+                      <h4 className="font-bold text-purple-950 text-sm">GST Free Status</h4>
+                      <p className="text-xs text-purple-800 mt-0.5">Effective 22.09.2025, PLI/RPLI premium payments are 100% GST Exempt.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div className="flex-1 w-full">
-                <div className="bg-linear-to-br from-(--primary-dark) to-slate-800 text-white p-8 rounded-2xl shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                  <h3 className="text-2xl font-bold mb-4 text-(--accent-gold) border-b border-white/10 pb-4">
-                    Why is it cheaper?
+                <div className="bg-linear-to-br from-(--primary-dark) via-slate-900 to-slate-800 text-white p-8 rounded-3xl shadow-xl space-y-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-(--accent-gold) opacity-10 rounded-full blur-2xl"></div>
+                  
+                  <h3 className="text-2xl font-bold text-(--accent-gold) border-b border-white/10 pb-4 flex items-center justify-between">
+                    <span>The Cost Savings Advantage</span>
+                    <i className="ri-line-chart-line text-2xl"></i>
                   </h3>
-                  <p className="mb-4 opacity-90">
-                    Operations are managed through the existing postal network,
-                    significantly reducing administrative costs. These savings
-                    are passed directly to you as{' '}
-                    <strong>Higher Bonuses</strong>.
-                  </p>
-                  <div className="bg-(--accent-gold)/20 p-4 rounded-lg border border-(--accent-gold)/30 mt-6">
-                    <span className="block text-sm uppercase tracking-wider text-(--accent-gold) font-bold mb-1">
-                      Update
-                    </span>
-                    <p className="text-sm font-medium">
-                      Effective 22.09.2025, PLI premiums are{' '}
-                      <span className="text-white bg-(--primary-red) px-2 py-0.5 rounded text-xs ml-1">
-                        GST FREE
-                      </span>
-                    </p>
+
+                  <div className="space-y-4 text-sm text-slate-200">
+                    <div className="flex justify-between items-center py-2 border-b border-white/10">
+                      <span>Expense Ratio Comparison:</span>
+                      <span className="font-bold text-emerald-400">PLI ~5% vs Private ~20%</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-white/10">
+                      <span>Maximum Whole Life Bonus:</span>
+                      <span className="font-bold text-(--accent-gold)">₹76 / ₹1,000 SA</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-white/10">
+                      <span>Tax Deductions (Sec 80C):</span>
+                      <span className="font-bold text-white">Up to ₹1,50,000 / yr</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2">
+                      <span>Maturity Tax Exemption:</span>
+                      <span className="font-bold text-emerald-400">100% Tax-Free under Sec 10(10D)</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 text-xs text-slate-300 leading-relaxed">
+                    💡 <strong>Pro Tip:</strong> By eliminating agent commissions and third-party overheads, PLI policyholders receive up to <strong>30-40% higher net maturity payouts</strong> compared to conventional commercial plans.
                   </div>
                 </div>
               </div>
@@ -131,54 +339,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* 3. ADVANTAGES & KEY FEATURES GRID */}
       <section className="py-20 px-6 bg-white" id="why">
         <div className="container-custom">
-          <h2 className="section-title">The PLI Advantage</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+          <h2 className="section-title">The Unmatched PLI & RPLI Advantage</h2>
+          <p className="text-center text-slate-600 max-w-2xl mx-auto mb-16 text-sm md:text-base">
+            Discover why millions of government officers, defense personnel, and rural citizens trust PLI & RPLI for life cover and long-term wealth creation.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 icon: 'ri-shield-check-fill',
                 title: 'Sovereign Guarantee',
-                desc: '100% security of capital and returns, backed by the Union Government.',
+                desc: '100% security of capital and accrued returns backed directly by the Union Government of India.',
+                color: 'text-amber-500',
               },
               {
                 icon: 'ri-money-diamond-circle-fill',
-                title: 'Low Premium, High Bonus',
-                desc: 'Unmatched returns compared to any other insurer in the market.',
-              },
-              {
-                icon: 'ri-bar-chart-grouped-fill',
-                title: 'Consistently High Bonus',
-                desc: 'We consistently declare higher bonus rates due to low operational costs.',
-              },
-              {
-                icon: 'ri-percent-line',
-                title: 'Tax Benefits',
-                desc: 'Tax exemptions under Sec 80C (Premium) and Sec 10(10D) (Maturity).',
+                title: 'Lowest Premiums, Highest Bonus',
+                desc: 'Unmatched maturity yields per rupee invested due to ultra-low operational expenses.',
+                color: 'text-emerald-500',
               },
               {
                 icon: 'ri-hand-coin-fill',
                 title: 'GST-Free Premiums',
-                desc: 'Save flat 18% instantly compared to private insurers. Full value for money.',
+                desc: 'Zero GST charged on premiums, saving policyholders flat 18% compared to commercial life policies.',
+                color: 'text-blue-500',
               },
               {
-                icon: 'ri-safe-2-fill',
-                title: 'Systematic Investment',
-                desc: "A disciplined way to build a corpus for retirement or child's education.",
+                icon: 'ri-percent-line',
+                title: 'Tax Exemption (Sec 80C & 10(10D))',
+                desc: 'Premiums qualify for Sec 80C tax deduction, and maturity returns are 100% tax-free under Sec 10(10D).',
+                color: 'text-purple-500',
+              },
+              {
+                icon: 'ri-bank-card-line',
+                title: 'Loan & Surrender Facilities',
+                desc: 'Policyholders can avail low-interest policy loans after 3 years and surrender options after qualifying periods.',
+                color: 'text-red-500',
+              },
+              {
+                icon: 'ri-heart-pulse-line',
+                title: 'Premium Waiver Benefit (Children Policy)',
+                desc: 'Under Bal Jeevan Bima, 100% of future premiums are waived upon parent passing; policy stays active until maturity.',
+                color: 'text-teal-500',
               },
             ].map((item, index) => (
               <div
                 key={index}
-                className="group p-8 rounded-2xl bg-(--bg-light) border border-transparent hover:border-(--accent-gold) hover:bg-white card-hover relative overflow-hidden animate-on-scroll">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-(--accent-gold) opacity-5 rounded-bl-full group-hover:opacity-10 transition-opacity"></div>
-                <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-md mb-6 text-(--primary-red) text-2xl group-hover:bg-(--primary-red) group-hover:text-white transition-colors duration-300">
-                  <i className={item.icon}></i>
+                className="group p-8 rounded-3xl bg-(--bg-light) border border-slate-100 hover:border-(--accent-gold) hover:bg-white transition-all duration-300 shadow-xs hover:shadow-xl relative overflow-hidden animate-on-scroll">
+                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md mb-6 text-2xl group-hover:bg-(--primary-red) group-hover:text-white transition-colors duration-300">
+                  <i className={`${item.icon} ${item.color} group-hover:text-white`}></i>
                 </div>
                 <h3 className="text-xl font-bold text-(--primary-dark) mb-3">
                   {item.title}
                 </h3>
-                <p className="text-(--text-light) text-[0.95rem] leading-relaxed">
+                <p className="text-slate-600 text-sm leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -187,74 +404,78 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Eligibility Section - Clean Modern List */}
-      <section className="py-20 px-6 bg-(--bg-light)">
+      {/* 4. ELIGIBILITY GUIDE SECTION */}
+      <section className="py-20 px-6 bg-(--bg-light)" id="eligibility">
         <div className="container-custom">
-          <h2 className="section-title">Who Can Apply?</h2>
-          <p className="text-center text-(--text-light) max-w-2xl mx-auto mb-16">
-            Previously exclusive to postal employees, PLI is now available to a
-            wide range of professionals and employees across India.
+          <h2 className="section-title">Who Is Eligible for PLI & RPLI?</h2>
+          <p className="text-center text-slate-600 max-w-2xl mx-auto mb-16 text-sm md:text-base">
+            Postal Life Insurance serves public sector personnel & professionals, while Rural PLI is open to all rural area residents.
           </p>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                title: 'Government Sector',
+                title: 'Government & Defense',
                 icon: 'ri-building-2-line',
+                schemeTag: 'PLI Eligible',
                 items: [
-                  'Central & State Govt.',
-                  'Defense & Paramilitary',
-                  'PSUs & Banks',
-                  'Local Bodies',
+                  'Central & State Govt Staff',
+                  'Defense & Paramilitary Forces',
+                  'Public Sector Undertakings (PSUs)',
+                  'Reserve Bank & Nationalized Banks',
                 ],
               },
               {
-                title: 'Education',
+                title: 'Education & Institutions',
                 icon: 'ri-book-open-line',
+                schemeTag: 'PLI Eligible',
                 items: [
-                  'Govt. Aided Schools',
-                  'Universities',
-                  'AICTE/CBSE/NAAC Inst.',
-                  'Private School Staff',
+                  'Govt. & Govt-Aided Schools',
+                  'Central & State Universities',
+                  'AICTE / CBSE / NAAC Institutions',
+                  'Recognized Private School Staff',
                 ],
               },
               {
-                title: 'Private Sector',
+                title: 'Corporate Professionals',
                 icon: 'ri-briefcase-4-line',
+                schemeTag: 'PLI Eligible',
                 items: [
-                  'NSE/BSE Listed Co.',
-                  'IT & Banking',
-                  'Manufacturing',
-                  'Joint Ventures',
+                  'Doctors, Engineers & CAs',
+                  'Lawyers & Architects',
+                  'NSE / BSE Listed Companies',
+                  'IT & Banking Professionals',
                 ],
               },
               {
-                title: 'Professionals',
-                icon: 'ri-stethoscope-line',
+                title: 'Rural Residents & Farmers',
+                icon: 'ri-plant-line',
+                schemeTag: 'RPLI Eligible',
                 items: [
-                  'Doctors & Engineers',
-                  'CAs & Architects',
-                  'Lawyers & Bankers',
-                  'Diploma Holders',
+                  'Rural Residents & Panchayats',
+                  'Farmers & Agricultural Workers',
+                  'Rural Artisans & Craftsmen',
+                  'Rural Small Business Owners',
                 ],
               },
             ].map((category, idx) => (
               <div
                 key={idx}
-                className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100/50 animate-on-scroll hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
-                  <i
-                    className={`${category.icon} text-2xl text-(--primary-red)`}></i>
-                  <h4 className="text-(--primary-dark) font-bold text-lg leading-tight">
-                    {category.title}
-                  </h4>
+                className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/70 animate-on-scroll hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                  <i className={`${category.icon} text-2xl text-(--primary-red)`}></i>
+                  <span className="text-[0.65rem] font-extrabold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full">
+                    {category.schemeTag}
+                  </span>
                 </div>
-                <ul className="space-y-3">
+                <h4 className="text-(--primary-dark) font-bold text-base mb-4">
+                  {category.title}
+                </h4>
+                <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
                   {category.items.map((item, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-3 text-(--text-light) text-sm font-medium">
-                      <i className="ri-check-line text-green-500 mt-0.5 font-bold"></i>
-                      {item}
+                    <li key={i} className="flex items-start gap-2">
+                      <i className="ri-check-line text-emerald-600 font-bold shrink-0 mt-0.5"></i>
+                      <span>{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -264,38 +485,46 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* 5. ALL 12 PRODUCTS SECTION (PLI + RPLI) */}
       <section className="py-20 md:py-24 px-6 bg-white" id="products">
         <div className="container-custom">
-          <h2 className="section-title">Our Premium Insurance Schemes (PLI & RPLI)</h2>
+          <h2 className="section-title">Complete 12-Product Insurance Suite</h2>
 
-          {/* PLI Section */}
+          {/* PLI Product Suite */}
           <div className="mb-16">
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
               <div>
-                <h3 className="text-2xl font-bold text-(--primary-dark)">Postal Life Insurance (PLI)</h3>
-                <p className="text-sm text-slate-500">For Govt/PSU/School staff, defense & professionals | Max SA ₹50 Lakhs</p>
+                <h3 className="text-2xl font-bold text-(--primary-dark) flex items-center gap-2">
+                  <i className="ri-building-line text-(--primary-red)"></i> Postal Life Insurance (PLI)
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">For Govt, PSU, Defense, Educational Staff & Professionals | Max SA ₹50 Lakhs</p>
               </div>
-              <Link href="/calculator?scheme=pli" className="text-sm font-bold text-(--primary-red) hover:underline">
+              <Link href="/calculator?scheme=pli" className="text-xs font-bold text-(--primary-red) hover:underline">
                 Open PLI Calculator →
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { title: 'Suraksha', sub: 'Whole Life Assurance', slug: 'suraksha', scheme: 'pli', color: 'from-blue-600 to-blue-800' },
-                { title: 'Santosh', sub: 'Endowment Assurance', slug: 'santosh', scheme: 'pli', color: 'from-green-600 to-green-800' },
-                { title: 'Suvidha', sub: 'Convertible Whole Life', slug: 'suvidha', scheme: 'pli', color: 'from-purple-600 to-purple-800' },
-                { title: 'Sumangal', sub: 'Anticipated Endowment', slug: 'sumangal', scheme: 'pli', color: 'from-orange-500 to-red-600' },
-                { title: 'Yugal Suraksha', sub: 'Joint Life Assurance', slug: 'yugal-suraksha', scheme: 'pli', color: 'from-pink-600 to-rose-700' },
-                { title: 'Bal Jeevan Bima', sub: 'Children Policy', slug: 'bal-jeevan-bima', scheme: 'pli', color: 'from-teal-500 to-cyan-700' },
+                { title: 'Suraksha', sub: 'Whole Life Assurance', slug: 'suraksha', scheme: 'pli', bonus: '₹76/₹1k', color: 'from-blue-600 to-blue-800', desc: 'Cover up to age 80 with highest bonus rate.' },
+                { title: 'Santosh', sub: 'Endowment Assurance', slug: 'santosh', scheme: 'pli', bonus: '₹52/₹1k', color: 'from-green-600 to-green-800', desc: 'Matures at ages 35, 40, 45, 50, 55, 58, 60.' },
+                { title: 'Suvidha', sub: 'Convertible Whole Life', slug: 'suvidha', scheme: 'pli', bonus: '₹76/₹1k', color: 'from-purple-600 to-purple-800', desc: 'Convertible to Endowment after 5 years.' },
+                { title: 'Sumangal', sub: 'Anticipated Endowment', slug: 'sumangal', scheme: 'pli', bonus: '₹48/₹1k', color: 'from-orange-500 to-red-600', desc: 'Periodic money back schedule (60% SA periodic).' },
+                { title: 'Yugal Suraksha', sub: 'Joint Life Assurance', slug: 'yugal-suraksha', scheme: 'pli', bonus: '₹52/₹1k', color: 'from-pink-600 to-rose-700', desc: 'Joint cover for policyholder and spouse.' },
+                { title: 'Bal Jeevan Bima', sub: 'Children Policy', slug: 'bal-jeevan-bima', scheme: 'pli', bonus: '₹52/₹1k', color: 'from-teal-500 to-cyan-700', desc: 'Child cover with 100% Premium Waiver on parent death.' },
               ].map((prod, idx) => (
-                <div key={idx} className="group relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div key={idx} className="group relative bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                   <div className={`h-2 bg-linear-to-r ${prod.color}`}></div>
                   <div className="p-6">
-                    <h4 className="text-xl font-bold text-(--primary-dark) mb-1">{prod.title}</h4>
-                    <p className="text-xs text-(--primary-red) font-semibold uppercase tracking-wide mb-4">{prod.sub}</p>
-                    <Link href={`/calculator?scheme=${prod.scheme}&policy=${prod.slug}`} className="inline-flex items-center text-xs font-bold text-(--text-light) group-hover:text-(--primary-red) transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-lg font-bold text-(--primary-dark)">{prod.title}</h4>
+                      <span className="text-[0.65rem] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                        Bonus {prod.bonus}
+                      </span>
+                    </div>
+                    <p className="text-xs text-(--primary-red) font-semibold uppercase tracking-wide mb-3">{prod.sub}</p>
+                    <p className="text-xs text-slate-600 mb-5 leading-relaxed">{prod.desc}</p>
+                    <Link href={`/calculator?scheme=${prod.scheme}&policy=${prod.slug}`} className="inline-flex items-center text-xs font-bold text-(--primary-red) hover:underline">
                       Calculate Premium <i className="ri-arrow-right-line ml-1.5 transform group-hover:translate-x-1 transition-transform"></i>
                     </Link>
                   </div>
@@ -304,33 +533,41 @@ export default function Home() {
             </div>
           </div>
 
-          {/* RPLI Section */}
+          {/* RPLI Product Suite */}
           <div>
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
               <div>
-                <h3 className="text-2xl font-bold text-emerald-950">Rural Postal Life Insurance (RPLI)</h3>
-                <p className="text-sm text-slate-500">For rural residents, farmers, artisans & workers | Max SA ₹10 Lakhs</p>
+                <h3 className="text-2xl font-bold text-emerald-950 flex items-center gap-2">
+                  <i className="ri-plant-line text-emerald-600"></i> Rural Postal Life Insurance (RPLI)
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">For Rural Residents, Farmers, Artisans & Small Business Owners | Max SA ₹10 Lakhs</p>
               </div>
-              <Link href="/calculator?scheme=rpli" className="text-sm font-bold text-emerald-700 hover:underline">
+              <Link href="/calculator?scheme=rpli" className="text-xs font-bold text-emerald-700 hover:underline">
                 Open RPLI Calculator →
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { title: 'Gram Suraksha', sub: 'RPLI Whole Life Assurance', slug: 'gram-suraksha', scheme: 'rpli', color: 'from-emerald-600 to-teal-800' },
-                { title: 'Gram Suvidha', sub: 'RPLI Convertible Whole Life', slug: 'gram-suvidha', scheme: 'rpli', color: 'from-purple-600 to-indigo-800' },
-                { title: 'Gram Santosh', sub: 'RPLI Endowment Assurance', slug: 'gram-santosh', scheme: 'rpli', color: 'from-amber-600 to-yellow-700' },
-                { title: 'Gram Priya', sub: '10-Yr Short Term Money Back', slug: 'gram-priya', scheme: 'rpli', color: 'from-rose-500 to-red-700' },
-                { title: 'Gram Sumangal', sub: 'RPLI Anticipated Endowment', slug: 'gram-sumangal', scheme: 'rpli', color: 'from-orange-500 to-amber-700' },
-                { title: 'Bal Jeevan Bima', sub: 'RPLI Children Policy', slug: 'bal-jeevan-bima', scheme: 'rpli', color: 'from-teal-500 to-cyan-700' },
+                { title: 'Gram Suraksha', sub: 'RPLI Whole Life Assurance', slug: 'gram-suraksha', scheme: 'rpli', bonus: '₹60/₹1k', color: 'from-emerald-600 to-teal-800', desc: 'RPLI Whole Life assurance up to age 80.' },
+                { title: 'Gram Suvidha', sub: 'RPLI Convertible Whole Life', slug: 'gram-suvidha', scheme: 'rpli', bonus: '₹60/₹1k', color: 'from-purple-600 to-indigo-800', desc: 'Convertible to Gram Santosh after 5 years.' },
+                { title: 'Gram Santosh', sub: 'RPLI Endowment Assurance', slug: 'gram-santosh', scheme: 'rpli', bonus: '₹48/₹1k', color: 'from-amber-600 to-yellow-700', desc: 'Endowment plan with 7 preset maturity age options.' },
+                { title: 'Gram Priya', sub: '10-Yr Short Term Money Back', slug: 'gram-priya', scheme: 'rpli', bonus: '₹45/₹1k', color: 'from-rose-500 to-red-700', desc: 'Fixed 10-Yr Money Back with Natural Calamity relief feature.' },
+                { title: 'Gram Sumangal', sub: 'RPLI Anticipated Endowment', slug: 'gram-sumangal', scheme: 'rpli', bonus: '₹45/₹1k', color: 'from-orange-500 to-amber-700', desc: 'RPLI Money Back policy (15 or 20 year terms).' },
+                { title: 'Bal Jeevan Bima', sub: 'RPLI Children Policy', slug: 'bal-jeevan-bima', scheme: 'rpli', bonus: '₹48/₹1k', color: 'from-teal-500 to-cyan-700', desc: 'Child cover up to ₹1 Lakh with Parent Death Premium Waiver.' },
               ].map((prod, idx) => (
-                <div key={idx} className="group relative bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div key={idx} className="group relative bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                   <div className={`h-2 bg-linear-to-r ${prod.color}`}></div>
                   <div className="p-6">
-                    <h4 className="text-xl font-bold text-emerald-950 mb-1">{prod.title}</h4>
-                    <p className="text-xs text-emerald-700 font-semibold uppercase tracking-wide mb-4">{prod.sub}</p>
-                    <Link href={`/calculator?scheme=${prod.scheme}&policy=${prod.slug}`} className="inline-flex items-center text-xs font-bold text-slate-600 group-hover:text-emerald-700 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-lg font-bold text-emerald-950">{prod.title}</h4>
+                      <span className="text-[0.65rem] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                        Bonus {prod.bonus}
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-700 font-semibold uppercase tracking-wide mb-3">{prod.sub}</p>
+                    <p className="text-xs text-slate-600 mb-5 leading-relaxed">{prod.desc}</p>
+                    <Link href={`/calculator?scheme=${prod.scheme}&policy=${prod.slug}`} className="inline-flex items-center text-xs font-bold text-emerald-700 hover:underline">
                       Calculate RPLI Premium <i className="ri-arrow-right-line ml-1.5 transform group-hover:translate-x-1 transition-transform"></i>
                     </Link>
                   </div>
@@ -341,30 +578,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Bonus Rates Table */}
-      <section className="py-20 px-6 bg-(--bg-light)">
+      {/* 6. OFFICIAL BONUS RATES COMPARISON TABLE */}
+      <section className="py-20 px-6 bg-(--bg-light)" id="rates">
         <div className="container-custom">
-          <h2 className="section-title">High Bonus Rates</h2>
-          <div className="max-w-4xl mx-auto overflow-hidden bg-white rounded-2xl shadow-lg animate-on-scroll">
-            <table className="w-full text-left border-collapse">
+          <h2 className="section-title">Official Declared Bonus Rates</h2>
+          <p className="text-center text-slate-600 max-w-2xl mx-auto mb-12 text-sm">
+            Comparison of official declared bonus rates per ₹1,000 Sum Assured per annum across PLI and RPLI policies.
+          </p>
+
+          <div className="max-w-4xl mx-auto overflow-hidden bg-white rounded-3xl shadow-lg border border-slate-200 animate-on-scroll">
+            <table className="w-full text-left border-collapse text-xs md:text-sm">
               <thead>
                 <tr className="bg-(--primary-dark) text-white">
-                  <th className="p-5 font-semibold">Policy Type</th>
-                  <th className="p-5 font-semibold text-right">
-                    Bonus per ₹1,000 SA
-                  </th>
+                  <th className="p-4 md:p-5 font-semibold">Policy Name</th>
+                  <th className="p-4 md:p-5 font-semibold">Scheme</th>
+                  <th className="p-4 md:p-5 font-semibold text-right">Bonus Rate per ₹1,000 SA</th>
                 </tr>
               </thead>
-              <tbody className="text-(--text-dark) divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100 text-slate-800">
                 {[
-                  { name: 'Whole Life Assurance (Suraksha)', rate: '₹76' },
-                  { name: 'Endowment Assurance (Santosh)', rate: '₹52' },
-                  { name: 'Anticipated Endowment (Sumangal)', rate: '₹48' },
-                  { name: 'Convertible Whole Life (Suvidha)', rate: '₹76' },
+                  { name: 'Suraksha (Whole Life Assurance)', scheme: 'PLI', rate: '₹76 / Year' },
+                  { name: 'Suvidha (Convertible Whole Life - Unconverted)', scheme: 'PLI', rate: '₹76 / Year' },
+                  { name: 'Gram Suraksha (RPLI Whole Life)', scheme: 'RPLI', rate: '₹60 / Year' },
+                  { name: 'Gram Suvidha (RPLI Convertible - Unconverted)', scheme: 'RPLI', rate: '₹60 / Year' },
+                  { name: 'Santosh (Endowment Assurance)', scheme: 'PLI', rate: '₹52 / Year' },
+                  { name: 'Yugal Suraksha (Joint Life Assurance)', scheme: 'PLI', rate: '₹52 / Year' },
+                  { name: 'Bal Jeevan Bima (PLI Children Policy)', scheme: 'PLI', rate: '₹52 / Year' },
+                  { name: 'Sumangal (Anticipated Endowment)', scheme: 'PLI', rate: '₹48 / Year' },
+                  { name: 'Gram Santosh (RPLI Endowment)', scheme: 'RPLI', rate: '₹48 / Year' },
+                  { name: 'Gram Bal Jeevan Bima (RPLI Children Policy)', scheme: 'RPLI', rate: '₹48 / Year' },
+                  { name: 'Gram Priya (10-Yr Rural Money Back)', scheme: 'RPLI', rate: '₹45 / Year' },
+                  { name: 'Gram Sumangal (RPLI Anticipated Endowment)', scheme: 'RPLI', rate: '₹45 / Year' },
                 ].map((row, i) => (
                   <tr key={i} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-5 font-medium">{row.name}</td>
-                    <td className="p-5 text-right font-bold text-(--primary-red)">
+                    <td className="p-4 md:p-5 font-bold">{row.name}</td>
+                    <td className="p-4 md:p-5">
+                      <span className={`px-2 py-0.5 rounded text-[0.7rem] font-bold ${
+                        row.scheme === 'PLI' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'
+                      }`}>
+                        {row.scheme}
+                      </span>
+                    </td>
+                    <td className="p-4 md:p-5 text-right font-extrabold text-(--primary-red)">
                       {row.rate}
                     </td>
                   </tr>
@@ -372,34 +627,149 @@ export default function Home() {
               </tbody>
             </table>
           </div>
-          <p className="text-center text-sm text-(--text-light) mt-6 italic">
-            * Bonus rates are subject to revision by GoI.
-          </p>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section
-        className="py-24 px-6 bg-(--primary-red) text-white text-center"
-        id="contact">
+      {/* 7. GOOGLE BUSINESS PROFILE & LIVE LOCATION MAP SECTION */}
+      <section className="py-20 md:py-24 px-6 bg-white border-t border-slate-200" id="google-business">
+        <div className="container-custom">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 bg-red-50 text-(--primary-red) px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+              <i className="ri-map-pin-user-line text-sm"></i> Official Google Business Profile
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-(--primary-dark)">
+              Visit Our Authorized Business Portal
+            </h2>
+            <p className="text-slate-600 text-sm md:text-base mt-2">
+              Connect directly with our authorized Postal Life Insurance advisory location on Google Maps for in-person consultation, policy servicing, and documentation assistance.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Google Business Profile Information Card */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="bg-linear-to-br from-slate-900 via-slate-800 to-slate-950 text-white p-8 rounded-3xl shadow-xl space-y-6 border border-slate-700">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-(--primary-red) flex items-center justify-center text-white text-2xl shadow-md">
+                      <i className="ri-google-fill"></i>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg text-white">PLI & RPLI Business Portal</h3>
+                      <p className="text-xs text-(--accent-gold) font-medium">Verified Google Business Profile</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 text-xs md:text-sm text-slate-300">
+                  <div className="flex items-start gap-3">
+                    <i className="ri-map-pin-2-fill text-(--accent-gold) text-lg shrink-0 mt-0.5"></i>
+                    <div>
+                      <strong className="text-white block">Official Address:</strong>
+                      <span>Directorate of Postal Life Insurance, Chanakyapuri, New Delhi - 110021</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <i className="ri-time-fill text-(--accent-gold) text-lg shrink-0 mt-0.5"></i>
+                    <div>
+                      <strong className="text-white block">Business Operating Hours:</strong>
+                      <span>Monday – Saturday: 09:00 AM – 06:00 PM (IST)</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <i className="ri-phone-fill text-(--accent-gold) text-lg shrink-0 mt-0.5"></i>
+                    <div>
+                      <strong className="text-white block">Toll-Free National Helpline:</strong>
+                      <a href="tel:18002666868" className="text-white hover:text-(--accent-gold) font-bold">1800 266 6868</a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <i className="ri-mail-send-fill text-(--accent-gold) text-lg shrink-0 mt-0.5"></i>
+                    <div>
+                      <strong className="text-white block">Official Email:</strong>
+                      <a href="mailto:pli@indiapost.gov.in" className="text-slate-200 hover:underline">pli@indiapost.gov.in</a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Direct Action Buttons for Google Business Link */}
+                <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="https://share.google/NHDWnZ0xIYZgnilIi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 px-4 bg-(--primary-red) hover:bg-red-700 text-white font-bold rounded-xl text-center text-xs transition-colors flex items-center justify-center gap-2 shadow-md">
+                    <i className="ri-google-line text-base"></i> Open Google Business Profile
+                  </a>
+                  <a
+                    href="https://share.google/NHDWnZ0xIYZgnilIi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-center text-xs transition-colors flex items-center justify-center gap-2 border border-white/20">
+                    <i className="ri-direction-line text-base"></i> Get Live Directions
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Live Interactive Google Map Frame */}
+            <div className="lg:col-span-7">
+              <div className="bg-white p-3 rounded-3xl shadow-xl border border-slate-200 overflow-hidden relative group">
+                <div className="w-full h-112 rounded-2xl overflow-hidden relative">
+                  <iframe
+                    title="Postal Life Insurance Google Business Profile Map Location"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3503.27581177651!2d77.1895696763435!3d28.591500375686008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1d644d67362f%3A0xc47e307dbdd1752b!2sChanakyapuri%2C%20New%20Delhi%2C%20Delhi%20110021!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen={true}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="w-full h-full rounded-2xl"></iframe>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-b-2xl flex items-center justify-between text-xs text-slate-700">
+                  <span className="font-semibold flex items-center gap-1.5">
+                    <i className="ri-checkbox-circle-fill text-emerald-600"></i> Live Interactive Location Map
+                  </span>
+                  <a
+                    href="https://share.google/NHDWnZ0xIYZgnilIi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-(--primary-red) hover:underline flex items-center gap-1">
+                    View on Google Business Profile <i className="ri-external-link-line"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. CTA SECTION */}
+      <section className="py-24 px-6 bg-(--primary-red) text-white text-center" id="contact">
         <div className="container-custom max-w-4xl">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8">
-            Secure Your Future Today
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
+            Secure Your Family&apos;s Financial Future Today
           </h2>
-          <p className="text-xl opacity-90 mb-10 leading-relaxed">
-            Join millions of satisfied customers who trust Postal Life Insurance
-            for their financial security. Get a quote in seconds.
+          <p className="text-lg md:text-xl opacity-90 mb-10 leading-relaxed font-light">
+            Join millions of satisfied policyholders who trust Postal Life Insurance and Rural Postal Life Insurance for guaranteed security, highest returns, and zero GST premiums.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/calculator"
-              className="bg-white text-(--primary-red) py-4 px-10 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
-              Calculate Premium
+              className="bg-white text-(--primary-red) py-4 px-10 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+              Calculate Instant Quote
             </Link>
             <a
-              href="#contact"
-              className="bg-transparent border-2 border-white text-white py-4 px-10 rounded-full font-bold text-lg hover:bg-white/10 transition-all">
-              Locate Post Office
+              href="https://share.google/NHDWnZ0xIYZgnilIi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-transparent border-2 border-white text-white py-4 px-10 rounded-full font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+              <i className="ri-google-line text-xl"></i> Google Business Profile
             </a>
           </div>
         </div>
