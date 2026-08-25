@@ -1076,27 +1076,48 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?policy=${poli
 
                     {/* Money-Back Periodic Survival Benefits Schedule for Sumangal */}
                     {quotationResult.survivalBenefits && quotationResult.survivalBenefits.length > 0 && (
-                      <div className="mt-4 p-4 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-3">
+                      <div className="mt-4 p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
                             <i className="ri-hand-coin-line text-emerald-600 text-sm"></i>
-                            Periodic Survival Benefits (Money Back Timeline)
+                            Periodic Survival Benefits (Money-Back Timeline)
                           </span>
-                          <span className="text-[0.65rem] font-bold bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
-                            60% SA Periodic
+                          <span className="text-[0.65rem] font-bold bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
+                            60% SA Periodic + 40% at Maturity
                           </span>
                         </div>
                         <div className="space-y-1.5 text-xs">
                           {quotationResult.survivalBenefits.map((b, idx) => (
-                            <div key={idx} className="flex justify-between py-1 border-b border-emerald-100/70">
+                            <div key={idx} className="flex justify-between items-center py-1 border-b border-emerald-100/70">
                               <span className="text-slate-700 font-medium">{b.description}</span>
-                              <span className="font-bold text-emerald-700">{formatINR(b.amount)}</span>
+                              <div className="text-right">
+                                <span className="font-bold text-emerald-700">{formatINR(b.amount)}</span>
+                                <span className="text-[0.65rem] text-emerald-600 font-semibold ml-1.5 bg-emerald-100 px-1.5 py-0.2 rounded">
+                                  20% SA
+                                </span>
+                              </div>
                             </div>
                           ))}
-                          <div className="flex justify-between py-1.5 font-bold text-slate-900 pt-2 border-t border-emerald-200">
-                            <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
-                            <span className="text-(--primary-red)">{formatINR(quotationResult.finalMaturityPayout ?? 0)}</span>
+                          <div className="flex justify-between items-center py-1.5 font-bold text-emerald-900 border-b border-emerald-200">
+                            <span>Total Periodic Survival Payouts (3 × 20%)</span>
+                            <span className="text-emerald-800 font-extrabold">
+                              {formatINR(quotationResult.sumAssured * 0.6)} (60% SA)
+                            </span>
                           </div>
+                          <div className="flex justify-between items-center py-2 font-bold text-slate-900 pt-2">
+                            <div>
+                              <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
+                              <p className="text-[0.68rem] text-slate-500 font-normal">
+                                Remaining 40% SA ({formatINR(quotationResult.sumAssured * 0.4)}) + Accrued Bonus ({formatINR(quotationResult.totalBonus)})
+                              </p>
+                            </div>
+                            <span className="text-base text-(--primary-red) font-extrabold">
+                              {formatINR(quotationResult.finalMaturityPayout ?? 0)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="p-2 bg-white/80 border border-emerald-100 rounded-lg text-[0.68rem] text-slate-600 leading-relaxed">
+                          💡 <strong>Money-Back Guarantee:</strong> 60% SA paid in 3 periodic installments + 40% SA + 100% Accrued Bonus at maturity = <strong>100% Full Sum Assured + 100% Accrued Bonus</strong>.
                         </div>
                       </div>
                     )}
