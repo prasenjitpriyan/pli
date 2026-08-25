@@ -1,3 +1,4 @@
+import { POLICY_REGISTRY } from '../../config/pli/policies';
 import { PolicyConfigItem, PolicyType } from './types';
 
 export const REFERENCE_AGE = 19;
@@ -10,93 +11,20 @@ export const CALCULATION_VERSION = '2.0';
 export const MIN_PREMIUM_BOUND = 100;
 export const MAX_PREMIUM_BOUND = 100000;
 
-export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
-  ENDOWMENT: {
-    name: 'Endowment Assurance (Santosh)',
-    code: 'EA',
-    bonusRate: 52,
-    minSumAssured: 20000,
-    maxSumAssured: 5000000,
-    minAge: 19,
-    maxAge: 55,
-    minTerm: 5,
-    maxTerm: 55,
-    loanYears: 3,
-    surrenderYears: 3,
-    presetMaturityAges: [35, 40, 45, 50, 55, 58, 60],
-    description: 'Provides sum assured with accrued bonus at maturity or to nominee upon death.',
-  },
-  ANTICIPATED_ENDOWMENT: {
-    name: 'Anticipated Endowment Assurance (Sumangal)',
-    code: 'AEA',
-    bonusRate: 48,
-    minSumAssured: 20000,
-    maxSumAssured: 5000000,
-    minAge: 19,
-    maxAge: 45,
-    minTerm: 15,
-    maxTerm: 20,
-    loanYears: null, // No loan facility available for Sumangal
-    surrenderYears: 3,
-    description: 'Money back policy providing periodic survival benefits and full maturity benefits.',
-  },
-  CHILDREN: {
-    name: 'Children Policy (Bal Jeevan Bima)',
-    code: 'CHILDREN',
-    bonusRate: 52,
-    minSumAssured: 20000,
-    maxSumAssured: 300000, // Max ₹3 Lakhs (or equal to parent's SA)
-    minAge: 5,
-    maxAge: 20, // Child entry age 5 to 20 years
-    minTerm: 5,
-    maxTerm: 20,
-    loanYears: null, // No loan facility available
-    surrenderYears: null, // No surrender option (Paid-Up after 5 years)
-    description: 'Provides insurance cover for children of PLI policyholders with premium waiver benefit.',
-  },
-  CONVERTIBLE_WHOLE_LIFE: {
-    name: 'Convertible Whole Life Assurance (Suvidha)',
-    code: 'CWLA',
-    bonusRate: 76,
-    minSumAssured: 20000,
-    maxSumAssured: 5000000,
-    minAge: 19,
-    maxAge: 50,
-    minTerm: 5,
-    maxTerm: 55,
-    loanYears: 4,
-    surrenderYears: 3,
-    presetMaturityAges: [35, 40, 45, 50, 55, 58, 60],
-    description: 'Whole Life policy convertible into Endowment Assurance after 5 years.',
-  },
-  WHOLE_LIFE: {
-    name: 'Whole Life Assurance (Suraksha)',
-    code: 'WLA',
-    bonusRate: 76,
-    minSumAssured: 20000,
-    maxSumAssured: 5000000,
-    minAge: 19,
-    maxAge: 55,
-    minTerm: 5,
-    maxTerm: 60,
-    loanYears: 4,
-    surrenderYears: 3,
-    presetMaturityAges: [55, 58, 60],
-    description: 'Assures payment of sum assured plus bonus upon attaining age 80 or earlier death.',
-  },
-  JOINT_LIFE: {
-    name: 'Joint Life Assurance (Yugal Suraksha)',
-    code: 'JLEA',
-    bonusRate: 52,
-    minSumAssured: 20000,
-    maxSumAssured: 5000000,
-    minAge: 19,
-    maxAge: 45,
-    minTerm: 5,
-    maxTerm: 45,
-    loanYears: 3,
-    surrenderYears: 3,
-    presetMaturityAges: [35, 40, 45, 50, 55, 58, 60],
-    description: 'Joint life cover for couples where both lives are covered under a single policy.',
-  },
+export const POLICY_CONFIG: Record<string, PolicyConfigItem> = {
+  // Canonical Policy Keys
+  SURAKSHA: POLICY_REGISTRY.SURAKSHA,
+  SANTOSH: POLICY_REGISTRY.SANTOSH,
+  SUVIDHA: POLICY_REGISTRY.SUVIDHA,
+  SUMANGAL: POLICY_REGISTRY.SUMANGAL,
+  YUGAL_SURAKSHA: POLICY_REGISTRY.YUGAL_SURAKSHA,
+  BAL_JEEVAN_BIMA: POLICY_REGISTRY.BAL_JEEVAN_BIMA,
+
+  // Legacy Policy Key Aliases
+  WHOLE_LIFE: POLICY_REGISTRY.SURAKSHA,
+  ENDOWMENT: POLICY_REGISTRY.SANTOSH,
+  CONVERTIBLE_WHOLE_LIFE: POLICY_REGISTRY.SUVIDHA,
+  ANTICIPATED_ENDOWMENT: POLICY_REGISTRY.SUMANGAL,
+  JOINT_LIFE: POLICY_REGISTRY.YUGAL_SURAKSHA,
+  CHILDREN: POLICY_REGISTRY.BAL_JEEVAN_BIMA,
 };

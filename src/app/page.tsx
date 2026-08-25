@@ -300,31 +300,37 @@ export default function Home() {
               {
                 title: 'Suraksha',
                 sub: 'Whole Life Assurance',
+                slug: 'suraksha',
                 color: 'from-blue-600 to-blue-800',
               },
               {
                 title: 'Santosh',
                 sub: 'Endowment Assurance',
+                slug: 'santosh',
                 color: 'from-green-600 to-green-800',
               },
               {
                 title: 'Suvidha',
                 sub: 'Convertible Whole Life',
+                slug: 'suvidha',
                 color: 'from-purple-600 to-purple-800',
               },
               {
                 title: 'Sumangal',
                 sub: 'Anticipated Endowment',
+                slug: 'sumangal',
                 color: 'from-orange-500 to-red-600',
               },
               {
                 title: 'Yugal Suraksha',
                 sub: 'Joint Life Assurance',
+                slug: 'yugal-suraksha',
                 color: 'from-pink-600 to-rose-700',
               },
               {
                 title: 'Bal Jeevan Bima',
                 sub: 'Children Policy',
+                slug: 'bal-jeevan-bima',
                 color: 'from-teal-500 to-cyan-700',
               },
             ].map((prod, idx) => (
@@ -340,7 +346,7 @@ export default function Home() {
                     {prod.sub}
                   </p>
                   <Link
-                    href="/calculator"
+                    href={`/calculator?policy=${prod.slug}`}
                     className="inline-flex items-center text-sm font-bold text-(--text-light) group-hover:text-(--primary-red) transition-colors">
                     Check Premium{' '}
                     <i className="ri-arrow-right-line ml-2 transform group-hover:translate-x-1 transition-transform"></i>

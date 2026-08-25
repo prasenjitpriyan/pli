@@ -6,6 +6,7 @@ import {
 } from './config';
 import { CALIBRATION_DATASET, CalibrationPoint } from './reference-data';
 import { PolicyType } from './types';
+import { mapToCanonicalPolicy } from './validation';
 
 export interface ModelPredictionResult {
   basePremiumPerLakh: number; // Base monthly premium for ₹1,00,000 SA
@@ -28,7 +29,10 @@ export function predictMonthlyPremium(params: {
 }): ModelPredictionResult {
   const { policyType, effectiveAge, duration, sumAssured, ageRate } = params;
 
-  const dataset = CALIBRATION_DATASET[policyType] || [];
+  const dataset =
+    CALIBRATION_DATASET[policyType] ||
+    CALIBRATION_DATASET[mapToCanonicalPolicy(policyType)] ||
+    [];
 
   // 1. Exact Reference Match Check
   const exactMatch = dataset.find(

@@ -1,4 +1,5 @@
 import { PolicyType } from './types';
+import { mapToCanonicalPolicy } from './validation';
 
 /**
  * Calculates completed age in years as of the effective date.
@@ -50,14 +51,15 @@ export function calculateEffectiveAge(params: {
   childAge?: number;
 }): number {
   const { policyType, age, firstLifeAge, secondLifeAge, childAge } = params;
+  const canonical = mapToCanonicalPolicy(policyType);
 
-  if (policyType === 'JOINT_LIFE') {
+  if (canonical === 'YUGAL_SURAKSHA') {
     const first = firstLifeAge ?? age ?? 30;
     const second = secondLifeAge ?? 28;
     return Math.floor((first + second) / 2);
   }
 
-  if (policyType === 'CHILDREN') {
+  if (canonical === 'BAL_JEEVAN_BIMA') {
     return childAge ?? 5;
   }
 
@@ -74,6 +76,7 @@ export function calculateDurationAndMaturityAge(params: {
   duration?: number;
 }): { duration: number; maturityAge: number } {
   const { policyType, age, maturityAge, duration } = params;
+  const canonical = mapToCanonicalPolicy(policyType);
 
   if (maturityAge !== undefined && maturityAge !== null && !isNaN(maturityAge)) {
     const calculatedDuration = Math.max(1, maturityAge - age);
@@ -91,7 +94,7 @@ export function calculateDurationAndMaturityAge(params: {
     };
   }
 
-  if (policyType === 'WHOLE_LIFE') {
+  if (canonical === 'SURAKSHA') {
     const defaultMaturityAge = 80;
     const defaultDuration = Math.max(1, defaultMaturityAge - age);
     return {
@@ -100,19 +103,9 @@ export function calculateDurationAndMaturityAge(params: {
     };
   }
 
-  if (policyType === 'CHILDREN') {
-    const defaultChildAge = age || 5;
-    const defaultMaturityAge = 20; // Default maturity age 20 (term 15)
-    const defaultDuration = Math.max(1, defaultMaturityAge - defaultChildAge);
-    return {
-      duration: defaultDuration,
-      maturityAge: defaultMaturityAge,
-    };
-  }
-
-  const fallbackDuration = 20;
+  const defaultDuration = 20;
   return {
-    duration: fallbackDuration,
-    maturityAge: age + fallbackDuration,
+    duration: defaultDuration,
+    maturityAge: age + defaultDuration,
   };
 }

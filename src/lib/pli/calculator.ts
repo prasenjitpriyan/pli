@@ -1,33 +1,38 @@
-import {
-  calculateAge,
-  calculateDurationAndMaturityAge,
-  calculateEffectiveAge,
-} from './age-calculator';
+import { FREQUENCY_CONFIG } from '../../config/pli/frequencies';
+import { POLICY_REGISTRY } from '../../config/pli/policies';
+import { calculateAge, calculateDurationAndMaturityAge, calculateEffectiveAge } from './age-calculator';
+import { generatePliAuditTrail } from './audit-engine';
+import { calculatePliBenefits } from './benefit-engine';
 import { calculateBonus } from './bonus-calculator';
-import { CALCULATION_VERSION, POLICY_CONFIG } from './config';
+import { CALCULATION_VERSION } from './config';
 import { predictMonthlyPremium } from './premium-model';
 import { calculateRebate } from './rebate-calculator';
 import { calculateTax } from './tax-calculator';
 import { calculateTerminalBonus } from './terminal-bonus';
 import {
-  CalculationStep,
+  PliInput,
+  PliPolicy,
+  PliQuoteResult,
   PLIInput,
   PLIQuotationResult,
-  SurvivalBenefitPayout,
 } from './types';
-import { formatINR } from './utils';
+import { validatePliInput, mapToCanonicalPolicy } from './validation';
 
-export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
-  const policyConfig = POLICY_CONFIG[input.policyType];
+export function calculatePliQuote(input: PliInput): PliQuoteResult {
+  const canonicalPolicy: PliPolicy = mapToCanonicalPolicy(input.policyType);
+  const policyConfig = POLICY_REGISTRY[canonicalPolicy];
 
-  // 1. Base Age & Date of Birth Derivation
+  // 1. Validation Check
+  const eligibility = validatePliInput(input);
+
+  // 2. Base Age & Effective Date Derivation
   const { age, effectiveDate } = calculateAge(
     input.dateOfBirth,
     input.effectiveDate,
     input.age
   );
 
-  // 2. Effective Age Derivation (Handles Single Life, Joint Life, Children)
+  // 3. Effective Age Derivation
   const effectiveAge = calculateEffectiveAge({
     policyType: input.policyType,
     age,
@@ -36,17 +41,11 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     childAge: input.childAge,
   });
 
-  // 3. Conversion Status for Convertible Whole Life Assurance (Suvidha)
-  const isConverted =
-    input.policyType === 'CONVERTIBLE_WHOLE_LIFE' && Boolean(input.isConverted);
-  const conversionStatus =
-    input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
-      ? isConverted
-        ? 'CONVERTED'
-        : 'UNCONVERTED'
-      : undefined;
+  // 4. Suvidha Conversion Option Check
+  const isConverted = canonicalPolicy === 'SUVIDHA' && Boolean(input.isConverted);
+  const conversionStatus = canonicalPolicy === 'SUVIDHA' ? (isConverted ? 'CONVERTED' : 'UNCONVERTED') : undefined;
 
-  // 4. Whole Life vs Converted Endowment Duration & Ceasing Age Logic
+  // 5. Whole Life Ceasing Age vs Standard Duration Logic
   let premiumCeasingAge: number | undefined = undefined;
   let premiumPaymentDuration: number | undefined = undefined;
   let bonusAccrualDuration: number | undefined = undefined;
@@ -54,17 +53,13 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
   let duration: number;
   let maturityAge: number;
 
-  if (
-    (input.policyType === 'WHOLE_LIFE' ||
-      input.policyType === 'CONVERTIBLE_WHOLE_LIFE') &&
-    !isConverted
-  ) {
+  if ((canonicalPolicy === 'SURAKSHA' || canonicalPolicy === 'SUVIDHA') && !isConverted) {
     premiumCeasingAge = input.premiumCeasingAge ?? 60;
     premiumPaymentDuration = Math.max(1, premiumCeasingAge - effectiveAge);
     bonusAccrualDuration = Math.max(1, 80 - effectiveAge);
 
-    duration = premiumPaymentDuration; // Premium is paid for premiumPaymentDuration years
-    maturityAge = 80; // Full maturity payout occurs at Age 80 or earlier death
+    duration = premiumPaymentDuration;
+    maturityAge = 80;
   } else {
     const durationRes = calculateDurationAndMaturityAge({
       policyType: input.policyType,
@@ -76,8 +71,7 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     maturityAge = durationRes.maturityAge;
   }
 
-  // 5. Bonus Calculation
-  // Converted Suvidha uses Endowment bonus rate (52), Unconverted uses Whole Life rate (76)
+  // 6. Bonus Engine
   const bonusDuration = bonusAccrualDuration ?? duration;
   let { bonusRate, annualBonus, totalBonus } = calculateBonus(
     input.policyType,
@@ -86,13 +80,12 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
   );
 
   if (isConverted) {
-    bonusRate = 52; // Switches to Endowment bonus rate
+    bonusRate = 52; // Endowment bonus rate
     annualBonus = (input.sumAssured / 1000) * bonusRate;
     totalBonus = annualBonus * duration;
   }
 
-  // 6. Mathematical Premium Engine Prediction
-  // Converted Suvidha uses ENDOWMENT premium model curve
+  // 7. Premium Surface Engine
   const targetModelPolicy = isConverted ? 'ENDOWMENT' : input.policyType;
   const modelPrediction = predictMonthlyPremium({
     policyType: targetModelPolicy,
@@ -102,210 +95,81 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     ageRate: input.ageRate,
   });
 
-  // 7. Policy-Aware Rebate
+  // 8. Policy-Aware Rebate
   const rebate = calculateRebate({
     policyType: input.policyType,
     sumAssured: input.sumAssured,
     overrideRebate: input.rebate,
   });
 
-  // 8. Tax / GST Calculation
+  // 9. Tax Engine
   const tax = calculateTax(
     modelPrediction.scaledGrossPremium,
     input.gstRate
   );
 
-  // 9. Net Premium Calculation
-  const netMonthlyPremium =
-    modelPrediction.scaledGrossPremium - rebate + tax;
+  // 10. Net Monthly Premium
+  const netMonthlyPremium = modelPrediction.scaledGrossPremium - rebate + tax;
 
-  // 10. Total Premium Paid Calculation
+  // 11. Premium Frequency Adjustment & Advance Discount
+  const frequency = input.frequency ?? 'MONTHLY';
+  const freqConfig = FREQUENCY_CONFIG[frequency];
+  const rawInstallment = netMonthlyPremium * (12 / freqConfig.paymentsPerYear);
+  const frequencyDiscount = rawInstallment * (freqConfig.rebatePercent / 100);
+  const netInstallmentPremium = rawInstallment - frequencyDiscount;
+  const annualizedPremium = netInstallmentPremium * freqConfig.paymentsPerYear;
+
+  // 12. Total Premium Paid
   const totalPremiumPaid = netMonthlyPremium * 12 * duration;
 
-  // 11. Terminal Bonus
+  // 13. Terminal Bonus
   const terminalBonus = calculateTerminalBonus({
     policyType: isConverted ? 'ENDOWMENT' : input.policyType,
     sumAssured: input.sumAssured,
     duration,
   });
 
-  // 12. Periodic Survival Benefits (Anticipated Endowment / Sumangal Money-Back Schedule)
-  let survivalBenefits: SurvivalBenefitPayout[] | undefined = undefined;
-  let finalMaturityPayout: number = input.sumAssured + totalBonus + terminalBonus;
+  // 14. Benefit Engine (Maturity, Death, Money-Back Timeline)
+  const benefits = calculatePliBenefits({
+    policy: canonicalPolicy,
+    sumAssured: input.sumAssured,
+    duration,
+    totalBonus,
+    terminalBonus,
+    isConverted,
+  });
 
-  if (input.policyType === 'ANTICIPATED_ENDOWMENT') {
-    survivalBenefits = [];
-    if (duration === 15) {
-      survivalBenefits.push(
-        {
-          year: 6,
-          percentage: 20,
-          description: '1st Survival Benefit (End of 6th Year)',
-          amount: input.sumAssured * 0.2,
-        },
-        {
-          year: 9,
-          percentage: 20,
-          description: '2nd Survival Benefit (End of 9th Year)',
-          amount: input.sumAssured * 0.2,
-        },
-        {
-          year: 12,
-          percentage: 20,
-          description: '3rd Survival Benefit (End of 12th Year)',
-          amount: input.sumAssured * 0.2,
-        }
-      );
-    } else if (duration === 20) {
-      survivalBenefits.push(
-        {
-          year: 8,
-          percentage: 20,
-          description: '1st Survival Benefit (End of 8th Year)',
-          amount: input.sumAssured * 0.2,
-        },
-        {
-          year: 12,
-          percentage: 20,
-          description: '2nd Survival Benefit (End of 12th Year)',
-          amount: input.sumAssured * 0.2,
-        },
-        {
-          year: 16,
-          percentage: 20,
-          description: '3rd Survival Benefit (End of 16th Year)',
-          amount: input.sumAssured * 0.2,
-        }
-      );
-    } else {
-      const y1 = Math.round(duration * 0.4);
-      const y2 = Math.round(duration * 0.6);
-      const y3 = Math.round(duration * 0.8);
-      survivalBenefits.push(
-        {
-          year: y1,
-          percentage: 20,
-          description: `1st Survival Benefit (End of Year ${y1})`,
-          amount: input.sumAssured * 0.2,
-        },
-        {
-          year: y2,
-          percentage: 20,
-          description: `2nd Survival Benefit (End of Year ${y2})`,
-          amount: input.sumAssured * 0.2,
-        },
-        {
-          year: y3,
-          percentage: 20,
-          description: `3rd Survival Benefit (End of Year ${y3})`,
-          amount: input.sumAssured * 0.2,
-        }
-      );
-    }
-
-    finalMaturityPayout = input.sumAssured * 0.4 + totalBonus + terminalBonus;
-  }
-
-  // Total maturity / return amount across entire lifecycle
-  const maturityAmount = input.sumAssured + totalBonus + terminalBonus;
-
-  // 13. Transparent Step-by-Step Breakdown Log
-  const breakdown: CalculationStep[] = [
-    {
-      title: '1. Policy Model & Conversion Status',
-      formula:
-        input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
-          ? 'Suvidha Policy Option (Conversion Window: 5-6 Years from Inception)'
-          : input.policyType === 'JOINT_LIFE'
-          ? 'Effective Age = (First Age + Second Age) / 2'
-          : 'Effective Age = Current Completed Age',
-      values:
-        input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
-          ? `Status: ${isConverted ? 'Converted to Endowment Assurance (Santosh)' : 'Unconverted (Left as Whole Life - Suraksha)'}`
-          : `Effective Age ${effectiveAge}`,
-      result: `${effectiveAge} years`,
-      note: `Selected Policy: ${policyConfig.name} (${policyConfig.code})`,
-    },
-    {
-      title: '2. Premium Payment Term & Bonus Accumulation',
-      formula:
-        (input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE') && !isConverted
-          ? 'Premium Term = Ceasing Age - Entry Age | Bonus Term = 80 - Entry Age'
-          : 'Duration = Target Maturity Age - Effective Age',
-      values:
-        (input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE') && !isConverted
-          ? `Ceasing Age ${premiumCeasingAge} (${duration} yrs payment) | Bonus Accrual until Age 80 (${bonusDuration} yrs)`
-          : `Maturity Age (${maturityAge}) - Effective Age (${effectiveAge})`,
-      result: `${duration} years`,
-    },
-    {
-      title: '3. Declared Bonus Rate & Annual Bonus',
-      formula: '(Sum Assured / 1,000) × Bonus Rate',
-      values: `(${formatINR(input.sumAssured)} / 1,000) × ₹${bonusRate}`,
-      result: `${formatINR(annualBonus)} / year`,
-      note: isConverted
-        ? 'Converted Suvidha uses Endowment bonus rate of ₹52 per ₹1,000 SA'
-        : `Bonus rate is ₹${bonusRate} per ₹1,000 SA`,
-    },
-    {
-      title: '4. Total Accrued Bonus',
-      formula: 'Annual Bonus × Bonus Accumulation Term',
-      values: `${formatINR(annualBonus)} × ${bonusDuration} years`,
-      result: formatINR(totalBonus),
-    },
-    {
-      title: '5. Mathematical Premium Model Surface Prediction',
-      formula: 'Base Premium = f(Effective Age, Payment Duration) per ₹1,00,000 SA',
-      values: `Effective Age ${effectiveAge}, Payment Duration ${duration} years`,
-      result: `₹${modelPrediction.basePremiumPerLakh}/month (Base)`,
-      note: `Method: ${modelPrediction.calculationMethod}`,
-    },
-    {
-      title: '6. Sum Assured Scaling & Gross Monthly Premium',
-      formula: 'Gross Monthly Premium = Base Premium × (Sum Assured / 100,000)',
-      values: `₹${modelPrediction.basePremiumPerLakh} × (${formatINR(input.sumAssured)} / ₹1,00,000)`,
-      result: `${formatINR(modelPrediction.scaledGrossPremium)}/month`,
-      note: `Model Confidence Score: ${modelPrediction.confidenceScore}%`,
-    },
-    {
-      title: '7. Policy-Aware Rebate & Net Premium',
-      formula: 'Gross Monthly Premium - Rebate + Tax',
-      values: `₹${modelPrediction.scaledGrossPremium} - ₹${rebate} + ₹${tax}`,
-      result: `${formatINR(netMonthlyPremium)}/month`,
-      note:
-        input.policyType === 'JOINT_LIFE'
-          ? 'Joint Life Rebate of ₹7 applied'
-          : 'Standard Rebate of ₹5 applied',
-    },
-    {
-      title: '8. Estimated Total Premium Paid',
-      formula: 'Net Monthly Premium × 12 × Premium Payment Duration',
-      values: `${formatINR(netMonthlyPremium)} × 12 × ${duration} years`,
-      result: formatINR(totalPremiumPaid),
-    },
-    {
-      title: '9. Maturity Benefit & Facilities',
-      formula:
-        input.policyType === 'ANTICIPATED_ENDOWMENT'
-          ? `3 Payouts of 20% SA + Final 40% SA + Total Bonus at Maturity (${duration} yrs)`
-          : 'Full Sum Assured + Accumulated Bonuses at Maturity',
-      values: `Sum Assured (${formatINR(input.sumAssured)}) + Total Bonus (${formatINR(totalBonus)})`,
-      result: formatINR(maturityAmount),
-      note: 'Loan facility available after 4 yrs | Surrender allowed after 3 yrs (5 yrs for bonus)',
-    },
-    {
-      title: '10. Total Overall Returns',
-      formula: 'Sum Assured + Total Accrued Bonus + Terminal Bonus',
-      values: `${formatINR(input.sumAssured)} + ${formatINR(totalBonus)} + ${formatINR(terminalBonus)}`,
-      result: formatINR(maturityAmount),
-    },
-  ];
+  // 15. Audit Engine
+  const breakdown = generatePliAuditTrail({
+    policyName: policyConfig.name,
+    policyCode: policyConfig.code,
+    effectiveAge,
+    maturityAge,
+    duration,
+    bonusRate,
+    annualBonus,
+    totalBonus,
+    sumAssured: input.sumAssured,
+    frequency,
+    basePremium: modelPrediction.basePremiumPerLakh,
+    rebate,
+    frequencyDiscount,
+    tax,
+    netMonthlyPremium,
+    netInstallmentPremium,
+    totalPremiumPaid,
+    maturityAmount: benefits.maturityAmount,
+    confidenceScore: modelPrediction.confidenceScore,
+    calculationMethod: modelPrediction.calculationMethod,
+    isConverted,
+  });
 
   return {
-    policyType: input.policyType,
+    policyType: canonicalPolicy,
     policyName: policyConfig.name,
     policyCode: policyConfig.code,
 
+    customer: input.customer,
     dateOfBirth: input.dateOfBirth,
     effectiveDate,
     age,
@@ -323,6 +187,7 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     duration,
 
     sumAssured: input.sumAssured,
+    frequency,
 
     bonusRate,
     annualBonus,
@@ -333,25 +198,38 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     sumAssuredFactor: input.sumAssured / 100000,
     ageFactor: 1.0,
     estimatedMonthlyPremium: modelPrediction.scaledGrossPremium,
+    frequencyPremium: rawInstallment,
+    frequencyDiscount,
     rebate,
     tax,
     netMonthlyPremium,
+    netInstallmentPremium,
+    annualizedPremium,
     totalPremiumPaid,
 
     terminalBonus,
-    survivalBenefits,
-    finalMaturityPayout,
-    maturityAmount,
+    survivalBenefits: benefits.survivalBenefits,
+    finalMaturityPayout: benefits.finalMaturityPayout,
+    maturityAmount: benefits.maturityAmount,
+    deathBenefitAmount: benefits.deathBenefitAmount,
 
     loanYears: policyConfig.loanYears,
     surrenderYears: policyConfig.surrenderYears,
 
+    eligibility,
     isEstimated: !modelPrediction.isExactReference,
-    premiumSource: modelPrediction.premiumSource,
+    premiumSource: modelPrediction.isExactReference ? 'OFFICIAL' : 'ESTIMATED',
     confidenceScore: modelPrediction.confidenceScore,
     calculationMethod: modelPrediction.calculationMethod,
     calculationVersion: CALCULATION_VERSION,
+    rateTableVersion: '2.0-OFFICIAL-SCHEDULE',
 
+    timeline: benefits.timeline,
     breakdown,
   };
 }
+
+// Export calculatePLIQuotation for 100% backward compatibility
+export const calculatePLIQuotation = (input: PLIInput): PLIQuotationResult => {
+  return calculatePliQuote(input);
+};

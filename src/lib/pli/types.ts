@@ -1,4 +1,14 @@
+export type PliPolicy =
+  | 'SURAKSHA'
+  | 'SANTOSH'
+  | 'SUVIDHA'
+  | 'SUMANGAL'
+  | 'YUGAL_SURAKSHA'
+  | 'BAL_JEEVAN_BIMA';
+
+// Legacy PolicyType type alias for backward compatibility
 export type PolicyType =
+  | PliPolicy
   | 'ANTICIPATED_ENDOWMENT'
   | 'CONVERTIBLE_WHOLE_LIFE'
   | 'ENDOWMENT'
@@ -10,19 +20,45 @@ export type PolicyTypeAlias = 'WLA' | 'EA' | 'CWLA' | 'AEA' | 'CHILDREN' | 'JLEA
 
 export type AgeInputMode = 'DOB' | 'AGE';
 export type TermInputMode = 'DURATION' | 'MATURITY_AGE';
+export type PremiumFrequency = 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'YEARLY';
 
-export interface PLIInput {
-  policyType: PolicyType;
-  effectiveDate?: string; // YYYY-MM-DD
+export interface PliCustomerInput {
+  fullName?: string;
   dateOfBirth?: string; // YYYY-MM-DD
   age?: number;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  occupation?: string;
+  eligibilityCategory?: string;
+  mobileNumber?: string;
+  email?: string;
+  pincode?: string;
+  state?: string;
+}
+
+export interface PliInput {
+  policyType: PolicyType;
+  effectiveDate?: string; // YYYY-MM-DD
+  commencementDate?: string; // YYYY-MM-DD
+  dateOfBirth?: string; // YYYY-MM-DD
+  age?: number;
+
+  // Premium Frequency
+  frequency?: PremiumFrequency;
   
-  // Joint Life Inputs
+  // Customer details
+  customer?: PliCustomerInput;
+  
+  // Joint Life Inputs (Yugal Suraksha)
   firstLifeAge?: number;
   secondLifeAge?: number;
+  firstLifeName?: string;
+  secondLifeName?: string;
   
-  // Children Policy Inputs
+  // Children Policy Inputs (Bal Jeevan Bima)
   childAge?: number;
+  childName?: string;
+  parentAge?: number;
+  parentSumAssured?: number;
 
   // Whole Life Ceasing Age (55, 58, 60)
   premiumCeasingAge?: number;
@@ -41,6 +77,8 @@ export interface PLIInput {
   gstRate?: number;
 }
 
+export type PLIInput = PliInput; // Alias for backward compatibility
+
 export interface CalculationStep {
   title: string;
   formula: string;
@@ -49,6 +87,8 @@ export interface CalculationStep {
   note?: string;
 }
 
+export type AuditStep = CalculationStep;
+
 export interface SurvivalBenefitPayout {
   year: number;
   percentage: number;
@@ -56,12 +96,26 @@ export interface SurvivalBenefitPayout {
   amount: number;
 }
 
-export interface PLIQuotationResult {
-  policyType: PolicyType;
+export interface BenefitTimelineStep {
+  year: number;
+  type: 'PAYMENT' | 'PAYOUT' | 'MATURITY';
+  description: string;
+  amount: number;
+}
+
+export interface PliValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface PliQuoteResult {
+  policyType: PliPolicy;
   policyName: string;
   policyCode: PolicyTypeAlias;
   
-  // Inputs & Age / Duration
+  // Customer & Age details
+  customer?: PliCustomerInput;
   dateOfBirth?: string;
   effectiveDate: string;
   age: number;
@@ -79,6 +133,7 @@ export interface PLIQuotationResult {
   
   // Amounts
   sumAssured: number;
+  frequency: PremiumFrequency;
   
   // Bonus details
   bonusRate: number; // ₹ per ₹1,000 Sum Assured
@@ -91,9 +146,13 @@ export interface PLIQuotationResult {
   sumAssuredFactor: number; // sumAssured / 100000
   ageFactor: number;
   estimatedMonthlyPremium: number; // Gross monthly premium
+  frequencyPremium: number; // Premium per installment frequency
+  frequencyDiscount: number; // Advance frequency rebate
   rebate: number;
   tax: number;
   netMonthlyPremium: number;
+  netInstallmentPremium: number;
+  annualizedPremium: number;
   totalPremiumPaid: number;
 
   // Terminal Bonus & Maturity
@@ -101,21 +160,27 @@ export interface PLIQuotationResult {
   survivalBenefits?: SurvivalBenefitPayout[];
   finalMaturityPayout?: number;
   maturityAmount: number;
+  deathBenefitAmount: number;
 
   // Facility Metadata
   loanYears?: number | null;
   surrenderYears?: number | null;
 
-  // Transparency & Confidence Flags
+  // Validation & Audit Flags
+  eligibility: PliValidationResult;
   isEstimated: boolean;
-  premiumSource: 'REFERENCE' | 'ESTIMATED';
+  premiumSource: 'OFFICIAL' | 'CONFIGURED' | 'ESTIMATED';
   confidenceScore: number; // Percentage 0-100%
   calculationMethod: string;
   calculationVersion: string;
+  rateTableVersion: string;
   
-  // Breakdown
+  // Visual Timeline & Breakdown
+  timeline?: BenefitTimelineStep[];
   breakdown: CalculationStep[];
 }
+
+export type PLIQuotationResult = PliQuoteResult; // Alias for backward compatibility
 
 export interface PolicyConfigItem {
   name: string;
