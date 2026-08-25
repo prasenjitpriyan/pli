@@ -23,6 +23,21 @@ export default function CalculatorPage() {
   const [effectiveDate, setEffectiveDate] = useState<string>(
     () => new Date().toISOString().split('T')[0]
   );
+
+  // Sync policy from URL search params cleanly post-hydration
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const p = params.get('policy');
+      if (p) {
+        const canonical = mapToCanonicalPolicy(p);
+        const timer = setTimeout(() => {
+          setPolicyType(canonical);
+        }, 0);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
   
   // Premium Payment Mode Frequency (Monthly, Quarterly, Half-Yearly, Yearly)
   const [frequency, setFrequency] = useState<PremiumFrequency>('MONTHLY');
@@ -72,17 +87,6 @@ export default function CalculatorPage() {
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
-
-  // Read URL query parameter ?policy=... on client mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const p = params.get('policy');
-      if (p) {
-        setPolicyType(mapToCanonicalPolicy(p));
-      }
-    }
-  }, []);
 
   // Derived Completed Age
   const computedAge = useMemo(() => {
@@ -810,33 +814,94 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?policy=${poli
                   {policyType !== 'SURAKSHA' &&
                     (policyType !== 'SUVIDHA' || isConverted) && (
                       <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-4">
-                        <div className="flex items-center justify-between">
-                          <label className="text-sm font-bold text-(--primary-dark)">
-                            Policy Duration Parameter
-                          </label>
-                          <div className="flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
-                            <button
-                              type="button"
-                              onClick={() => setTermInputMode('MATURITY_AGE')}
-                              className={`px-3 py-1 rounded-md transition-all ${
-                                termInputMode === 'MATURITY_AGE'
-                                  ? 'bg-white text-(--primary-dark) shadow-xs'
-                                  : 'text-slate-600'
-                              }`}>
-                              Maturity Age
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setTermInputMode('DURATION')}
-                              className={`px-3 py-1 rounded-md transition-all ${
-                                termInputMode === 'DURATION'
-                                  ? 'bg-white text-(--primary-dark) shadow-xs'
-                                  : 'text-slate-600'
-                              }`}>
-                              Duration (Years)
-                            </button>
+                        {policyType === 'SUMANGAL' ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-bold text-orange-950 flex items-center gap-1.5">
+                                <i className="ri-calendar-event-line text-orange-600 text-base"></i>
+                                Sumangal Policy Term (Fixed 15 or 20 Years)
+                              </label>
+                              <span className="text-[0.65rem] font-bold bg-orange-200 text-orange-900 px-2 py-0.5 rounded-full">
+                                Money-Back Schedule
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <button
+                                type="button"
+                                disabled={computedAge > 45}
+                                onClick={() => {
+                                  setTermInputMode('DURATION');
+                                  setDuration(15);
+                                }}
+                                className={`p-3 rounded-lg text-center border-2 transition-all ${
+                                  computedAge > 45
+                                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                                    : duration === 15
+                                    ? 'border-orange-600 bg-white font-bold text-orange-950 shadow-xs'
+                                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                                }`}>
+                                <div className="text-sm font-bold">15 Years Term</div>
+                                <div className="text-[0.68rem] text-slate-500 mt-0.5">
+                                  Payouts: Yrs 6 (20%), 9 (20%), 12 (20%), 15 (40%+Bonus)
+                                </div>
+                                <div className="text-[0.65rem] font-semibold text-orange-700 mt-1">
+                                  Max Entry Age: 45 Yrs
+                                </div>
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={computedAge > 40}
+                                onClick={() => {
+                                  setTermInputMode('DURATION');
+                                  setDuration(20);
+                                }}
+                                className={`p-3 rounded-lg text-center border-2 transition-all ${
+                                  computedAge > 40
+                                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                                    : duration === 20
+                                    ? 'border-orange-600 bg-white font-bold text-orange-950 shadow-xs'
+                                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                                }`}>
+                                <div className="text-sm font-bold">20 Years Term</div>
+                                <div className="text-[0.68rem] text-slate-500 mt-0.5">
+                                  Payouts: Yrs 8 (20%), 12 (20%), 16 (20%), 20 (40%+Bonus)
+                                </div>
+                                <div className="text-[0.65rem] font-semibold text-orange-700 mt-1">
+                                  Max Entry Age: 40 Yrs
+                                </div>
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-bold text-(--primary-dark)">
+                                Policy Duration Parameter
+                              </label>
+                              <div className="flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
+                                <button
+                                  type="button"
+                                  onClick={() => setTermInputMode('MATURITY_AGE')}
+                                  className={`px-3 py-1 rounded-md transition-all ${
+                                    termInputMode === 'MATURITY_AGE'
+                                      ? 'bg-white text-(--primary-dark) shadow-xs'
+                                      : 'text-slate-600'
+                                  }`}>
+                                  Maturity Age
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setTermInputMode('DURATION')}
+                                  className={`px-3 py-1 rounded-md transition-all ${
+                                    termInputMode === 'DURATION'
+                                      ? 'bg-white text-(--primary-dark) shadow-xs'
+                                      : 'text-slate-600'
+                                  }`}>
+                                  Duration (Years)
+                                </button>
+                              </div>
+                            </div>
 
                         {termInputMode === 'MATURITY_AGE' ? (
                           <div className="space-y-3">
@@ -906,6 +971,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?policy=${poli
                               </div>
                             </div>
                           </div>
+                        )}
+                        </>
                         )}
                       </div>
                     )}

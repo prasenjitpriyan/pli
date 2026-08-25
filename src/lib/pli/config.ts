@@ -1,5 +1,5 @@
 import { POLICY_REGISTRY } from '../../config/pli/policies';
-import { PolicyConfigItem, PolicyType } from './types';
+import { PolicyConfigItem } from './types';
 
 export const REFERENCE_AGE = 19;
 export const DEFAULT_AGE_RATE = 0.025;

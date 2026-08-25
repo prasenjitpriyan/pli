@@ -45,7 +45,7 @@ export function calculateAge(
  */
 export function calculateEffectiveAge(params: {
   policyType: PolicyType;
-  age: number;
+  age?: number;
   firstLifeAge?: number;
   secondLifeAge?: number;
   childAge?: number;
@@ -63,7 +63,7 @@ export function calculateEffectiveAge(params: {
     return childAge ?? 5;
   }
 
-  return age;
+  return age ?? 30;
 }
 
 /**

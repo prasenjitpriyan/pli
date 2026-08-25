@@ -1,4 +1,4 @@
-import { PolicyConfigItem, PolicyType, PliPolicy } from '../../lib/pli/types';
+import { PolicyConfigItem, PliPolicy } from '../../lib/pli/types';
 
 export const POLICY_REGISTRY: Record<PliPolicy, PolicyConfigItem> = {
   SURAKSHA: {
