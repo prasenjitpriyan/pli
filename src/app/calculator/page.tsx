@@ -32,6 +32,9 @@ export default function CalculatorPage() {
   // Children Policy Inputs
   const [childAge, setChildAge] = useState<number>(5);
 
+  // Whole Life Premium Ceasing Age Option (55, 58, 60)
+  const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60);
+
   // Spouse Details Option for Single Life Policies
   const [includeSpouse, setIncludeSpouse] = useState<boolean>(false);
   const [spouseDob, setSpouseDob] = useState<string>('');
@@ -86,6 +89,10 @@ export default function CalculatorPage() {
       firstLifeAge: policyType === 'JOINT_LIFE' ? firstLifeAge : undefined,
       secondLifeAge: policyType === 'JOINT_LIFE' ? secondLifeAge : undefined,
       childAge: policyType === 'CHILDREN' ? childAge : undefined,
+      premiumCeasingAge:
+        policyType === 'WHOLE_LIFE' || policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? premiumCeasingAge
+          : undefined,
       sumAssured,
       maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
       duration: termInputMode === 'DURATION' ? duration : undefined,
@@ -101,6 +108,7 @@ export default function CalculatorPage() {
     firstLifeAge,
     secondLifeAge,
     childAge,
+    premiumCeasingAge,
     sumAssured,
     termInputMode,
     maturityAge,
@@ -130,6 +138,10 @@ export default function CalculatorPage() {
         firstLifeAge: p === 'JOINT_LIFE' ? firstLifeAge : undefined,
         secondLifeAge: p === 'JOINT_LIFE' ? secondLifeAge : undefined,
         childAge: p === 'CHILDREN' ? childAge : undefined,
+        premiumCeasingAge:
+          p === 'WHOLE_LIFE' || p === 'CONVERTIBLE_WHOLE_LIFE'
+            ? premiumCeasingAge
+            : undefined,
         sumAssured,
         maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
         duration: termInputMode === 'DURATION' ? duration : undefined,
@@ -143,6 +155,7 @@ export default function CalculatorPage() {
     firstLifeAge,
     secondLifeAge,
     childAge,
+    premiumCeasingAge,
     sumAssured,
     termInputMode,
     maturityAge,
@@ -172,6 +185,7 @@ export default function CalculatorPage() {
     setFirstLifeAge(30);
     setSecondLifeAge(28);
     setChildAge(5);
+    setPremiumCeasingAge(60);
     setIncludeSpouse(false);
     setSpouseDob('');
     setSpouseAge(28);
@@ -516,6 +530,42 @@ export default function CalculatorPage() {
                     </div>
                   )}
 
+                  {/* Whole Life Ceasing Age Selector */}
+                  {(policyType === 'WHOLE_LIFE' || policyType === 'CONVERTIBLE_WHOLE_LIFE') && (
+                    <div className="p-4 bg-amber-50/40 border border-amber-200 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-bold text-amber-900">
+                          Select Premium Ceasing Age
+                        </label>
+                        <span className="text-xs font-semibold bg-amber-200 text-amber-900 px-2 py-0.5 rounded">
+                          Pay till Age {premiumCeasingAge}
+                        </span>
+                      </div>
+                      <div className="flex gap-3">
+                        {[55, 58, 60].map((ageVal) => (
+                          <button
+                            key={ageVal}
+                            type="button"
+                            onClick={() => setPremiumCeasingAge(ageVal)}
+                            className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                              premiumCeasingAge === ageVal
+                                ? 'bg-(--primary-red) text-white shadow-xs'
+                                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                            }`}>
+                            Age {ageVal} ({ageVal - computedAge} yrs pay)
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[0.7rem] text-slate-600 leading-relaxed">
+                        💡 Premium payments cease at age <strong>{premiumCeasingAge}</strong> ({quotationResult.premiumPaymentDuration} yrs), while life cover and bonuses continue to accumulate until age <strong>80</strong> ({quotationResult.bonusAccrualDuration} yrs).
+                      </p>
+                      <div className="flex gap-2 text-[0.65rem] font-semibold text-emerald-800">
+                        <span className="bg-emerald-100 px-2 py-0.5 rounded">Loan after 4 yrs</span>
+                        <span className="bg-emerald-100 px-2 py-0.5 rounded">Surrender after 3 yrs</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* 4. Sum Assured */}
                   <div>
                     <label className="block text-sm font-semibold text-(--text-dark) mb-2">
@@ -550,86 +600,88 @@ export default function CalculatorPage() {
                     </p>
                   </div>
 
-                  {/* 5. Policy Term / Maturity Age */}
-                  <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-bold text-(--primary-dark)">
-                        Policy Duration Parameter
-                      </label>
-                      <div className="flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
-                        <button
-                          type="button"
-                          onClick={() => setTermInputMode('MATURITY_AGE')}
-                          className={`px-3 py-1 rounded-md transition-all ${
-                            termInputMode === 'MATURITY_AGE'
-                              ? 'bg-white text-(--primary-dark) shadow-xs'
-                              : 'text-slate-600'
-                          }`}>
-                          Maturity Age
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setTermInputMode('DURATION')}
-                          className={`px-3 py-1 rounded-md transition-all ${
-                            termInputMode === 'DURATION'
-                              ? 'bg-white text-(--primary-dark) shadow-xs'
-                              : 'text-slate-600'
-                          }`}>
-                          Duration (Years)
-                        </button>
+                  {/* 5. Policy Term / Maturity Age (Hide for Whole Life as ceasing age controls duration) */}
+                  {policyType !== 'WHOLE_LIFE' && policyType !== 'CONVERTIBLE_WHOLE_LIFE' && (
+                    <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-bold text-(--primary-dark)">
+                          Policy Duration Parameter
+                        </label>
+                        <div className="flex bg-slate-200 p-1 rounded-lg text-xs font-semibold">
+                          <button
+                            type="button"
+                            onClick={() => setTermInputMode('MATURITY_AGE')}
+                            className={`px-3 py-1 rounded-md transition-all ${
+                              termInputMode === 'MATURITY_AGE'
+                                ? 'bg-white text-(--primary-dark) shadow-xs'
+                                : 'text-slate-600'
+                            }`}>
+                            Maturity Age
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTermInputMode('DURATION')}
+                            className={`px-3 py-1 rounded-md transition-all ${
+                              termInputMode === 'DURATION'
+                                ? 'bg-white text-(--primary-dark) shadow-xs'
+                                : 'text-slate-600'
+                            }`}>
+                            Duration (Years)
+                          </button>
+                        </div>
                       </div>
-                    </div>
 
-                    {termInputMode === 'MATURITY_AGE' ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                            Target Maturity Age
-                          </label>
-                          <input
-                            type="number"
-                            min={computedAge + 5}
-                            max="80"
-                            value={maturityAge}
-                            onChange={(e) => setMaturityAge(parseInt(e.target.value, 10) || 50)}
-                            className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                            Calculated Policy Duration
-                          </label>
-                          <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                            {quotationResult.duration} Years
+                      {termInputMode === 'MATURITY_AGE' ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                              Target Maturity Age
+                            </label>
+                            <input
+                              type="number"
+                              min={computedAge + 5}
+                              max="80"
+                              value={maturityAge}
+                              onChange={(e) => setMaturityAge(parseInt(e.target.value, 10) || 50)}
+                              className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                              Calculated Policy Duration
+                            </label>
+                            <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
+                              {quotationResult.duration} Years
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                            Policy Duration (Years)
-                          </label>
-                          <input
-                            type="number"
-                            min="5"
-                            max="55"
-                            value={duration}
-                            onChange={(e) => setDuration(parseInt(e.target.value, 10) || 20)}
-                            className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                            Calculated Maturity Age
-                          </label>
-                          <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                            {quotationResult.maturityAge} Years Old
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                              Policy Duration (Years)
+                            </label>
+                            <input
+                              type="number"
+                              min="5"
+                              max="55"
+                              value={duration}
+                              onChange={(e) => setDuration(parseInt(e.target.value, 10) || 20)}
+                              className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                              Calculated Maturity Age
+                            </label>
+                            <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
+                              {quotationResult.maturityAge} Years Old
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
@@ -700,7 +752,9 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="flex justify-between py-1.5 border-b border-slate-100">
-                      <span className="text-(--text-light)">Total Premium Paid ({quotationResult.duration} yrs)</span>
+                      <span className="text-(--text-light)">
+                        Total Premium Paid ({quotationResult.duration} yrs)
+                      </span>
                       <span className="font-semibold text-(--text-dark)">
                         {formatINR(quotationResult.totalPremiumPaid)}
                       </span>
@@ -714,7 +768,9 @@ export default function CalculatorPage() {
                     </div>
 
                     <div className="flex justify-between py-1.5 border-b border-slate-100">
-                      <span className="text-(--text-light)">Total Accrued Bonus</span>
+                      <span className="text-(--text-light)">
+                        Total Accrued Bonus ({quotationResult.bonusAccrualDuration ?? quotationResult.duration} yrs)
+                      </span>
                       <span className="font-semibold text-emerald-600">
                         +{formatINR(quotationResult.totalBonus)}
                       </span>
@@ -762,7 +818,7 @@ export default function CalculatorPage() {
                     {/* Maturity Highlight Box */}
                     <div className="bg-linear-to-br from-amber-50 to-orange-50/50 p-5 rounded-xl border border-amber-200 text-center mt-4">
                       <span className="text-xs uppercase tracking-wider text-amber-800 font-bold block mb-1">
-                        Estimated Maturity Amount
+                        Estimated Maturity Amount (Age {quotationResult.maturityAge})
                       </span>
                       <span className="text-3xl font-extrabold text-(--primary-dark)">
                         {formatINR(quotationResult.maturityAmount)}
@@ -839,7 +895,7 @@ export default function CalculatorPage() {
                   PLI 6-Policy Options Comparison
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Effective Age {computedAge} years | Sum Assured {formatINR(sumAssured)} | Term {quotationResult.duration} years
+                  Effective Age {computedAge} years | Sum Assured {formatINR(sumAssured)} | Payment Term {quotationResult.duration} years
                 </p>
               </div>
               <button

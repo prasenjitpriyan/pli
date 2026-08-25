@@ -36,22 +36,44 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     childAge: input.childAge,
   });
 
-  // 3. Duration & Target Maturity Age
-  const { duration, maturityAge } = calculateDurationAndMaturityAge({
-    policyType: input.policyType,
-    age: effectiveAge,
-    maturityAge: input.maturityAge,
-    duration: input.duration,
-  });
+  // 3. Whole Life Premium Ceasing Age & Duration Logic
+  let premiumCeasingAge: number | undefined = undefined;
+  let premiumPaymentDuration: number | undefined = undefined;
+  let bonusAccrualDuration: number | undefined = undefined;
 
-  // 4. Bonus Calculation
+  let duration: number;
+  let maturityAge: number;
+
+  if (
+    input.policyType === 'WHOLE_LIFE' ||
+    input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+  ) {
+    premiumCeasingAge = input.premiumCeasingAge ?? 60;
+    premiumPaymentDuration = Math.max(1, premiumCeasingAge - effectiveAge);
+    bonusAccrualDuration = Math.max(1, 80 - effectiveAge);
+
+    duration = premiumPaymentDuration; // Premium is paid for premiumPaymentDuration years
+    maturityAge = 80; // Full maturity payout occurs at Age 80 or earlier death
+  } else {
+    const durationRes = calculateDurationAndMaturityAge({
+      policyType: input.policyType,
+      age: effectiveAge,
+      maturityAge: input.maturityAge,
+      duration: input.duration,
+    });
+    duration = durationRes.duration;
+    maturityAge = durationRes.maturityAge;
+  }
+
+  // 4. Bonus Calculation (Bonus Accrues for bonusAccrualDuration for Whole Life, duration for others)
+  const bonusDuration = bonusAccrualDuration ?? duration;
   const { bonusRate, annualBonus, totalBonus } = calculateBonus(
     input.policyType,
     input.sumAssured,
-    duration
+    bonusDuration
   );
 
-  // 5. Mathematical Premium Engine Prediction
+  // 5. Mathematical Premium Engine Prediction (Using Premium Payment Duration)
   const modelPrediction = predictMonthlyPremium({
     policyType: input.policyType,
     effectiveAge,
@@ -77,7 +99,7 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
   const netMonthlyPremium =
     modelPrediction.scaledGrossPremium - rebate + tax;
 
-  // 9. Total Premium Paid Calculation
+  // 9. Total Premium Paid Calculation (Stopped at premiumCeasingAge for Whole Life)
   const totalPremiumPaid = netMonthlyPremium * 12 * duration;
 
   // 10. Terminal Bonus
@@ -183,10 +205,19 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
       note: `Selected Policy: ${policyConfig.name} (${policyConfig.code})`,
     },
     {
-      title: '2. Policy Duration & Target Maturity',
-      formula: 'Duration = Target Maturity Age - Effective Age',
-      values: `Maturity Age (${maturityAge}) - Effective Age (${effectiveAge})`,
-      result: `${duration} years`,
+      title: '2. Premium Payment Term & Bonus Accumulation',
+      formula:
+        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? 'Premium Term = Ceasing Age - Entry Age | Bonus Term = 80 - Entry Age'
+          : 'Duration = Target Maturity Age - Effective Age',
+      values:
+        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? `Ceasing Age ${premiumCeasingAge} (${duration} yrs payment) | Bonus Accrual until Age 80 (${bonusDuration} yrs)`
+          : `Maturity Age (${maturityAge}) - Effective Age (${effectiveAge})`,
+      result:
+        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? `Pay for ${duration} yrs | Accrue bonus for ${bonusDuration} yrs`
+          : `${duration} years`,
     },
     {
       title: '3. Declared Bonus Rate & Annual Bonus',
@@ -197,14 +228,14 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     },
     {
       title: '4. Total Accrued Bonus',
-      formula: 'Annual Bonus × Policy Term',
-      values: `${formatINR(annualBonus)} × ${duration} years`,
+      formula: 'Annual Bonus × Bonus Accumulation Term',
+      values: `${formatINR(annualBonus)} × ${bonusDuration} years`,
       result: formatINR(totalBonus),
     },
     {
       title: '5. Mathematical Premium Model Surface Prediction',
-      formula: 'Base Premium = f(Effective Age, Duration) per ₹1,00,000 SA',
-      values: `Effective Age ${effectiveAge}, Duration ${duration} years`,
+      formula: 'Base Premium = f(Effective Age, Payment Duration) per ₹1,00,000 SA',
+      values: `Effective Age ${effectiveAge}, Payment Duration ${duration} years`,
       result: `₹${modelPrediction.basePremiumPerLakh}/month (Base)`,
       note: `Method: ${modelPrediction.calculationMethod}`,
     },
@@ -227,36 +258,37 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     },
     {
       title: '8. Estimated Total Premium Paid',
-      formula: 'Net Monthly Premium × 12 × Duration',
+      formula: 'Net Monthly Premium × 12 × Premium Payment Duration',
       values: `${formatINR(netMonthlyPremium)} × 12 × ${duration} years`,
       result: formatINR(totalPremiumPaid),
+      note:
+        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? `Premium payments cease at age ${premiumCeasingAge}`
+          : undefined,
     },
     {
-      title: '9. Periodic Survival Benefits Schedule',
+      title: '9. Periodic Survival / Maturity Schedule',
       formula:
         input.policyType === 'ANTICIPATED_ENDOWMENT'
           ? `3 Payouts of 20% SA + Final 40% SA + Total Bonus at Maturity (${duration} yrs)`
-          : 'Standard Maturity Benefit (100% SA + Total Bonus)',
+          : 'Full Sum Assured + Accumulated Bonuses at Maturity',
       values:
         input.policyType === 'ANTICIPATED_ENDOWMENT'
-          ? `3 Survival Payouts of ${formatINR(input.sumAssured * 0.2)} each (Total 60% SA = ${formatINR(input.sumAssured * 0.6)})`
+          ? `3 Survival Payouts of ${formatINR(input.sumAssured * 0.2)} each`
           : `Full Sum Assured (${formatINR(input.sumAssured)})`,
       result:
         input.policyType === 'ANTICIPATED_ENDOWMENT'
           ? `Final Maturity Payout: ${formatINR(finalMaturityPayout)}`
           : formatINR(maturityAmount),
       note:
-        input.policyType === 'ANTICIPATED_ENDOWMENT'
-          ? 'Periodic survival benefits do NOT reduce the full death or maturity payout'
+        input.policyType === 'WHOLE_LIFE' || input.policyType === 'CONVERTIBLE_WHOLE_LIFE'
+          ? 'Paid upon reaching Age 80 or to nominee upon earlier death'
           : undefined,
     },
     {
-      title: '10. Total Overall Returns & Benefits',
-      formula: 'Total Periodic Benefits + Final Maturity Payout',
-      values:
-        input.policyType === 'ANTICIPATED_ENDOWMENT'
-          ? `Survival Benefits (${formatINR(input.sumAssured * 0.6)}) + Final Maturity Payout (${formatINR(finalMaturityPayout)})`
-          : `Sum Assured (${formatINR(input.sumAssured)}) + Bonus (${formatINR(totalBonus)})`,
+      title: '10. Total Overall Returns & Maturity Benefit',
+      formula: 'Sum Assured + Total Accrued Bonus + Terminal Bonus',
+      values: `${formatINR(input.sumAssured)} + ${formatINR(totalBonus)} + ${formatINR(terminalBonus)}`,
       result: formatINR(maturityAmount),
     },
   ];
@@ -273,6 +305,9 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     firstLifeAge: input.firstLifeAge,
     secondLifeAge: input.secondLifeAge,
     childAge: input.childAge,
+    premiumCeasingAge,
+    premiumPaymentDuration,
+    bonusAccrualDuration,
 
     maturityAge,
     duration,

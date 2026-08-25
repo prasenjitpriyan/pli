@@ -31,6 +31,49 @@ describe('PLI Calculation Engine Test Suite (6 Policy Types & Continuous Model)'
     });
   });
 
+  describe('Whole Life Assurance (Suraksha & Suvidha) Ceasing Age Rules', () => {
+    it('should calculate Whole Life premiums for ceasing age 60, 58, 55 with bonus accruing to age 80', () => {
+      // Age 30, SA ₹1L, Ceasing Age 60 (Term 30)
+      const quote60 = calculatePLIQuotation({
+        policyType: 'WHOLE_LIFE',
+        age: 30,
+        premiumCeasingAge: 60,
+        sumAssured: 100000,
+      });
+
+      expect(quote60.duration).toBe(30); // 60 - 30 = 30 yrs premium payment
+      expect(quote60.bonusAccrualDuration).toBe(50); // 80 - 30 = 50 yrs bonus accrual
+      expect(quote60.estimatedMonthlyPremium).toBe(200);
+      expect(quote60.netMonthlyPremium).toBe(195);
+      expect(quote60.totalBonus).toBe(76 * 100 * 50); // 380,000
+      expect(quote60.maturityAmount).toBe(100000 + 380000); // 480,000
+
+      // Age 30, SA ₹1L, Ceasing Age 58 (Term 28)
+      const quote58 = calculatePLIQuotation({
+        policyType: 'WHOLE_LIFE',
+        age: 30,
+        premiumCeasingAge: 58,
+        sumAssured: 100000,
+      });
+
+      expect(quote58.duration).toBe(28); // 58 - 30 = 28 yrs payment
+      expect(quote58.estimatedMonthlyPremium).toBe(220);
+      expect(quote58.netMonthlyPremium).toBe(215);
+
+      // Age 30, SA ₹1L, Ceasing Age 55 (Term 25)
+      const quote55 = calculatePLIQuotation({
+        policyType: 'WHOLE_LIFE',
+        age: 30,
+        premiumCeasingAge: 55,
+        sumAssured: 100000,
+      });
+
+      expect(quote55.duration).toBe(25); // 55 - 30 = 25 yrs payment
+      expect(quote55.estimatedMonthlyPremium).toBe(220);
+      expect(quote55.netMonthlyPremium).toBe(215);
+    });
+  });
+
   describe('Policy-Aware Rebates', () => {
     it('should apply ₹7 rebate for Joint Life Assurance', () => {
       const quote = calculatePLIQuotation({

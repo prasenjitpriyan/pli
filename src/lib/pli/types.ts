@@ -23,6 +23,9 @@ export interface PLIInput {
   
   // Children Policy Inputs
   childAge?: number;
+
+  // Whole Life Ceasing Age (55, 58, 60)
+  premiumCeasingAge?: number;
   
   spouseDateOfBirth?: string; // YYYY-MM-DD
   spouseAge?: number;
@@ -63,6 +66,9 @@ export interface PLIQuotationResult {
   firstLifeAge?: number;
   secondLifeAge?: number;
   childAge?: number;
+  premiumCeasingAge?: number;
+  premiumPaymentDuration?: number;
+  bonusAccrualDuration?: number;
   maturityAge: number;
   duration: number;
   
