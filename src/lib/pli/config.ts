@@ -21,6 +21,9 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     maxAge: 55,
     minTerm: 5,
     maxTerm: 55,
+    loanYears: 3,
+    surrenderYears: 3,
+    presetMaturityAges: [35, 40, 45, 50, 55, 58, 60],
     description: 'Provides sum assured with accrued bonus at maturity or to nominee upon death.',
   },
   ANTICIPATED_ENDOWMENT: {
@@ -33,6 +36,8 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     maxAge: 45,
     minTerm: 15,
     maxTerm: 20,
+    loanYears: null, // No loan facility available for Sumangal
+    surrenderYears: 3,
     description: 'Money back policy providing periodic survival benefits and full maturity benefits.',
   },
   CHILDREN: {
@@ -45,6 +50,8 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     maxAge: 12,
     minTerm: 5,
     maxTerm: 20,
+    loanYears: null,
+    surrenderYears: 3,
     description: 'Provides insurance cover for children of PLI policyholders with high bonus benefits.',
   },
   CONVERTIBLE_WHOLE_LIFE: {
@@ -57,6 +64,9 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     maxAge: 50,
     minTerm: 5,
     maxTerm: 55,
+    loanYears: 4,
+    surrenderYears: 3,
+    presetMaturityAges: [35, 40, 45, 50, 55, 58, 60],
     description: 'Whole Life policy convertible into Endowment Assurance after 5 years.',
   },
   WHOLE_LIFE: {
@@ -69,6 +79,9 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     maxAge: 55,
     minTerm: 5,
     maxTerm: 60,
+    loanYears: 4,
+    surrenderYears: 3,
+    presetMaturityAges: [55, 58, 60],
     description: 'Assures payment of sum assured plus bonus upon attaining age 80 or earlier death.',
   },
   JOINT_LIFE: {
@@ -81,6 +94,9 @@ export const POLICY_CONFIG: Record<PolicyType, PolicyConfigItem> = {
     maxAge: 45,
     minTerm: 5,
     maxTerm: 45,
+    loanYears: 3,
+    surrenderYears: 3,
+    presetMaturityAges: [35, 40, 45, 50, 55, 58, 60],
     description: 'Joint life cover for couples where both lives are covered under a single policy.',
   },
 };

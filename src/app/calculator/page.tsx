@@ -728,26 +728,46 @@ export default function CalculatorPage() {
                       </div>
 
                       {termInputMode === 'MATURITY_AGE' ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                              Target Maturity Age
-                            </label>
-                            <input
-                              type="number"
-                              min={computedAge + 5}
-                              max="80"
-                              value={maturityAge}
-                              onChange={(e) => setMaturityAge(parseInt(e.target.value, 10) || 50)}
-                              className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
-                            />
+                        <div className="space-y-3">
+                          <div className="flex flex-wrap gap-1.5">
+                            {[35, 40, 45, 50, 55, 58, 60].map((mAge) => (
+                              <button
+                                key={mAge}
+                                type="button"
+                                disabled={mAge <= computedAge}
+                                onClick={() => setMaturityAge(mAge)}
+                                className={`px-2.5 py-1 rounded text-xs font-bold transition-all ${
+                                  mAge <= computedAge
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    : maturityAge === mAge
+                                    ? 'bg-(--primary-red) text-white shadow-xs'
+                                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                                }`}>
+                                Age {mAge}
+                              </button>
+                            ))}
                           </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                              Calculated Policy Duration
-                            </label>
-                            <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                              {quotationResult.duration} Years
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                                Target Maturity Age
+                              </label>
+                              <input
+                                type="number"
+                                min={computedAge + 5}
+                                max="80"
+                                value={maturityAge}
+                                onChange={(e) => setMaturityAge(parseInt(e.target.value, 10) || 50)}
+                                className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                                Calculated Policy Duration
+                              </label>
+                              <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
+                                {quotationResult.duration} Years
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -922,6 +942,35 @@ export default function CalculatorPage() {
                       <p className="text-[0.7rem] text-slate-500 mt-1">
                         Sum Assured ({formatINR(quotationResult.sumAssured)}) + Bonus ({formatINR(quotationResult.totalBonus)}) {quotationResult.terminalBonus > 0 ? `+ Terminal Bonus (${formatINR(quotationResult.terminalBonus)})` : ''}
                       </p>
+                    </div>
+
+                    {/* Policy Facilities & Tax Benefits Badge Bar */}
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-[0.72rem] mt-3">
+                      <div className="flex items-center justify-between font-bold text-slate-800">
+                        <span className="flex items-center gap-1">
+                          <i className="ri-shield-check-line text-emerald-600"></i> Policy Facilities & Tax Benefits
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 font-medium text-slate-700">
+                        {quotationResult.loanYears !== null ? (
+                          <span className="bg-emerald-100/80 text-emerald-900 px-2 py-0.5 rounded font-semibold">
+                            Loan: After {quotationResult.loanYears} Yrs
+                          </span>
+                        ) : (
+                          <span className="bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-semibold">
+                            No Loan Facility
+                          </span>
+                        )}
+                        <span className="bg-blue-100/80 text-blue-900 px-2 py-0.5 rounded font-semibold">
+                          Surrender: After 3 Yrs (5 Yrs for bonus)
+                        </span>
+                        <span className="bg-purple-100/80 text-purple-900 px-2 py-0.5 rounded font-semibold">
+                          Sec 80C Tax Deduction
+                        </span>
+                        <span className="bg-amber-100/80 text-amber-900 px-2 py-0.5 rounded font-semibold">
+                          Sec 10(10D) Tax-Free Payout
+                        </span>
+                      </div>
                     </div>
                   </div>
 

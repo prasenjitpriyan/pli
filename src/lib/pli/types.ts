@@ -102,6 +102,10 @@ export interface PLIQuotationResult {
   finalMaturityPayout?: number;
   maturityAmount: number;
 
+  // Facility Metadata
+  loanYears?: number | null;
+  surrenderYears?: number | null;
+
   // Transparency & Confidence Flags
   isEstimated: boolean;
   premiumSource: 'REFERENCE' | 'ESTIMATED';
@@ -124,4 +128,7 @@ export interface PolicyConfigItem {
   minTerm: number;
   maxTerm: number;
   description: string;
+  loanYears?: number | null; // Years required for loan eligibility (null if not available)
+  surrenderYears?: number | null; // Years required for surrender eligibility
+  presetMaturityAges?: number[];
 }

@@ -343,6 +343,9 @@ export function calculatePLIQuotation(input: PLIInput): PLIQuotationResult {
     finalMaturityPayout,
     maturityAmount,
 
+    loanYears: policyConfig.loanYears,
+    surrenderYears: policyConfig.surrenderYears,
+
     isEstimated: !modelPrediction.isExactReference,
     premiumSource: modelPrediction.premiumSource,
     confidenceScore: modelPrediction.confidenceScore,
