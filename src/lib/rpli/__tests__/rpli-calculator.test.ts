@@ -57,8 +57,8 @@ describe('RPLI Policy Validation Engine', () => {
 
     const quoteUnder = calculateRpliQuote({
       policyType: 'GRAM_SANTOSH',
-      age: 25,
-      maturityAge: 45,
+      age: 30,
+      maturityAge: 60,
       sumAssured: 20000, // <= 25,000 & Age <= 35
     });
     expect(quoteUnder.medicalRequired).toBe(false);
@@ -116,16 +116,36 @@ describe('Official Dak Sewa RPLI Calibration & Quotation Matches', () => {
     });
 
     expect(quote39.duration).toBe(21);
-    expect(quote39.modeDetails.yearly.ratePer1000).toBe(46.00);
-    expect(quote39.modeDetails.yearly.grossPremium).toBe(46000);
+    expect(quote39.modeDetails.yearly.ratePer1000).toBe(45.35);
+    expect(quote39.modeDetails.yearly.grossPremium).toBe(45350);
     expect(quote39.modeDetails.yearly.rebate).toBe(600);
-    expect(quote39.modeDetails.yearly.netPremium).toBe(45400);
+    expect(quote39.modeDetails.yearly.tax).toBe(0);
+    expect(quote39.modeDetails.yearly.netPremium).toBe(44750);
+    expect(quote39.annualizedPremium).toBe(44750);
 
-    expect(quote39.modeDetails.monthly.ratePer1000).toBe(4.00);
-    expect(quote39.modeDetails.monthly.grossPremium).toBe(4000);
+    // Half-Yearly
+    expect(quote39.modeDetails.halfYearly.ratePer1000).toBe(23.15);
+    expect(quote39.modeDetails.halfYearly.grossPremium).toBe(23150);
+    expect(quote39.modeDetails.halfYearly.rebate).toBe(300);
+    expect(quote39.modeDetails.halfYearly.tax).toBe(0);
+    expect(quote39.modeDetails.halfYearly.netPremium).toBe(22850);
+
+    // Quarterly
+    expect(quote39.modeDetails.quarterly.ratePer1000).toBe(11.70);
+    expect(quote39.modeDetails.quarterly.grossPremium).toBe(11700);
+    expect(quote39.modeDetails.quarterly.rebate).toBe(150);
+    expect(quote39.modeDetails.quarterly.tax).toBe(0);
+    expect(quote39.modeDetails.quarterly.netPremium).toBe(11550);
+
+    // Monthly
+    expect(quote39.modeDetails.monthly.ratePer1000).toBe(3.95);
+    expect(quote39.modeDetails.monthly.grossPremium).toBe(3950);
     expect(quote39.modeDetails.monthly.rebate).toBe(50);
-    expect(quote39.modeDetails.monthly.netPremium).toBe(3950);
+    expect(quote39.modeDetails.monthly.tax).toBe(0);
+    expect(quote39.modeDetails.monthly.netPremium).toBe(3900);
+    expect(quote39.netMonthlyPremium).toBe(3900);
 
+    // Bonus and Maturity
     expect(quote39.annualBonus).toBe(48000);
     expect(quote39.totalBonus).toBe(1008000);
     expect(quote39.maturityAmount).toBe(2008000);
@@ -253,6 +273,18 @@ describe('Official Dak Sewa RPLI Calibration & Quotation Matches', () => {
     expect(childQuote.modeDetails.monthly.rebate).toBe(50);
     expect(childQuote.modeDetails.monthly.netPremium).toBe(10060);
     expect(childQuote.totalBonus).toBe(48000); // 10 * 4,800
-    expect(childQuote.maturityAmount).toBe(1480000 > 100000 ? 148000 : 148000); // SA 1L + Bonus 48k = 1.48L
+    expect(childQuote.maturityAmount).toBe(148000); // SA 1L + Bonus 48k = 1.48L
+  });
+
+  // Test 7: Exact lookup constraint verification
+  it('strictly throws an error when no official table rate exists (no guessing or approximations)', () => {
+    expect(() => {
+      calculateRpliQuote({
+        policyType: 'GRAM_SANTOSH',
+        age: 54,
+        maturityAge: 55, // 1-year term (not in official table)
+        sumAssured: 1000000,
+      });
+    }).toThrowError(/No official RPLI rate found/);
   });
 });

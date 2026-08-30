@@ -1291,14 +1291,11 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         Estimated {FREQUENCY_CONFIG[frequency].label} Net Premium
                       </span>
                       <span
-                        className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                          quotationResult.confidenceScore >= 90
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-amber-500 text-slate-900'
-                        }`}
+                        className="text-[0.65rem] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-slate-800 text-slate-200 border border-slate-700"
                       >
-                        {quotationResult.confidenceScore}% Confidence |{' '}
-                        {quotationResult.premiumSource}
+                        {scheme === 'RPLI'
+                          ? `Table: ${(quotationResult as RpliQuoteResult).rateTableVersion}`
+                          : `${quotationResult.confidenceScore}% Confidence | ${quotationResult.premiumSource}`}
                       </span>
                     </div>
 
@@ -1419,14 +1416,20 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     {/* Official Table-Driven Mode Breakdown Grid (RPLI Standard) */}
                     {scheme === 'RPLI' && (quotationResult as RpliQuoteResult).modeDetails && (
                       <div className="mt-4 p-4 bg-slate-50/80 border border-slate-200 rounded-xl space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-                            <i className="ri-table-line text-emerald-700 text-sm"></i>
-                            Official Mode Breakdown Table (Dak Sewa Format)
-                          </span>
-                          <span className="text-[0.65rem] font-bold text-slate-500">
-                            Rate Table: {(quotationResult as RpliQuoteResult).rateTableVersion}
-                          </span>
+                        <div className="flex flex-col gap-1 border-b border-slate-200 pb-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                              <i className="ri-table-line text-emerald-700 text-sm"></i>
+                              Official RPLI Mode Breakdown Table
+                            </span>
+                            <span className="text-[0.65rem] font-bold bg-slate-200 text-slate-800 px-2 py-0.5 rounded">
+                              {(quotationResult as RpliQuoteResult).rateTableVersion}
+                            </span>
+                          </div>
+                          <div className="text-[0.68rem] text-slate-600 space-y-0.5">
+                            <p><strong>Rate Source:</strong> {(quotationResult as RpliQuoteResult).rateSource}</p>
+                            <p><strong>Entry Age:</strong> {quotationResult.effectiveAge} | <strong>Maturity Age:</strong> {quotationResult.maturityAge} | <strong>Term:</strong> {quotationResult.duration} Years</p>
+                          </div>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -1574,70 +1577,68 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                   )}
                 </div>
 
-                {/* Calculation Procedure Card */}
+                {/* 11-Step Mathematical Calculation Procedure Card */}
                 {scheme === 'RPLI' && (
                   <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3 text-xs no-print">
                     <h3 className="font-bold text-sm text-(--primary-dark) flex items-center gap-1.5 border-b border-slate-100 pb-2">
                       <i className="ri-functions text-emerald-700 text-base"></i>
-                      RPLI Table-Driven Calculation Procedure
+                      RPLI Table-Driven Step-by-Step Calculation Procedure
                     </h3>
 
-                    <div className="space-y-2.5 text-slate-700">
-                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">
-                          1. Exact Age Determination:
-                        </span>
-                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          {ageInputMode === 'DOB'
-                            ? `Age = DATEDIF(DOB: ${dateOfBirth}, StartDate: ${effectiveDate}, "Y") = ${quotationResult.effectiveAge} Years`
-                            : `Age = Selected Proposer Completed Age = ${quotationResult.effectiveAge} Years`}
-                        </code>
+                    <div className="space-y-2 text-slate-700 font-mono text-[0.7rem]">
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">1. Exact Age:</span>
+                        <code>DATEDIF({dateOfBirth || 'DOB'}, {effectiveDate}, &quot;Y&quot;) = {quotationResult.effectiveAge}</code>
                       </div>
 
-                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">
-                          2. Sum Assured Premium Units:
-                        </span>
-                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Units = {formatINR(quotationResult.sumAssured)} / 1,000 ={' '}
-                          {quotationResult.sumAssured / 1000} Units
-                        </code>
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">2. Exact Maturity Age:</span>
+                        <code>{quotationResult.maturityAge}</code>
                       </div>
 
-                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">
-                          3. Mode Gross Premium Lookup:
-                        </span>
-                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Gross = RatePer1000 × Units ={' '}
-                          {formatINR(quotationResult.frequencyPremium)}
-                        </code>
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">3. Exact Term:</span>
+                        <code>{quotationResult.maturityAge} - {quotationResult.effectiveAge} = {quotationResult.duration} years</code>
                       </div>
 
-                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">
-                          4. Mode Rebate & Net Premium:
-                        </span>
-                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Net = Gross ({formatINR(quotationResult.frequencyPremium)}) - Rebate (
-                          {formatINR(quotationResult.rebate)}) + Tax (
-                          {formatINR(quotationResult.tax)}) ={' '}
-                          {formatINR(quotationResult.netInstallmentPremium)}
-                        </code>
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">4. Sum Assured Premium Units:</span>
+                        <code>{formatINR(quotationResult.sumAssured)} / ₹1,000 = {quotationResult.sumAssured / 1000}</code>
                       </div>
 
-                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">
-                          5. Accrued Bonus & Maturity Benefit:
-                        </span>
-                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Total Bonus = Units × ₹{quotationResult.bonusRate} ×{' '}
-                          {quotationResult.duration} yrs = {formatINR(quotationResult.totalBonus)}
-                        </code>
-                        <code className="text-[0.7rem] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 block text-emerald-950 font-mono font-bold mt-1">
-                          Maturity Benefit = SA + Total Bonus ={' '}
-                          {formatINR(quotationResult.maturityAmount)}
-                        </code>
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">5. Exact Yearly Table Lookup:</span>
+                        <code>Age {quotationResult.effectiveAge} → Age {quotationResult.maturityAge} = ₹{(quotationResult as RpliQuoteResult).modeDetails.yearly.ratePer1000.toFixed(2)} / ₹1,000</code>
+                      </div>
+
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">6. Gross Premium:</span>
+                        <code>₹{(quotationResult as RpliQuoteResult).modeDetails[frequency === 'MONTHLY' ? 'monthly' : frequency === 'QUARTERLY' ? 'quarterly' : frequency === 'HALF_YEARLY' ? 'halfYearly' : 'yearly'].ratePer1000.toFixed(2)} × {quotationResult.sumAssured / 1000} = {formatINR(quotationResult.frequencyPremium)}</code>
+                      </div>
+
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">7. Mode Rebate:</span>
+                        <code>{formatINR(quotationResult.rebate)}</code>
+                      </div>
+
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">8. Tax / GST:</span>
+                        <code>{formatINR(quotationResult.tax)}</code>
+                      </div>
+
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">9. Net Payable Premium:</span>
+                        <code>{formatINR(quotationResult.netInstallmentPremium)}</code>
+                      </div>
+
+                      <div className="p-2 bg-slate-50 rounded border border-slate-100">
+                        <span className="font-bold text-slate-900 block font-sans">10. Accrued Bonus:</span>
+                        <code>{quotationResult.sumAssured / 1000} × ₹{quotationResult.bonusRate} × {quotationResult.duration} = {formatINR(quotationResult.totalBonus)} (Declared bonus rate: ₹{quotationResult.bonusRate}/₹1k/yr)</code>
+                      </div>
+
+                      <div className="p-2 bg-emerald-50 rounded border border-emerald-200 text-emerald-950 font-bold">
+                        <span className="font-bold text-emerald-900 block font-sans">11. Indicative Maturity Benefit:</span>
+                        <code>{formatINR(quotationResult.sumAssured)} + {formatINR(quotationResult.totalBonus)} = {formatINR(quotationResult.maturityAmount)}</code>
                       </div>
                     </div>
                   </div>

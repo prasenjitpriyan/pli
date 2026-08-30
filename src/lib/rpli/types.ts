@@ -130,6 +130,7 @@ export interface RpliQuoteResult {
   calculationMethod: string;
   calculationVersion: string;
   rateTableVersion: string;
+  rateSource: string;
 
   timeline?: BenefitTimelineStep[];
   breakdown: AuditStep[];

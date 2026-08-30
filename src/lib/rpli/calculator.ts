@@ -208,6 +208,7 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     calculationMethod: modelPrediction.calculationMethod,
     calculationVersion: '2.0-RPLI-TABLE-DRIVEN',
     rateTableVersion: modelPrediction.rateTableVersion,
+    rateSource: modelPrediction.rateSource,
 
     timeline: benefits.timeline,
     breakdown,
