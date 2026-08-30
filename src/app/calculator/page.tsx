@@ -983,19 +983,31 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-(--primary-red) outline-none"
                             />
                           </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                              Calculated Completed Age
-                            </label>
-                            <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                              {computedAge} years
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-semibold text-(--text-light) mb-1">
+                                Completed Age
+                              </label>
+                              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
+                                {calculateAge(dateOfBirth, effectiveDate).completedAge} years
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-(--text-light) mb-1 flex items-center justify-between">
+                                <span>Entry Age (ANB)</span>
+                                <span className="text-[0.62rem] text-emerald-700 font-bold">Official</span>
+                              </label>
+                              <div className="p-2.5 bg-emerald-50/70 border border-emerald-300 rounded-lg text-sm font-bold text-emerald-950">
+                                {computedAge} yrs
+                              </div>
                             </div>
                           </div>
                         </div>
                       ) : (
                         <div>
-                          <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                            Completed Age (Years)
+                          <label className="block text-xs font-semibold text-(--text-light) mb-1 flex items-center justify-between">
+                            <span>Age on Next Birthday (ANB)</span>
+                            <span className="text-[0.62rem] text-emerald-700 font-bold">19 – 55 Years</span>
                           </label>
                           <input
                             type="number"
@@ -1587,8 +1599,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
 
                     <div className="space-y-2 text-slate-700 font-mono text-[0.7rem]">
                       <div className="p-2 bg-slate-50 rounded border border-slate-100">
-                        <span className="font-bold text-slate-900 block font-sans">1. Exact Age:</span>
-                        <code>DATEDIF({dateOfBirth || 'DOB'}, {effectiveDate}, &quot;Y&quot;) = {quotationResult.effectiveAge}</code>
+                        <span className="font-bold text-slate-900 block font-sans">1. Entry Age (Age on Next Birthday - ANB):</span>
+                        <code>DATEDIF({dateOfBirth || 'DOB'}, {effectiveDate}, &quot;Y&quot;) + 1 = {quotationResult.effectiveAge} Years (ANB)</code>
                       </div>
 
                       <div className="p-2 bg-slate-50 rounded border border-slate-100">

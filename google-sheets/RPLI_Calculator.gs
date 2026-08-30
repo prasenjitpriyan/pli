@@ -30,6 +30,18 @@ function DATEDIF_AGE(dob, onDate) {
 }
 
 /**
+ * Custom function: Calculate Age as on Next Birthday (ANB) under India Post PLI/RPLI rules.
+ *
+ * @param {Date|string} dob Policyholder Date of Birth
+ * @param {Date|string} onDate Reference Date (Policy Start Date)
+ * @return {number} Age as on Next Birthday (ANB)
+ * @customfunction
+ */
+function DATEDIF_ANB(dob, onDate) {
+  return DATEDIF_AGE(dob, onDate) + 1;
+}
+
+/**
  * Main Table-Driven RPLI Quotation Custom Function.
  *
  * @param {Date|string} dob Policyholder Date of Birth (e.g., '1987-08-07')
@@ -85,8 +97,8 @@ function RPLI_QUOTE(dob, policyStartDate, plan, sumAssured, maturityAge, premium
     }
   }
 
-  // 2. Validate Proposer Age
-  var entryAge = DATEDIF_AGE(dob, policyStartDate);
+  // 2. Validate Proposer Age as on Next Birthday (ANB)
+  var entryAge = typeof dob === "number" ? dob : DATEDIF_ANB(dob, policyStartDate);
   if (!isRural) {
     return [["NOT ELIGIBLE - PROPOSER MUST BE RURAL RESIDENT"]];
   }

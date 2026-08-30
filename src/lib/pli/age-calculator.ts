@@ -2,14 +2,20 @@ import { PolicyType } from './types';
 import { mapToCanonicalPolicy } from './validation';
 
 /**
- * Calculates completed age in years as of the effective date.
+ * Calculates completed age in years and Age as on Next Birthday (ANB) as of the effective date.
+ * Under India Post PLI and RPLI official rules, entry age is determined by "Age as on next birthday" (ANB).
  * If dateOfBirth is provided, it takes precedence.
  */
 export function calculateAge(
   dateOfBirth?: string,
   effectiveDateStr?: string,
   providedAge?: number
-): { age: number; effectiveDate: string } {
+): {
+  completedAge: number;
+  ageNextBirthday: number;
+  age: number; // Returns ageNextBirthday for official PLI/RPLI calculation
+  effectiveDate: string;
+} {
   const effectiveDate = effectiveDateStr
     ? new Date(effectiveDateStr)
     : new Date();
@@ -18,24 +24,33 @@ export function calculateAge(
 
   if (dateOfBirth) {
     const dob = new Date(dateOfBirth);
-    let age = effectiveDate.getFullYear() - dob.getFullYear();
+    let completed = effectiveDate.getFullYear() - dob.getFullYear();
     const monthDiff = effectiveDate.getMonth() - dob.getMonth();
     
     if (
       monthDiff < 0 ||
       (monthDiff === 0 && effectiveDate.getDate() < dob.getDate())
     ) {
-      age--;
+      completed--;
     }
 
+    const completedAge = Math.max(0, completed);
+    // Under India Post PLI & RPLI rules, entry age is Age as on Next Birthday (ANB)
+    const ageNextBirthday = completedAge + 1;
+
     return {
-      age: Math.max(0, age),
+      completedAge,
+      ageNextBirthday,
+      age: ageNextBirthday,
       effectiveDate: formattedEffectiveDate,
     };
   }
 
+  const baseAge = Math.max(0, providedAge ?? 20);
   return {
-    age: Math.max(0, providedAge ?? 19),
+    completedAge: baseAge,
+    ageNextBirthday: baseAge,
+    age: baseAge,
     effectiveDate: formattedEffectiveDate,
   };
 }
@@ -103,6 +118,24 @@ export function calculateDurationAndMaturityAge(params: {
     };
   }
 
+  if (canonical === 'SUVIDHA') {
+    const defaultMaturityAge = 80;
+    const defaultDuration = Math.max(1, defaultMaturityAge - age);
+    return {
+      duration: defaultDuration,
+      maturityAge: defaultMaturityAge,
+    };
+  }
+
+  if (canonical === 'SUMANGAL') {
+    const defaultDuration = 15;
+    return {
+      duration: defaultDuration,
+      maturityAge: age + defaultDuration,
+    };
+  }
+
+  // Default fallback
   const defaultDuration = 20;
   return {
     duration: defaultDuration,

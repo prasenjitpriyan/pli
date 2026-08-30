@@ -5,11 +5,13 @@ import { predictMonthlyPremium } from '../premium-model';
 import { validatePliInput } from '../validation';
 
 describe('PLI Age Calculator Module', () => {
-  it('calculates completed age accurately from date of birth', () => {
+  it('calculates completed age and Age Next Birthday (ANB) accurately from date of birth', () => {
     const dob = '1995-06-15';
     const effectiveDate = '2025-06-15';
-    const { age } = calculateAge(dob, effectiveDate);
-    expect(age).toBe(30);
+    const { completedAge, ageNextBirthday, age } = calculateAge(dob, effectiveDate);
+    expect(completedAge).toBe(30);
+    expect(ageNextBirthday).toBe(31);
+    expect(age).toBe(31);
   });
 
   it('calculates joint life effective age as floor average of both lives', () => {
