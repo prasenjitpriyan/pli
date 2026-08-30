@@ -1,8 +1,8 @@
+import { RPLI_CONFIG } from '../../config/rpli/config';
 import { RPLI_FREQUENCY_CONFIG } from '../../config/rpli/frequencies';
 import { RPLI_POLICY_REGISTRY } from '../../config/rpli/policies';
 import { calculateAge, calculateDurationAndMaturityAge, calculateEffectiveAge } from '../pli/age-calculator';
 import { generatePliAuditTrail } from '../pli/audit-engine';
-import { calculateTax } from '../pli/tax-calculator';
 import { calculateRpliBenefits } from './benefit-engine';
 import { predictRpliMonthlyPremium } from './premium-engine';
 import { RpliInput, RpliPolicy, RpliQuoteResult } from './types';
@@ -15,10 +15,10 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
   // 1. Validation Check
   const eligibility = validateRpliInput(input);
 
-  // 2. Base Age & Effective Date Derivation
+  // 2. Base Age & Effective Date Derivation (Exact Completed Years)
   const { age, effectiveDate } = calculateAge(
     input.dateOfBirth,
-    input.effectiveDate,
+    input.effectiveDate ?? input.commencementDate,
     input.age
   );
 
@@ -33,7 +33,6 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
   const isConverted = canonicalPolicy === 'GRAM_SUVIDHA' && Boolean(input.isConverted);
   const conversionStatus = canonicalPolicy === 'GRAM_SUVIDHA' ? (isConverted ? 'CONVERTED' : 'UNCONVERTED') : undefined;
 
-  // 5. Whole Life Ceasing Age vs Fixed Term vs Maturity Age
   let premiumCeasingAge: number | undefined = undefined;
   let premiumPaymentDuration: number | undefined = undefined;
   let bonusAccrualDuration: number | undefined = undefined;
@@ -44,10 +43,13 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
   if (canonicalPolicy === 'GRAM_PRIYA') {
     duration = 10; // Fixed 10 Years Term
     maturityAge = effectiveAge + 10;
+  } else if (canonicalPolicy === 'GRAM_SUMANGAL') {
+    duration = input.duration ?? 20;
+    maturityAge = effectiveAge + duration;
   } else if ((canonicalPolicy === 'GRAM_SURAKSHA' || canonicalPolicy === 'GRAM_SUVIDHA') && !isConverted) {
     premiumCeasingAge = input.premiumCeasingAge ?? 60;
     premiumPaymentDuration = Math.max(1, premiumCeasingAge - effectiveAge);
-    bonusAccrualDuration = Math.max(1, 80 - effectiveAge);
+    bonusAccrualDuration = premiumPaymentDuration;
 
     duration = premiumPaymentDuration;
     maturityAge = 80;
@@ -62,7 +64,7 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     maturityAge = durationRes.maturityAge;
   }
 
-  // 6. Bonus Engine
+  // 5. Bonus Engine
   let bonusRate = policyConfig.bonusRate;
   if (isConverted) {
     bonusRate = 48; // Gram Santosh bonus rate upon conversion
@@ -72,33 +74,37 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
   const annualBonus = (input.sumAssured / 1000) * bonusRate;
   const totalBonus = annualBonus * bonusDuration;
 
-  // 7. Premium Engine
+  // 6. Table-Driven Premium Engine
   const modelPrediction = predictRpliMonthlyPremium({
     policyType: canonicalPolicy,
     effectiveAge,
     duration,
     sumAssured: input.sumAssured,
+    premiumCeasingAge,
+    maturityAge,
+    childAge: input.childAge,
   });
 
-  // 8. Rebate & Tax
-  const rebate = input.sumAssured >= 100000 ? 5 : 0;
-  const tax = calculateTax(modelPrediction.scaledGrossPremium, 0);
-
-  // 9. Net Monthly Premium
-  const netMonthlyPremium = Math.max(10, modelPrediction.scaledGrossPremium - rebate + tax);
-
-  // 10. Payment Frequency Adjustments
+  // 7. Payment Frequency Adjustments
   const frequency = input.frequency ?? 'MONTHLY';
   const freqConfig = RPLI_FREQUENCY_CONFIG[frequency];
-  const rawInstallment = netMonthlyPremium * (12 / freqConfig.paymentsPerYear);
-  const frequencyDiscount = rawInstallment * (freqConfig.rebatePercent / 100);
-  const netInstallmentPremium = rawInstallment - frequencyDiscount;
-  const annualizedPremium = netInstallmentPremium * freqConfig.paymentsPerYear;
 
-  // 11. Total Premium Paid
-  const totalPremiumPaid = netMonthlyPremium * 12 * duration;
+  let selectedModeDetail = modelPrediction.modeDetails.monthly;
+  if (frequency === 'QUARTERLY') selectedModeDetail = modelPrediction.modeDetails.quarterly;
+  else if (frequency === 'HALF_YEARLY') selectedModeDetail = modelPrediction.modeDetails.halfYearly;
+  else if (frequency === 'YEARLY') selectedModeDetail = modelPrediction.modeDetails.yearly;
 
-  // 12. Benefit Engine
+  const rawInstallment = selectedModeDetail.grossPremium;
+  const rebate = selectedModeDetail.rebate;
+  const tax = selectedModeDetail.tax;
+  const netInstallmentPremium = selectedModeDetail.netPremium;
+  const netMonthlyPremium = modelPrediction.modeDetails.monthly.netPremium;
+  const annualizedPremium = modelPrediction.modeDetails.yearly.netPremium;
+
+  // 8. Total Premium Paid over Policy Term
+  const totalPremiumPaid = Math.round(netInstallmentPremium * freqConfig.paymentsPerYear * duration);
+
+  // 9. Benefit Engine
   const benefits = calculateRpliBenefits({
     policy: canonicalPolicy,
     sumAssured: input.sumAssured,
@@ -108,13 +114,18 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     isConverted,
   });
 
-  // 13. Audit Trail
+  // 10. Medical Requirement Flag
+  const medicalRequired = input.sumAssured > RPLI_CONFIG.medical.sumAssuredThreshold || effectiveAge > RPLI_CONFIG.medical.ageThreshold;
+  const medicalRuleStatus = medicalRequired ? 'MEDICAL REQUIRED' : 'MEDICAL RULE NOT TRIGGERED';
+
+  // 11. Audit Trail
   const breakdown = generatePliAuditTrail({
     policyName: policyConfig.name,
     policyCode: policyConfig.code,
     effectiveAge,
     maturityAge,
     duration,
+    bonusDuration,
     bonusRate,
     annualBonus,
     totalBonus,
@@ -122,7 +133,7 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     frequency,
     basePremium: modelPrediction.basePremiumPerLakh,
     rebate,
-    frequencyDiscount,
+    frequencyDiscount: 0,
     tax,
     netMonthlyPremium,
     netInstallmentPremium,
@@ -161,11 +172,14 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     bonusRate,
     annualBonus,
     totalBonus,
+    terminalBonus: 0,
+
+    modeDetails: modelPrediction.modeDetails,
 
     referenceBasePremium: modelPrediction.basePremiumPerLakh,
     estimatedMonthlyPremium: modelPrediction.scaledGrossPremium,
     frequencyPremium: rawInstallment,
-    frequencyDiscount,
+    frequencyDiscount: 0,
     rebate,
     tax,
     netMonthlyPremium,
@@ -178,6 +192,9 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     maturityAmount: benefits.maturityAmount,
     deathBenefitAmount: benefits.deathBenefitAmount,
 
+    medicalRequired,
+    medicalRuleStatus,
+
     loanYears: policyConfig.loanYears,
     surrenderYears: policyConfig.surrenderYears,
     paidUpYears: policyConfig.paidUpYears,
@@ -185,12 +202,12 @@ export function calculateRpliQuote(input: RpliInput): RpliQuoteResult {
     specialFeatures: policyConfig.specialFeatures,
 
     eligibility,
-    isEstimated: true,
-    premiumSource: 'CONFIGURED',
+    isEstimated: !modelPrediction.isExactReference,
+    premiumSource: modelPrediction.premiumSource,
     confidenceScore: modelPrediction.confidenceScore,
     calculationMethod: modelPrediction.calculationMethod,
-    calculationVersion: '2.0-RPLI',
-    rateTableVersion: '2.0-RPLI-OFFICIAL',
+    calculationVersion: '2.0-RPLI-TABLE-DRIVEN',
+    rateTableVersion: modelPrediction.rateTableVersion,
 
     timeline: benefits.timeline,
     breakdown,

@@ -1,3 +1,4 @@
+import { RPLI_CONFIG } from '../../config/rpli/config';
 import { RPLI_POLICY_REGISTRY } from '../../config/rpli/policies';
 import { PliValidationResult } from '../pli/types';
 import { RpliInput, RpliPolicy } from './types';
@@ -21,17 +22,38 @@ export function validateRpliInput(input: RpliInput): PliValidationResult {
   const warnings: string[] = [];
 
   const age = input.age ?? 30;
+  const isRural = input.isRuralResident !== false; // Default true
+  const ageProof = input.ageProofType ?? 'STANDARD';
 
-  // 1. Entry Age Validation
+  // 1. Rural Eligibility
+  if (!isRural) {
+    errors.push('Rural Postal Life Insurance (RPLI) requires the proposer to be permanently residing in a rural area.');
+  }
+
+  // 2. Proposer Entry Age & Age Proof Validation
   if (canonicalPolicy === 'BAL_JEEVAN_BIMA') {
     const childAge = input.childAge ?? age;
     const parentAge = input.parentAge ?? 35;
 
-    if (childAge < 5 || childAge > 20) {
-      errors.push('Child entry age must be between 5 and 20 years for RPLI Bal Jeevan Bima.');
+    // Future Child DOB validation
+    if (input.childDateOfBirth) {
+      const childDob = new Date(input.childDateOfBirth);
+      const today = new Date();
+      const policyDate = input.effectiveDate ? new Date(input.effectiveDate) : today;
+
+      if (childDob > today) {
+        errors.push('INVALID - CHILD DOB IS IN THE FUTURE.');
+      }
+      if (childDob > policyDate) {
+        errors.push('INVALID - CHILD NOT YET BORN (Child DOB cannot be after Policy Start Date).');
+      }
     }
-    if (parentAge > 45) {
-      errors.push('Parent/Policyholder age must not exceed 45 years at entry for RPLI Bal Jeevan Bima.');
+
+    if (childAge < RPLI_CONFIG.childPolicy.minAge || childAge > RPLI_CONFIG.childPolicy.maxAge) {
+      errors.push(`Child entry age must be between ${RPLI_CONFIG.childPolicy.minAge} and ${RPLI_CONFIG.childPolicy.maxAge} years for RPLI Bal Jeevan Bima.`);
+    }
+    if (parentAge > RPLI_CONFIG.childPolicy.maxParentAge) {
+      errors.push(`Parent/Policyholder age must not exceed ${RPLI_CONFIG.childPolicy.maxParentAge} years at entry for RPLI Bal Jeevan Bima.`);
     }
   } else if (canonicalPolicy === 'GRAM_PRIYA') {
     if (age < 20 || age > 45) {
@@ -45,34 +67,37 @@ export function validateRpliInput(input: RpliInput): PliValidationResult {
     if (duration === 20 && age > 40) {
       errors.push('Maximum entry age for 20-year Gram Sumangal is 40 years.');
     }
-    if (age < config.minAge) {
-      errors.push(`Minimum entry age for ${config.name} is ${config.minAge} years.`);
+    if (age < RPLI_CONFIG.minEntryAge) {
+      errors.push(`Minimum entry age for ${config.name} is ${RPLI_CONFIG.minEntryAge} years.`);
     }
   } else {
-    if (age < config.minAge) {
-      errors.push(`Minimum entry age for ${config.name} is ${config.minAge} years.`);
+    // Standard / Non-Standard Proof Max Age
+    const maxAllowedAge = ageProof === 'NON-STANDARD' ? RPLI_CONFIG.maxEntryAgeNonStandard : RPLI_CONFIG.maxEntryAgeStandard;
+
+    if (age < RPLI_CONFIG.minEntryAge) {
+      errors.push(`Minimum entry age for ${config.name} is ${RPLI_CONFIG.minEntryAge} years.`);
     }
-    if (age > config.maxAge) {
-      errors.push(`Maximum entry age for ${config.name} is ${config.maxAge} years.`);
+    if (age > maxAllowedAge) {
+      errors.push(`Maximum entry age for ${config.name} with ${ageProof} age proof is ${maxAllowedAge} years.`);
     }
   }
 
-  // 2. Sum Assured Validation
-  if (input.sumAssured < config.minSumAssured) {
-    errors.push(`Minimum Sum Assured permitted for ${config.name} is ₹${config.minSumAssured.toLocaleString('en-IN')}.`);
+  // 3. Sum Assured Validation
+  if (input.sumAssured < RPLI_CONFIG.minSumAssured) {
+    errors.push(`Minimum Sum Assured permitted for ${config.name} is ₹${RPLI_CONFIG.minSumAssured.toLocaleString('en-IN')}.`);
   }
 
   if (canonicalPolicy === 'BAL_JEEVAN_BIMA') {
-    const parentSA = input.parentSumAssured ?? 100000;
-    const maxPermitted = Math.min(100000, parentSA);
+    const parentSA = input.parentSumAssured ?? RPLI_CONFIG.childPolicy.maxSumAssured;
+    const maxPermitted = Math.min(RPLI_CONFIG.childPolicy.maxSumAssured, parentSA);
     if (input.sumAssured > maxPermitted) {
-      errors.push(`Maximum Sum Assured for RPLI Bal Jeevan Bima is ₹1,00,000 (or equal to parent's Sum Assured of ₹${parentSA.toLocaleString('en-IN')}, whichever is lower).`);
+      errors.push(`Maximum Sum Assured for RPLI Bal Jeevan Bima is ₹${maxPermitted.toLocaleString('en-IN')}.`);
     }
-  } else if (input.sumAssured > config.maxSumAssured) {
-    errors.push(`Maximum Sum Assured permitted for ${config.name} is ₹${config.maxSumAssured.toLocaleString('en-IN')}.`);
+  } else if (input.sumAssured > RPLI_CONFIG.maxSumAssured) {
+    errors.push(`Maximum Sum Assured permitted for ${config.name} is ₹${RPLI_CONFIG.maxSumAssured.toLocaleString('en-IN')}.`);
   }
 
-  // 3. Maturity Age / Term Validation
+  // 4. Maturity Age / Term Validation
   if (canonicalPolicy === 'GRAM_SANTOSH' || canonicalPolicy === 'GRAM_SURAKSHA' || (canonicalPolicy === 'GRAM_SUVIDHA' && input.isConverted)) {
     if (input.maturityAge) {
       const term = input.maturityAge - age;
@@ -80,6 +105,11 @@ export function validateRpliInput(input: RpliInput): PliValidationResult {
         errors.push(`Calculated policy term (${term} years) is less than the minimum required term of ${config.minTerm} years.`);
       }
     }
+  }
+
+  // 5. Medical Requirement Advisory
+  if (input.sumAssured > RPLI_CONFIG.medical.sumAssuredThreshold || age > RPLI_CONFIG.medical.ageThreshold) {
+    warnings.push(`Medical Examination is mandatory (Sum Assured > ₹${RPLI_CONFIG.medical.sumAssuredThreshold.toLocaleString('en-IN')} or Age > ${RPLI_CONFIG.medical.ageThreshold} years).`);
   }
 
   return {

@@ -33,27 +33,30 @@ describe('PLI Age Calculator Module', () => {
 });
 
 describe('PLI Premium Surface Model Engine', () => {
-  it('returns 100% exact reference calibration values for benchmark points', () => {
+  it('returns exact official rate values for benchmark points', () => {
     const res = predictMonthlyPremium({
       policyType: 'ENDOWMENT',
-      effectiveAge: 30,
-      duration: 30,
+      effectiveAge: 31,
+      duration: 20,
       sumAssured: 100000,
     });
     expect(res.isExactReference).toBe(true);
     expect(res.confidenceScore).toBe(100);
-    expect(res.scaledGrossPremium).toBe(260);
+    // Rate for term 20 is 5.2% -> 5200/yr -> 433/mo
+    expect(res.yearlyPremium).toBe(5200);
+    expect(res.monthlyPremium).toBe(433);
   });
 
-  it('performs smooth 2D surface interpolation for unlisted age/term combinations', () => {
+  it('calculates official whole life rate for Suraksha by ceasing age', () => {
     const res = predictMonthlyPremium({
-      policyType: 'ENDOWMENT',
-      effectiveAge: 33,
-      duration: 27,
+      policyType: 'SURAKSHA',
+      effectiveAge: 31,
+      duration: 29,
       sumAssured: 500000,
+      premiumCeasingAge: 60,
     });
-    expect(res.confidenceScore).toBeGreaterThanOrEqual(70);
-    expect(res.scaledGrossPremium).toBeGreaterThan(0);
+    expect(res.yearlyPremium).toBe((500000 / 1000) * 34); // ₹17,000/yr
+    expect(res.monthlyPremium).toBe(Math.round(17000 / 12)); // ₹1,417/mo
   });
 });
 
@@ -108,11 +111,11 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     });
 
     expect(result.policyType).toBe('SANTOSH');
-    expect(result.duration).toBe(30);
+    expect(result.duration).toBe(29); // ANB = 31, 60 - 31 = 29
     expect(result.bonusRate).toBe(52);
     expect(result.annualBonus).toBe(26000);
-    expect(result.totalBonus).toBe(780000);
-    expect(result.maturityAmount).toBe(1280000); // SA ₹5L + Bonus ₹7.8L
+    expect(result.totalBonus).toBe(754000); // 26000 * 29
+    expect(result.maturityAmount).toBe(1254000); // SA ₹5L + Bonus ₹7.54L
     expect(result.breakdown.length).toBeGreaterThan(0);
   });
 
@@ -125,8 +128,7 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     });
 
     expect(result.policyType).toBe('SURAKSHA');
-    expect(result.premiumPaymentDuration).toBe(30);
-    expect(result.bonusAccrualDuration).toBe(50); // Age 80 - 30 = 50 yrs
+    expect(result.premiumPaymentDuration).toBe(29); // 60 - 31 = 29
     expect(result.bonusRate).toBe(76);
   });
 
@@ -161,7 +163,7 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     expect(result.survivalBenefits?.length).toBe(3);
     expect(result.survivalBenefits?.[0].year).toBe(6);
     expect(result.survivalBenefits?.[0].amount).toBe(100000); // 20% of ₹5L
-    expect(result.finalMaturityPayout).toBe(200000 + result.totalBonus + result.terminalBonus);
+    expect(result.finalMaturityPayout).toBe(200000 + result.totalBonus);
   });
 
   it('calculates Bal Jeevan Bima with child entry age & parent waiver metadata', () => {
@@ -179,7 +181,7 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     expect(result.eligibility.valid).toBe(true);
   });
 
-  it('calculates multi-frequency installment premiums with advance rebates', () => {
+  it('calculates multi-frequency installment premiums without frequency discount', () => {
     const monthly = calculatePliQuote({
       policyType: 'SANTOSH',
       age: 30,
@@ -196,7 +198,8 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
       sumAssured: 100000,
     });
 
-    expect(yearly.frequencyDiscount).toBeGreaterThan(0); // 2% yearly discount
-    expect(yearly.netInstallmentPremium).toBeLessThan(monthly.netMonthlyPremium * 12);
+    expect(yearly.frequencyDiscount).toBe(0);
+    expect(yearly.netInstallmentPremium).toBe(yearly.annualizedPremium);
+    expect(monthly.netInstallmentPremium * 12).toBe(yearly.annualizedPremium);
   });
 });

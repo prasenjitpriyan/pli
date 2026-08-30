@@ -46,6 +46,9 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
   const conversionStatus = canonicalPolicy === 'SUVIDHA' ? (isConverted ? 'CONVERTED' : 'UNCONVERTED') : undefined;
 
   // 5. Whole Life Ceasing Age vs Standard Duration Logic
+  // ANB (Age Next Birthday) is used for duration and premium table lookup
+  const ageNextBirthday = effectiveAge + 1;
+
   let premiumCeasingAge: number | undefined = undefined;
   let premiumPaymentDuration: number | undefined = undefined;
   let bonusAccrualDuration: number | undefined = undefined;
@@ -55,15 +58,18 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
 
   if ((canonicalPolicy === 'SURAKSHA' || canonicalPolicy === 'SUVIDHA') && !isConverted) {
     premiumCeasingAge = input.premiumCeasingAge ?? 60;
-    premiumPaymentDuration = Math.max(1, premiumCeasingAge - effectiveAge);
-    bonusAccrualDuration = Math.max(1, 80 - effectiveAge);
+    // Duration (premium paying term) = ceasing age - ANB
+    premiumPaymentDuration = Math.max(1, premiumCeasingAge - ageNextBirthday);
+    // Bonus accrues from ANB until age 80
+    bonusAccrualDuration = Math.max(1, 80 - ageNextBirthday);
 
     duration = premiumPaymentDuration;
     maturityAge = 80;
   } else {
+    // For endowment-style policies: duration = maturityAge - ANB
     const durationRes = calculateDurationAndMaturityAge({
       policyType: input.policyType,
-      age: effectiveAge,
+      age: ageNextBirthday,
       maturityAge: input.maturityAge,
       duration: input.duration,
     });
@@ -72,7 +78,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
   }
 
   // 6. Bonus Engine
-  const bonusDuration = bonusAccrualDuration ?? duration;
+  const bonusDuration = duration;
   let { bonusRate, annualBonus, totalBonus } = calculateBonus(
     input.policyType,
     input.sumAssured,
@@ -85,19 +91,21 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     totalBonus = annualBonus * duration;
   }
 
-  // 7. Premium Surface Engine
+  // 7. Premium Rate Engine (Official India Post Formulas)
   const targetModelPolicy = isConverted ? 'ENDOWMENT' : input.policyType;
   const modelPrediction = predictMonthlyPremium({
     policyType: targetModelPolicy,
-    effectiveAge,
+    effectiveAge: ageNextBirthday,    // Always use ANB for premium table
     duration,
     sumAssured: input.sumAssured,
+    premiumCeasingAge,                // For Suraksha/Suvidha ceasing age tiers
+    isConverted,
     ageRate: input.ageRate,
   });
 
-  // 8. Policy-Aware Rebate
+  // 8. Policy-Aware Rebate (₹5 per ₹1L SA for single life, ₹9.7 per ₹1L for joint life)
   const rebate = calculateRebate({
-    policyType: input.policyType,
+    policyType: canonicalPolicy,
     sumAssured: input.sumAssured,
     overrideRebate: input.rebate,
   });
@@ -108,19 +116,20 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     input.gstRate
   );
 
-  // 10. Net Monthly Premium
-  const netMonthlyPremium = modelPrediction.scaledGrossPremium - rebate + tax;
+  // 10. Net Monthly Premium = Gross Monthly - Rebate + Tax
+  const netMonthlyPremium = Math.max(0, modelPrediction.monthlyPremium - rebate + tax);
 
-  // 11. Premium Frequency Adjustment & Advance Discount
+  // 11. Premium Frequency Adjustment
   const frequency = input.frequency ?? 'MONTHLY';
   const freqConfig = FREQUENCY_CONFIG[frequency];
-  const rawInstallment = netMonthlyPremium * (12 / freqConfig.paymentsPerYear);
-  const frequencyDiscount = rawInstallment * (freqConfig.rebatePercent / 100);
-  const netInstallmentPremium = rawInstallment - frequencyDiscount;
-  const annualizedPremium = netInstallmentPremium * freqConfig.paymentsPerYear;
+  const monthsPerPayment = 12 / freqConfig.paymentsPerYear;
+  const rawInstallment = modelPrediction.monthlyPremium * monthsPerPayment;
+  const frequencyDiscount = 0; // Direct multiple, no advance rebate
+  const netInstallmentPremium = netMonthlyPremium * monthsPerPayment;
+  const annualizedPremium = netMonthlyPremium * 12;
 
-  // 12. Total Premium Paid
-  const totalPremiumPaid = netMonthlyPremium * 12 * duration;
+  // 12. Total Premium Paid = installment × payments per year × duration
+  const totalPremiumPaid = Math.round(netInstallmentPremium * freqConfig.paymentsPerYear * duration);
 
   // 13. Terminal Bonus
   const terminalBonus = calculateTerminalBonus({
@@ -146,6 +155,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     effectiveAge,
     maturityAge,
     duration,
+    bonusDuration,
     bonusRate,
     annualBonus,
     totalBonus,

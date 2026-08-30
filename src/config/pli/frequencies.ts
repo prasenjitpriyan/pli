@@ -20,21 +20,21 @@ export const FREQUENCY_CONFIG: Record<PremiumFrequency, FrequencyConfig> = {
     frequency: 'QUARTERLY',
     label: 'Quarterly (3 Months)',
     paymentsPerYear: 4,
-    rebatePercent: 0.5, // 0.5% advance payment discount
-    description: 'Pay premium every 3 months in advance.',
+    rebatePercent: 0.0,
+    description: 'Pay premium every 3 months.',
   },
   HALF_YEARLY: {
     frequency: 'HALF_YEARLY',
     label: 'Half-Yearly (6 Months)',
     paymentsPerYear: 2,
-    rebatePercent: 1.0, // 1% advance payment discount
-    description: 'Pay premium every 6 months in advance with 1% discount.',
+    rebatePercent: 0.0,
+    description: 'Pay premium every 6 months.',
   },
   YEARLY: {
     frequency: 'YEARLY',
     label: 'Yearly (Annual)',
     paymentsPerYear: 1,
-    rebatePercent: 1,
-    description: 'Pay premium once annually with 2% discount.',
+    rebatePercent: 0.0,
+    description: 'Pay premium once annually.',
   },
 };

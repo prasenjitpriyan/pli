@@ -10,13 +10,18 @@ export type RpliPolicy =
   | 'GRAM_SUMANGAL'
   | 'BAL_JEEVAN_BIMA';
 
+export type AgeProofType = 'STANDARD' | 'NON-STANDARD';
+
 export interface RpliInput {
   scheme?: InsuranceScheme;
   policyType: RpliPolicy | string;
-  effectiveDate?: string; // YYYY-MM-DD
+  effectiveDate?: string; // YYYY-MM-DD (Policy Start Date)
   commencementDate?: string; // YYYY-MM-DD
-  dateOfBirth?: string; // YYYY-MM-DD
-  age?: number;
+  dateOfBirth?: string; // YYYY-MM-DD (Policyholder DOB)
+  age?: number; // Exact completed age
+
+  isRuralResident?: boolean;
+  ageProofType?: AgeProofType;
 
   frequency?: PremiumFrequency;
   
@@ -28,11 +33,14 @@ export interface RpliInput {
   };
   
   // Children Policy Inputs
+  childDateOfBirth?: string; // YYYY-MM-DD
   childAge?: number;
   childName?: string;
+  childPolicyRequired?: boolean;
+  childSumAssured?: number;
   parentAge?: number;
   parentSumAssured?: number;
-  isParentDeceased?: boolean; // Parent death state toggle
+  isParentDeceased?: boolean;
 
   // Whole Life Ceasing Age
   premiumCeasingAge?: number;
@@ -44,6 +52,14 @@ export interface RpliInput {
   maturityAge?: number;
   duration?: number;
   rebate?: number;
+}
+
+export interface ModePremiumDetail {
+  ratePer1000: number;
+  grossPremium: number;
+  rebate: number;
+  tax: number;
+  netPremium: number;
 }
 
 export interface RpliQuoteResult {
@@ -72,6 +88,15 @@ export interface RpliQuoteResult {
   bonusRate: number; // ₹ per ₹1,000 Sum Assured
   annualBonus: number;
   totalBonus: number;
+  terminalBonus?: number;
+
+  // Mode-wise Breakdown Grid
+  modeDetails: {
+    monthly: ModePremiumDetail;
+    quarterly: ModePremiumDetail;
+    halfYearly: ModePremiumDetail;
+    yearly: ModePremiumDetail;
+  };
 
   referenceBasePremium: number;
   estimatedMonthlyPremium: number;
@@ -88,6 +113,9 @@ export interface RpliQuoteResult {
   finalMaturityPayout?: number;
   maturityAmount: number;
   deathBenefitAmount: number;
+
+  medicalRequired: boolean;
+  medicalRuleStatus: string;
 
   loanYears?: number | null;
   surrenderYears?: number | null;

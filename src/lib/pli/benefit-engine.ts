@@ -21,10 +21,12 @@ export function calculatePliBenefits(input: BenefitCalculationInput): BenefitCal
   const { policy, sumAssured, duration, totalBonus, terminalBonus } = input;
   const timeline: BenefitTimelineStep[] = [];
 
-  // Death benefit across all policies: Full Sum Assured + Accrued Bonus to date + Terminal Bonus
+  // Death benefit: always includes terminal bonus across all policies
   const deathBenefitAmount = sumAssured + totalBonus + terminalBonus;
-  const maturityAmount = sumAssured + totalBonus + terminalBonus;
-  let finalMaturityPayout = sumAssured + totalBonus + terminalBonus;
+
+  // Maturity Amount = Sum Assured + Total Accrued Bonus per official India Post / Dak Sewa report
+  const maturityAmount = sumAssured + totalBonus;
+  let finalMaturityPayout = maturityAmount;
 
   let survivalBenefits: SurvivalBenefitPayout[] | undefined = undefined;
 
@@ -114,7 +116,7 @@ export function calculatePliBenefits(input: BenefitCalculationInput): BenefitCal
       });
     });
 
-    finalMaturityPayout = sumAssured * 0.4 + totalBonus + terminalBonus;
+    finalMaturityPayout = sumAssured * 0.4 + totalBonus;
 
     timeline.push({
       year: duration,

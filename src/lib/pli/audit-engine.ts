@@ -7,6 +7,7 @@ export interface AuditTrailInput {
   effectiveAge: number;
   maturityAge: number;
   duration: number;
+  bonusDuration?: number;
   bonusRate: number;
   annualBonus: number;
   totalBonus: number;
@@ -26,6 +27,7 @@ export interface AuditTrailInput {
 }
 
 export function generatePliAuditTrail(input: AuditTrailInput): AuditStep[] {
+  const bonusYears = input.bonusDuration ?? input.duration;
   return [
     {
       title: '1. Policy Identification & Entry Age',
@@ -51,8 +53,8 @@ export function generatePliAuditTrail(input: AuditTrailInput): AuditStep[] {
     },
     {
       title: '4. Total Accrued Bonus Projection',
-      formula: 'Total Bonus = Annual Bonus × Policy Term',
-      values: `${formatINR(input.annualBonus)} × ${input.duration} years`,
+      formula: 'Total Bonus = Annual Bonus × Bonus Accrual Years',
+      values: `${formatINR(input.annualBonus)} × ${bonusYears} years`,
       result: formatINR(input.totalBonus),
     },
     {
