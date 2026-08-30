@@ -993,7 +993,7 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               </div>
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-(--text-light) mb-1 flex items-center justify-between">
+                              <label className="flex items-center justify-between text-xs font-semibold text-(--text-light) mb-1">
                                 <span>Entry Age (ANB)</span>
                                 <span className="text-[0.62rem] text-emerald-700 font-bold">Official</span>
                               </label>
@@ -1005,7 +1005,7 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         </div>
                       ) : (
                         <div>
-                          <label className="block text-xs font-semibold text-(--text-light) mb-1 flex items-center justify-between">
+                          <label className="flex items-center justify-between text-xs font-semibold text-(--text-light) mb-1">
                             <span>Age on Next Birthday (ANB)</span>
                             <span className="text-[0.62rem] text-emerald-700 font-bold">19 – 55 Years</span>
                           </label>
