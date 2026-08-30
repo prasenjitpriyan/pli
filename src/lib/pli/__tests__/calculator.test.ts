@@ -113,11 +113,11 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     });
 
     expect(result.policyType).toBe('SANTOSH');
-    expect(result.duration).toBe(29); // ANB = 31, 60 - 31 = 29
+    expect(result.duration).toBe(30); // 60 - 30 = 30
     expect(result.bonusRate).toBe(52);
     expect(result.annualBonus).toBe(26000);
-    expect(result.totalBonus).toBe(754000); // 26000 * 29
-    expect(result.maturityAmount).toBe(1254000); // SA ₹5L + Bonus ₹7.54L
+    expect(result.totalBonus).toBe(780000); // 26000 * 30
+    expect(result.maturityAmount).toBe(1280000); // SA ₹5L + Bonus ₹7.80L
     expect(result.breakdown.length).toBeGreaterThan(0);
   });
 
@@ -130,7 +130,7 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     });
 
     expect(result.policyType).toBe('SURAKSHA');
-    expect(result.premiumPaymentDuration).toBe(29); // 60 - 31 = 29
+    expect(result.premiumPaymentDuration).toBe(30); // 60 - 30 = 30
     expect(result.bonusRate).toBe(76);
   });
 

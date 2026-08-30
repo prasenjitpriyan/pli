@@ -46,9 +46,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
   const conversionStatus = canonicalPolicy === 'SUVIDHA' ? (isConverted ? 'CONVERTED' : 'UNCONVERTED') : undefined;
 
   // 5. Whole Life Ceasing Age vs Standard Duration Logic
-  // ANB (Age Next Birthday) is used for duration and premium table lookup
-  const ageNextBirthday = effectiveAge + 1;
-
+  // effectiveAge is already Age as on Next Birthday (ANB)
   let premiumCeasingAge: number | undefined = undefined;
   let premiumPaymentDuration: number | undefined = undefined;
   let bonusAccrualDuration: number | undefined = undefined;
@@ -59,9 +57,9 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
   if ((canonicalPolicy === 'SURAKSHA' || canonicalPolicy === 'SUVIDHA') && !isConverted) {
     premiumCeasingAge = input.premiumCeasingAge ?? 60;
     // Duration (premium paying term) = ceasing age - ANB
-    premiumPaymentDuration = Math.max(1, premiumCeasingAge - ageNextBirthday);
+    premiumPaymentDuration = Math.max(1, premiumCeasingAge - effectiveAge);
     // Bonus accrues from ANB until age 80
-    bonusAccrualDuration = Math.max(1, 80 - ageNextBirthday);
+    bonusAccrualDuration = Math.max(1, 80 - effectiveAge);
 
     duration = premiumPaymentDuration;
     maturityAge = 80;
@@ -69,7 +67,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     // For endowment-style policies: duration = maturityAge - ANB
     const durationRes = calculateDurationAndMaturityAge({
       policyType: input.policyType,
-      age: ageNextBirthday,
+      age: effectiveAge,
       maturityAge: input.maturityAge,
       duration: input.duration,
     });
@@ -95,7 +93,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
   const targetModelPolicy = isConverted ? 'ENDOWMENT' : input.policyType;
   const modelPrediction = predictMonthlyPremium({
     policyType: targetModelPolicy,
-    effectiveAge: ageNextBirthday,    // Always use ANB for premium table
+    effectiveAge,    // Always use ANB for premium table
     duration,
     sumAssured: input.sumAssured,
     premiumCeasingAge,                // For Suraksha/Suvidha ceasing age tiers
