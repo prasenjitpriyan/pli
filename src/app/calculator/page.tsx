@@ -1248,11 +1248,13 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-xs font-semibold text-(--text-light) mb-1">
-                                      Calculated Policy Duration
+                                    <label className="flex items-center justify-between text-xs font-semibold text-(--text-light) mb-1">
+                                      <span>Calculated Policy Duration</span>
+                                      <span className="text-[0.62rem] text-emerald-700 font-bold">Maturity Age – ANB</span>
                                     </label>
-                                    <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-(--primary-red)">
-                                      {quotationResult.duration} Years
+                                    <div className="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg text-sm font-bold text-emerald-950 flex items-center justify-between">
+                                      <span>{quotationResult.duration} Years</span>
+                                      <span className="text-[0.7rem] text-slate-600 font-medium">({maturityAge} – {computedAge})</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1440,7 +1442,7 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                           </div>
                           <div className="text-[0.68rem] text-slate-600 space-y-0.5">
                             <p><strong>Rate Source:</strong> {(quotationResult as RpliQuoteResult).rateSource}</p>
-                            <p><strong>Entry Age:</strong> {quotationResult.effectiveAge} | <strong>Maturity Age:</strong> {quotationResult.maturityAge} | <strong>Term:</strong> {quotationResult.duration} Years</p>
+                            <p><strong>Entry Age (ANB):</strong> {quotationResult.effectiveAge} Years | <strong>Target Maturity Age:</strong> {quotationResult.maturityAge} Years | <strong>Policy Duration (Term):</strong> {quotationResult.duration} Years ({quotationResult.maturityAge} – {quotationResult.effectiveAge})</p>
                           </div>
                         </div>
 
@@ -1609,8 +1611,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                       </div>
 
                       <div className="p-2 bg-slate-50 rounded border border-slate-100">
-                        <span className="font-bold text-slate-900 block font-sans">3. Exact Term:</span>
-                        <code>{quotationResult.maturityAge} - {quotationResult.effectiveAge} = {quotationResult.duration} years</code>
+                        <span className="font-bold text-slate-900 block font-sans">3. Policy Duration Parameter (Term):</span>
+                        <code>Policy Term = Maturity Age ({quotationResult.maturityAge}) – Entry Age ANB ({quotationResult.effectiveAge}) = {quotationResult.duration} Years</code>
                       </div>
 
                       <div className="p-2 bg-slate-50 rounded border border-slate-100">
