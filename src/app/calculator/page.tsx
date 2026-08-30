@@ -1003,6 +1003,7 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             max="55"
                             value={manualAge}
                             onChange={(e) => setManualAge(parseInt(e.target.value, 10) || 30)}
+                            onWheel={(e) => e.currentTarget.blur()}
                             className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-(--primary-red) outline-none"
                           />
                         </div>
@@ -1587,8 +1588,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                           1. Exact Age Determination:
                         </span>
                         <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Age = DATEDIF(DOB, StartDate, &quot;Y&quot;) ={' '}
-                          {quotationResult.effectiveAge} Years
+                          {ageInputMode === 'DOB'
+                            ? `Age = DATEDIF(DOB: ${dateOfBirth}, StartDate: ${effectiveDate}, "Y") = ${quotationResult.effectiveAge} Years`
+                            : `Age = Selected Proposer Completed Age = ${quotationResult.effectiveAge} Years`}
                         </code>
                       </div>
 
