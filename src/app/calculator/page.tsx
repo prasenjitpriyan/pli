@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   calculateAge,
@@ -7,11 +7,11 @@ import {
   formatINR,
   FREQUENCY_CONFIG,
   mapToCanonicalPolicy,
-  POLICY_REGISTRY,
   PliPolicy,
   PliQuoteResult,
+  POLICY_REGISTRY,
   PremiumFrequency,
-} from '@/lib/pli';
+} from '@/lib/pli'
 import {
   calculateRpliQuote,
   mapToCanonicalRpliPolicy,
@@ -19,126 +19,124 @@ import {
   RPLI_POLICY_REGISTRY,
   RpliPolicy,
   RpliQuoteResult,
-} from '@/lib/rpli';
-import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+} from '@/lib/rpli'
+import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 
-const SUM_ASSURED_PRESETS_PLI = [100000, 200000, 500000, 1000000, 2000000, 5000000];
-const SUM_ASSURED_PRESETS_RPLI = [20000, 50000, 100000, 200000, 500000, 1000000];
+const SUM_ASSURED_PRESETS_PLI = [100000, 200000, 500000, 1000000, 2000000, 5000000]
+const SUM_ASSURED_PRESETS_RPLI = [20000, 50000, 100000, 200000, 500000, 1000000]
 
 export default function CalculatorPage() {
   // Scheme State (PLI vs RPLI)
-  const [scheme, setScheme] = useState<'PLI' | 'RPLI'>('PLI');
+  const [scheme, setScheme] = useState<'PLI' | 'RPLI'>('PLI')
 
   // Form State
-  const [policyType, setPolicyType] = useState<string>('SANTOSH');
+  const [policyType, setPolicyType] = useState<string>('SANTOSH')
   const [effectiveDate, setEffectiveDate] = useState<string>(
     () => new Date().toISOString().split('T')[0]
-  );
-  
+  )
+
   // Premium Payment Mode Frequency (Monthly, Quarterly, Half-Yearly, Yearly)
-  const [frequency, setFrequency] = useState<PremiumFrequency>('MONTHLY');
+  const [frequency, setFrequency] = useState<PremiumFrequency>('MONTHLY')
 
   // Customer Information Details
-  const [fullName, setFullName] = useState<string>('');
-  const [gender, setGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>('MALE');
-  const [eligibilityCategory, setEligibilityCategory] = useState<string>('GOVT_CENTRAL_STATE');
-  const [pincode, setPincode] = useState<string>('');
+  const [fullName, setFullName] = useState<string>('')
+  const [gender, setGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>('MALE')
+  const [eligibilityCategory, setEligibilityCategory] = useState<string>('GOVT_CENTRAL_STATE')
+  const [pincode, setPincode] = useState<string>('')
 
   // Single Life Age Input Options
-  const [ageInputMode, setAgeInputMode] = useState<'DOB' | 'AGE'>('DOB');
-  const [dateOfBirth, setDateOfBirth] = useState<string>('2005-01-15');
-  const [manualAge, setManualAge] = useState<number>(30);
+  const [ageInputMode, setAgeInputMode] = useState<'DOB' | 'AGE'>('DOB')
+  const [dateOfBirth, setDateOfBirth] = useState<string>('2005-01-15')
+  const [manualAge, setManualAge] = useState<number>(30)
 
   // Joint Life Inputs (Yugal Suraksha)
-  const [firstLifeAge, setFirstLifeAge] = useState<number>(30);
-  const [secondLifeAge, setSecondLifeAge] = useState<number>(28);
+  const [firstLifeAge, setFirstLifeAge] = useState<number>(30)
+  const [secondLifeAge, setSecondLifeAge] = useState<number>(28)
 
   // Children Policy Inputs (Bal Jeevan Bima)
-  const [childDateOfBirth, setChildDateOfBirth] = useState<string>('2020-05-10');
-  const [childAge, setChildAge] = useState<number>(5);
-  const [parentAge, setParentAge] = useState<number>(35);
-  const [isParentDeceased, setIsParentDeceased] = useState<boolean>(false);
+  const [childDateOfBirth, setChildDateOfBirth] = useState<string>('2020-05-10')
+  const [childAge, setChildAge] = useState<number>(5)
+  const [parentAge, setParentAge] = useState<number>(35)
+  const [isParentDeceased, setIsParentDeceased] = useState<boolean>(false)
 
   // RPLI Specific Eligibility Toggles
-  const [isRuralResident, setIsRuralResident] = useState<boolean>(true);
-  const [ageProofType, setAgeProofType] = useState<'STANDARD' | 'NON-STANDARD'>('STANDARD');
+  const [isRuralResident, setIsRuralResident] = useState<boolean>(true)
+  const [ageProofType, setAgeProofType] = useState<'STANDARD' | 'NON-STANDARD'>('STANDARD')
 
   // Whole Life Premium Ceasing Age Option (55, 58, 60)
-  const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60);
+  const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60)
 
   // Convertible Whole Life (Suvidha) Conversion Toggle
-  const [isConverted, setIsConverted] = useState<boolean>(false);
+  const [isConverted, setIsConverted] = useState<boolean>(false)
 
   // Sum Assured State
-  const [sumAssured, setSumAssured] = useState<number>(100000);
-  const [customSumAssured, setCustomSumAssured] = useState<string>('100000');
+  const [sumAssured, setSumAssured] = useState<number>(100000)
+  const [customSumAssured, setCustomSumAssured] = useState<string>('100000')
 
   // Term / Duration Input Options
-  const [termInputMode, setTermInputMode] = useState<'MATURITY_AGE' | 'DURATION'>(
-    'MATURITY_AGE'
-  );
-  const [maturityAge, setMaturityAge] = useState<number>(50);
-  const [duration, setDuration] = useState<number>(20);
+  const [termInputMode, setTermInputMode] = useState<'MATURITY_AGE' | 'DURATION'>('MATURITY_AGE')
+  const [maturityAge, setMaturityAge] = useState<number>(50)
+  const [duration, setDuration] = useState<number>(20)
 
   // UI Expansion, Copy & Modal States
-  const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
-  const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [showBreakdown, setShowBreakdown] = useState<boolean>(false)
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false)
+  const [copied, setCopied] = useState<boolean>(false)
 
   // Read URL query parameters ?scheme=rpli&policy=gram-priya on client mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const sParam = params.get('scheme');
-      const pParam = params.get('policy');
+      const params = new URLSearchParams(window.location.search)
+      const sParam = params.get('scheme')
+      const pParam = params.get('policy')
 
-      const targetScheme = sParam && sParam.toUpperCase() === 'RPLI' ? 'RPLI' : 'PLI';
+      const targetScheme = sParam && sParam.toUpperCase() === 'RPLI' ? 'RPLI' : 'PLI'
 
       const timer = setTimeout(() => {
-        setScheme(targetScheme);
+        setScheme(targetScheme)
         if (pParam) {
           if (targetScheme === 'RPLI') {
-            setPolicyType(mapToCanonicalRpliPolicy(pParam));
+            setPolicyType(mapToCanonicalRpliPolicy(pParam))
           } else {
-            setPolicyType(mapToCanonicalPolicy(pParam));
+            setPolicyType(mapToCanonicalPolicy(pParam))
           }
         } else {
-          setPolicyType(targetScheme === 'RPLI' ? 'GRAM_SANTOSH' : 'SANTOSH');
+          setPolicyType(targetScheme === 'RPLI' ? 'GRAM_SANTOSH' : 'SANTOSH')
         }
-      }, 0);
+      }, 0)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     }
-  }, []);
+  }, [])
 
   // Sync default policy when switching schemes manually
   const handleSchemeChange = (newScheme: 'PLI' | 'RPLI') => {
-    setScheme(newScheme);
+    setScheme(newScheme)
     if (newScheme === 'RPLI') {
-      setPolicyType('GRAM_SANTOSH');
-      setSumAssured(100000);
-      setCustomSumAssured('100000');
+      setPolicyType('GRAM_SANTOSH')
+      setSumAssured(100000)
+      setCustomSumAssured('100000')
     } else {
-      setPolicyType('SANTOSH');
-      setSumAssured(100000);
-      setCustomSumAssured('100000');
+      setPolicyType('SANTOSH')
+      setSumAssured(100000)
+      setCustomSumAssured('100000')
     }
-  };
+  }
 
   // Derived Completed Age
   const computedAge = useMemo(() => {
     if (policyType === 'BAL_JEEVAN_BIMA') {
-      return childAge;
+      return childAge
     }
     if (policyType === 'YUGAL_SURAKSHA') {
-      return Math.floor((firstLifeAge + secondLifeAge) / 2);
+      return Math.floor((firstLifeAge + secondLifeAge) / 2)
     }
     if (ageInputMode === 'DOB' && dateOfBirth) {
-      const { age } = calculateAge(dateOfBirth, effectiveDate);
-      return age;
+      const { age } = calculateAge(dateOfBirth, effectiveDate)
+      return age
     }
-    return manualAge;
+    return manualAge
   }, [
     policyType,
     childAge,
@@ -148,12 +146,12 @@ export default function CalculatorPage() {
     dateOfBirth,
     effectiveDate,
     manualAge,
-  ]);
+  ])
 
   // Quotation Calculation Result (Dispatches to PLI or RPLI engine)
   const quotationResult: PliQuoteResult | RpliQuoteResult = useMemo(() => {
     if (scheme === 'RPLI') {
-      const canonicalRpli = mapToCanonicalRpliPolicy(policyType);
+      const canonicalRpli = mapToCanonicalRpliPolicy(policyType)
       return calculateRpliQuote({
         scheme: 'RPLI',
         policyType: canonicalRpli,
@@ -172,11 +170,12 @@ export default function CalculatorPage() {
         isConverted: canonicalRpli === 'GRAM_SUVIDHA' ? isConverted : undefined,
         sumAssured: Math.min(sumAssured, canonicalRpli === 'BAL_JEEVAN_BIMA' ? 100000 : 1000000),
         maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
-        duration: canonicalRpli === 'GRAM_PRIYA' ? 10 : termInputMode === 'DURATION' ? duration : undefined,
-      });
+        duration:
+          canonicalRpli === 'GRAM_PRIYA' ? 10 : termInputMode === 'DURATION' ? duration : undefined,
+      })
     }
 
-    const canonicalPli = mapToCanonicalPolicy(policyType);
+    const canonicalPli = mapToCanonicalPolicy(policyType)
     return calculatePliQuote({
       policyType: canonicalPli,
       effectiveDate,
@@ -196,7 +195,7 @@ export default function CalculatorPage() {
       sumAssured: Math.min(sumAssured, canonicalPli === 'BAL_JEEVAN_BIMA' ? 300000 : 5000000),
       maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
       duration: termInputMode === 'DURATION' ? duration : undefined,
-    });
+    })
   }, [
     scheme,
     policyType,
@@ -220,7 +219,7 @@ export default function CalculatorPage() {
     termInputMode,
     maturityAge,
     duration,
-  ]);
+  ])
 
   // Comparison Results Across All Policies of Current Scheme
   const comparisonResults = useMemo(() => {
@@ -232,7 +231,7 @@ export default function CalculatorPage() {
         'GRAM_PRIYA',
         'GRAM_SUMANGAL',
         'BAL_JEEVAN_BIMA',
-      ];
+      ]
       return rpliList.map((p) =>
         calculateRpliQuote({
           scheme: 'RPLI',
@@ -243,12 +242,13 @@ export default function CalculatorPage() {
           frequency,
           childAge: p === 'BAL_JEEVAN_BIMA' ? childAge : undefined,
           parentAge: p === 'BAL_JEEVAN_BIMA' ? parentAge : undefined,
-          premiumCeasingAge: p === 'GRAM_SURAKSHA' || p === 'GRAM_SUVIDHA' ? premiumCeasingAge : undefined,
+          premiumCeasingAge:
+            p === 'GRAM_SURAKSHA' || p === 'GRAM_SUVIDHA' ? premiumCeasingAge : undefined,
           sumAssured: Math.min(sumAssured, p === 'BAL_JEEVAN_BIMA' ? 100000 : 1000000),
           maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
           duration: p === 'GRAM_PRIYA' ? 10 : termInputMode === 'DURATION' ? duration : undefined,
         })
-      );
+      )
     }
 
     const pliList: PliPolicy[] = [
@@ -258,7 +258,7 @@ export default function CalculatorPage() {
       'SUMANGAL',
       'BAL_JEEVAN_BIMA',
       'YUGAL_SURAKSHA',
-    ];
+    ]
     return pliList.map((p) =>
       calculatePliQuote({
         policyType: p,
@@ -275,7 +275,7 @@ export default function CalculatorPage() {
         maturityAge: termInputMode === 'MATURITY_AGE' ? maturityAge : undefined,
         duration: termInputMode === 'DURATION' ? duration : undefined,
       })
-    );
+    )
   }, [
     scheme,
     effectiveDate,
@@ -292,17 +292,17 @@ export default function CalculatorPage() {
     termInputMode,
     maturityAge,
     duration,
-  ]);
+  ])
 
   // Handlers
   const handleSumAssuredPreset = (value: number) => {
-    setSumAssured(value);
-    setCustomSumAssured(value.toString());
-  };
+    setSumAssured(value)
+    setCustomSumAssured(value.toString())
+  }
 
   const handleCustomSumAssuredChange = (val: string) => {
-    setCustomSumAssured(val);
-    const num = parseInt(val, 10);
+    setCustomSumAssured(val)
+    const num = parseInt(val, 10)
     if (!isNaN(num) && num >= 10000) {
       const maxAllowed =
         scheme === 'RPLI'
@@ -310,41 +310,41 @@ export default function CalculatorPage() {
             ? 100000
             : 1000000
           : policyType === 'BAL_JEEVAN_BIMA'
-          ? 300000
-          : 5000000;
-      setSumAssured(Math.min(num, maxAllowed));
+            ? 300000
+            : 5000000
+      setSumAssured(Math.min(num, maxAllowed))
     }
-  };
+  }
 
   const handleResetForm = () => {
-    setScheme('PLI');
-    setPolicyType('SANTOSH');
-    setEffectiveDate(new Date().toISOString().split('T')[0]);
-    setFrequency('MONTHLY');
-    setFullName('');
-    setGender('MALE');
-    setEligibilityCategory('GOVT_CENTRAL_STATE');
-    setPincode('');
-    setAgeInputMode('DOB');
-    setDateOfBirth('2005-01-15');
-    setManualAge(30);
-    setFirstLifeAge(30);
-    setSecondLifeAge(28);
-    setChildAge(5);
-    setParentAge(35);
-    setIsParentDeceased(false);
-    setPremiumCeasingAge(60);
-    setIsConverted(false);
-    setSumAssured(100000);
-    setCustomSumAssured('100000');
-    setTermInputMode('MATURITY_AGE');
-    setMaturityAge(50);
-    setDuration(20);
-    setShowBreakdown(false);
-  };
+    setScheme('PLI')
+    setPolicyType('SANTOSH')
+    setEffectiveDate(new Date().toISOString().split('T')[0])
+    setFrequency('MONTHLY')
+    setFullName('')
+    setGender('MALE')
+    setEligibilityCategory('GOVT_CENTRAL_STATE')
+    setPincode('')
+    setAgeInputMode('DOB')
+    setDateOfBirth('2005-01-15')
+    setManualAge(30)
+    setFirstLifeAge(30)
+    setSecondLifeAge(28)
+    setChildAge(5)
+    setParentAge(35)
+    setIsParentDeceased(false)
+    setPremiumCeasingAge(60)
+    setIsConverted(false)
+    setSumAssured(100000)
+    setCustomSumAssured('100000')
+    setTermInputMode('MATURITY_AGE')
+    setMaturityAge(50)
+    setDuration(20)
+    setShowBreakdown(false)
+  }
 
   const handleCopySummary = () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return
     const text = `📌 ${scheme} QUOTATION ESTIMATE
 Scheme: ${scheme === 'RPLI' ? 'Rural Postal Life Insurance (RPLI)' : 'Postal Life Insurance (PLI)'}
 Policy: ${quotationResult.policyName} (${quotationResult.policyCode})
@@ -353,18 +353,18 @@ Net Monthly Premium: ${formatINR(quotationResult.netMonthlyPremium)}
 Net Installment (${FREQUENCY_CONFIG[frequency].label}): ${formatINR(quotationResult.netInstallmentPremium)}
 Policy Term: ${quotationResult.duration} Years
 Estimated Maturity Amount: ${formatINR(quotationResult.maturityAmount)}
-Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${scheme.toLowerCase()}&policy=${policyType.toLowerCase().replace('_', '-')}`;
+Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${scheme.toLowerCase()}&policy=${policyType.toLowerCase().replace('_', '-')}`
 
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
-      window.print();
+      window.print()
     }
-  };
+  }
 
   return (
     <main className="min-h-screen bg-(--bg-light) pb-20 print:bg-white print:pb-0">
@@ -405,7 +405,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              {scheme === 'RPLI' ? 'Rural Postal Life Insurance (RPLI) Calculator' : 'Postal Life Insurance (PLI) Calculator'}
+              {scheme === 'RPLI'
+                ? 'Rural Postal Life Insurance (RPLI) Calculator'
+                : 'Postal Life Insurance (PLI) Calculator'}
             </h1>
             <p className="opacity-80 text-sm md:text-base mt-1">
               Policy-aware premium & benefit calculation across all 6 official {scheme} products.
@@ -413,7 +415,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
           </div>
           <Link
             href="/"
-            className="inline-flex items-center text-(--accent-gold) hover:text-white font-medium transition-colors">
+            className="inline-flex items-center text-(--accent-gold) hover:text-white font-medium transition-colors"
+          >
             <i className="ri-arrow-left-line mr-2 text-lg"></i> Back to Overview
           </Link>
         </div>
@@ -429,7 +432,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
               scheme === 'PLI'
                 ? 'bg-(--primary-red) text-white shadow-md'
                 : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-            }`}>
+            }`}
+          >
             <i className="ri-building-line text-lg"></i>
             <span>Postal Life Insurance (PLI)</span>
             <span className="text-[0.68rem] bg-white/20 px-2 py-0.5 rounded-full ml-1 font-semibold">
@@ -444,7 +448,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
               scheme === 'RPLI'
                 ? 'bg-emerald-700 text-white shadow-md'
                 : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-            }`}>
+            }`}
+          >
             <i className="ri-plant-line text-lg"></i>
             <span>Rural Postal Life Insurance (RPLI)</span>
             <span className="text-[0.68rem] bg-white/20 px-2 py-0.5 rounded-full ml-1 font-semibold">
@@ -463,7 +468,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
               Indicative {scheme} Calculation Disclaimer
             </h4>
             <p className="text-amber-800 text-xs md:text-sm mt-0.5 leading-relaxed">
-              This calculator provides an indicative calculation based on configured {scheme} rules and rates. Final premium and benefits are subject to official India Post quotation and applicable rules at the time of policy issuance.
+              This calculator provides an indicative calculation based on configured {scheme} rules
+              and rates. Final premium and benefits are subject to official India Post quotation and
+              applicable rules at the time of policy issuance.
             </p>
           </div>
         </div>
@@ -496,7 +503,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                   <button
                     onClick={handleResetForm}
                     type="button"
-                    className="text-xs text-slate-500 hover:text-(--primary-red) flex items-center gap-1 font-medium transition-colors">
+                    className="text-xs text-slate-500 hover:text-(--primary-red) flex items-center gap-1 font-medium transition-colors"
+                  >
                     <i className="ri-refresh-line"></i> Reset Form
                   </button>
                 </div>
@@ -515,8 +523,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         const config =
                           scheme === 'RPLI'
                             ? RPLI_POLICY_REGISTRY[key as RpliPolicy]
-                            : POLICY_REGISTRY[key as PliPolicy];
-                        const isSelected = policyType === key;
+                            : POLICY_REGISTRY[key as PliPolicy]
+                        const isSelected = policyType === key
                         return (
                           <div
                             key={key}
@@ -527,13 +535,15 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                   ? 'border-emerald-600 bg-emerald-50/30 shadow-xs'
                                   : 'border-(--primary-red) bg-red-50/30 shadow-xs'
                                 : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-                            }`}>
+                            }`}
+                          >
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-bold text-xs text-(--primary-dark)">
                                 {config.code}
                               </span>
                               <span className="text-[0.65rem] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                Bonus ₹{key.includes('SUVIDHA') && isConverted ? 48 : config.bonusRate}/₹1k
+                                Bonus ₹
+                                {key.includes('SUVIDHA') && isConverted ? 48 : config.bonusRate}/₹1k
                               </span>
                             </div>
                             <p className="text-xs font-bold text-(--text-dark) truncate">
@@ -543,7 +553,7 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               {config.description}
                             </p>
                           </div>
-                        );
+                        )
                       })}
                     </div>
                   </div>
@@ -573,14 +583,16 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         <select
                           value={eligibilityCategory}
                           onChange={(e) => setEligibilityCategory(e.target.value)}
-                          className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold outline-none">
-                          {(scheme === 'RPLI' ? RPLI_ELIGIBILITY_CATEGORIES : ELIGIBILITY_CATEGORIES).map(
-                            (cat) => (
-                              <option key={cat.id} value={cat.id}>
-                                {cat.label}
-                              </option>
-                            )
-                          )}
+                          className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold outline-none"
+                        >
+                          {(scheme === 'RPLI'
+                            ? RPLI_ELIGIBILITY_CATEGORIES
+                            : ELIGIBILITY_CATEGORIES
+                          ).map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -589,22 +601,30 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     {scheme === 'RPLI' && (
                       <div className="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
-                          <label className="font-bold text-slate-800 block">Policyholder Rural Residency:</label>
+                          <label className="font-bold text-slate-800 block">
+                            Policyholder Rural Residency:
+                          </label>
                           <div className="flex gap-2">
                             <button
                               type="button"
                               onClick={() => setIsRuralResident(true)}
                               className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                isRuralResident ? 'bg-emerald-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}>
+                                isRuralResident
+                                  ? 'bg-emerald-700 text-white shadow-xs'
+                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}
+                            >
                               YES (Rural)
                             </button>
                             <button
                               type="button"
                               onClick={() => setIsRuralResident(false)}
                               className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                !isRuralResident ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}>
+                                !isRuralResident
+                                  ? 'bg-red-600 text-white shadow-xs'
+                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}
+                            >
                               NO (Urban)
                             </button>
                           </div>
@@ -617,16 +637,22 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               type="button"
                               onClick={() => setAgeProofType('STANDARD')}
                               className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                ageProofType === 'STANDARD' ? 'bg-emerald-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}>
+                                ageProofType === 'STANDARD'
+                                  ? 'bg-emerald-700 text-white shadow-xs'
+                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}
+                            >
                               Standard (Max 55)
                             </button>
                             <button
                               type="button"
                               onClick={() => setAgeProofType('NON-STANDARD')}
                               className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                ageProofType === 'NON-STANDARD' ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}>
+                                ageProofType === 'NON-STANDARD'
+                                  ? 'bg-amber-600 text-white shadow-xs'
+                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}
+                            >
                               Non-Std (Max 45)
                             </button>
                           </div>
@@ -642,8 +668,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {(Object.keys(FREQUENCY_CONFIG) as PremiumFrequency[]).map((fKey) => {
-                        const fItem = FREQUENCY_CONFIG[fKey];
-                        const isSelected = frequency === fKey;
+                        const fItem = FREQUENCY_CONFIG[fKey]
+                        const isSelected = frequency === fKey
                         return (
                           <button
                             key={fKey}
@@ -655,7 +681,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                   ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
                                   : 'bg-(--primary-red) text-white border-(--primary-red) shadow-xs'
                                 : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                            }`}>
+                            }`}
+                          >
                             <div>{fItem.label.split('(')[0]}</div>
                             {fItem.rebatePercent > 0 && (
                               <div className="text-[0.65rem] font-normal opacity-90">
@@ -663,7 +690,7 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               </div>
                             )}
                           </button>
-                        );
+                        )
                       })}
                     </div>
                   </div>
@@ -676,7 +703,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         Gram Priya Special Policy Feature:
                       </p>
                       <p className="text-slate-700 leading-relaxed">
-                        🌧️ <strong>Natural Calamity Premium Relief:</strong> No interest is charged for up to 1 year of premium arrears in case of natural calamities such as floods, drought, earthquake, or cyclone.
+                        🌧️ <strong>Natural Calamity Premium Relief:</strong> No interest is charged
+                        for up to 1 year of premium arrears in case of natural calamities such as
+                        floods, drought, earthquake, or cyclone.
                       </p>
                     </div>
                   )}
@@ -702,9 +731,12 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             !isConverted
                               ? 'border-purple-600 bg-white shadow-xs'
                               : 'border-slate-200 bg-purple-50/30 hover:bg-white'
-                          }`}>
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-xs text-purple-950">Option A: Unconverted</span>
+                            <span className="font-bold text-xs text-purple-950">
+                              Option A: Unconverted
+                            </span>
                             <span className="text-[0.65rem] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
                               Bonus ₹{scheme === 'RPLI' ? 60 : 76}/₹1k
                             </span>
@@ -721,9 +753,12 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             isConverted
                               ? 'border-purple-600 bg-white shadow-xs'
                               : 'border-slate-200 bg-purple-50/30 hover:bg-white'
-                          }`}>
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-xs text-purple-950">Option B: Converted to Endowment</span>
+                            <span className="font-bold text-xs text-purple-950">
+                              Option B: Converted to Endowment
+                            </span>
                             <span className="text-[0.65rem] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
                               Bonus ₹48/₹1k
                             </span>
@@ -816,10 +851,10 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             type="date"
                             value={childDateOfBirth}
                             onChange={(e) => {
-                              setChildDateOfBirth(e.target.value);
+                              setChildDateOfBirth(e.target.value)
                               if (e.target.value) {
-                                const { age } = calculateAge(e.target.value, effectiveDate);
-                                setChildAge(Math.max(5, Math.min(20, age)));
+                                const { age } = calculateAge(e.target.value, effectiveDate)
+                                setChildAge(Math.max(5, Math.min(20, age)))
                               }
                             }}
                             className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium outline-none"
@@ -829,11 +864,12 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               ⚠️ INVALID - Child DOB is in the future.
                             </p>
                           )}
-                          {new Date(childDateOfBirth) > new Date(effectiveDate) && new Date(childDateOfBirth) <= new Date() && (
-                            <p className="text-[0.68rem] text-red-600 font-bold mt-1">
-                              ⚠️ INVALID - Child DOB is after Policy Start Date.
-                            </p>
-                          )}
+                          {new Date(childDateOfBirth) > new Date(effectiveDate) &&
+                            new Date(childDateOfBirth) <= new Date() && (
+                              <p className="text-[0.68rem] text-red-600 font-bold mt-1">
+                                ⚠️ INVALID - Child DOB is after Policy Start Date.
+                              </p>
+                            )}
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-(--text-dark) mb-1">
@@ -876,7 +912,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               isParentDeceased
                                 ? 'bg-red-600 text-white'
                                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                            }`}>
+                            }`}
+                          >
                             {isParentDeceased ? 'Parent Deceased (0 Premium)' : 'Parent Alive'}
                           </button>
                         </div>
@@ -889,10 +926,14 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         </p>
                         <ul className="list-disc pl-4 space-y-1 leading-relaxed">
                           <li>
-                            <strong>Premium Waiver:</strong> No premium payable on Children Policy after parent death; full SA + accrued bonus paid on maturity.
+                            <strong>Premium Waiver:</strong> No premium payable on Children Policy
+                            after parent death; full SA + accrued bonus paid on maturity.
                           </li>
                           <li>
-                            <strong>Loan & Surrender:</strong> {scheme === 'RPLI' ? 'Not Available. Paid-Up eligible after 5 years.' : 'No loan facility. Paid-up option after 5 years.'}
+                            <strong>Loan & Surrender:</strong>{' '}
+                            {scheme === 'RPLI'
+                              ? 'Not Available. Paid-Up eligible after 5 years.'
+                              : 'No loan facility. Paid-up option after 5 years.'}
                           </li>
                         </ul>
                       </div>
@@ -911,7 +952,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               ageInputMode === 'DOB'
                                 ? 'bg-white text-(--primary-dark) shadow-xs'
                                 : 'text-slate-600'
-                            }`}>
+                            }`}
+                          >
                             Option A: Date of Birth
                           </button>
                           <button
@@ -921,7 +963,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               ageInputMode === 'AGE'
                                 ? 'bg-white text-(--primary-dark) shadow-xs'
                                 : 'text-slate-600'
-                            }`}>
+                            }`}
+                          >
                             Option B: Current Age
                           </button>
                         </div>
@@ -968,7 +1011,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                   )}
 
                   {/* Whole Life Ceasing Age Selector */}
-                  {(policyType.includes('SURAKSHA') || (policyType.includes('SUVIDHA') && !isConverted)) && (
+                  {(policyType.includes('SURAKSHA') ||
+                    (policyType.includes('SUVIDHA') && !isConverted)) && (
                     <div className="p-4 bg-amber-50/40 border border-amber-200 rounded-xl space-y-3">
                       <div className="flex items-center justify-between">
                         <label className="text-sm font-bold text-amber-900">
@@ -990,7 +1034,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                   ? 'bg-emerald-700 text-white shadow-xs'
                                   : 'bg-(--primary-red) text-white shadow-xs'
                                 : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-                            }`}>
+                            }`}
+                          >
                             Age {ageVal} ({ageVal - computedAge} yrs pay)
                           </button>
                         ))}
@@ -1010,8 +1055,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             ? 'RPLI Max: ₹1 Lakh'
                             : 'RPLI Max: ₹10 Lakhs'
                           : policyType === 'BAL_JEEVAN_BIMA'
-                          ? 'PLI Max: ₹3 Lakhs'
-                          : 'PLI Max: ₹50 Lakhs'}
+                            ? 'PLI Max: ₹3 Lakhs'
+                            : 'PLI Max: ₹50 Lakhs'}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -1032,7 +1077,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                   ? 'bg-emerald-700 text-white shadow-xs'
                                   : 'bg-(--primary-red) text-white shadow-xs'
                                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                            }`}>
+                            }`}
+                          >
                             {val >= 100000 ? `₹${val / 100000} Lakh` : formatINR(val)}
                           </button>
                         ))}
@@ -1046,8 +1092,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             ? 100000
                             : 1000000
                           : policyType === 'BAL_JEEVAN_BIMA'
-                          ? 300000
-                          : 5000000
+                            ? 300000
+                            : 5000000
                       }
                       step="1000"
                       value={customSumAssured}
@@ -1069,7 +1115,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                               10 Years Fixed Term (Non-changeable)
                             </div>
                             <p className="text-[0.68rem] text-slate-500">
-                              Payouts: 20% SA at Year 4, 20% SA at Year 7, 60% SA + Bonus at Year 10.
+                              Payouts: 20% SA at Year 4, 20% SA at Year 7, 60% SA + Bonus at Year
+                              10.
                             </p>
                           </div>
                         ) : policyType.includes('SUMANGAL') ? (
@@ -1085,16 +1132,17 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                 type="button"
                                 disabled={computedAge > 45}
                                 onClick={() => {
-                                  setTermInputMode('DURATION');
-                                  setDuration(15);
+                                  setTermInputMode('DURATION')
+                                  setDuration(15)
                                 }}
                                 className={`p-3 rounded-lg text-center border-2 transition-all ${
                                   computedAge > 45
                                     ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                                     : duration === 15
-                                    ? 'border-orange-600 bg-white font-bold text-orange-950 shadow-xs'
-                                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                                }`}>
+                                      ? 'border-orange-600 bg-white font-bold text-orange-950 shadow-xs'
+                                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
                                 <div className="text-sm font-bold">15 Years Term</div>
                               </button>
 
@@ -1102,16 +1150,17 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                 type="button"
                                 disabled={computedAge > 40}
                                 onClick={() => {
-                                  setTermInputMode('DURATION');
-                                  setDuration(20);
+                                  setTermInputMode('DURATION')
+                                  setDuration(20)
                                 }}
                                 className={`p-3 rounded-lg text-center border-2 transition-all ${
                                   computedAge > 40
                                     ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                                     : duration === 20
-                                    ? 'border-orange-600 bg-white font-bold text-orange-950 shadow-xs'
-                                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                                }`}>
+                                      ? 'border-orange-600 bg-white font-bold text-orange-950 shadow-xs'
+                                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                                }`}
+                              >
                                 <div className="text-sm font-bold">20 Years Term</div>
                               </button>
                             </div>
@@ -1130,7 +1179,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                     termInputMode === 'MATURITY_AGE'
                                       ? 'bg-white text-(--primary-dark) shadow-xs'
                                       : 'text-slate-600'
-                                  }`}>
+                                  }`}
+                                >
                                   Maturity Age
                                 </button>
                                 <button
@@ -1140,7 +1190,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                     termInputMode === 'DURATION'
                                       ? 'bg-white text-(--primary-dark) shadow-xs'
                                       : 'text-slate-600'
-                                  }`}>
+                                  }`}
+                                >
                                   Duration (Years)
                                 </button>
                               </div>
@@ -1159,9 +1210,10 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                         mAge <= computedAge
                                           ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                           : maturityAge === mAge
-                                          ? 'bg-(--primary-red) text-white shadow-xs'
-                                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-                                      }`}>
+                                            ? 'bg-(--primary-red) text-white shadow-xs'
+                                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                                      }`}
+                                    >
                                       Age {mAge}
                                     </button>
                                   ))}
@@ -1176,7 +1228,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                       min={computedAge + 5}
                                       max="80"
                                       value={maturityAge}
-                                      onChange={(e) => setMaturityAge(parseInt(e.target.value, 10) || 50)}
+                                      onChange={(e) =>
+                                        setMaturityAge(parseInt(e.target.value, 10) || 50)
+                                      }
                                       className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
                                     />
                                   </div>
@@ -1201,7 +1255,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                                     min="5"
                                     max="55"
                                     value={duration}
-                                    onChange={(e) => setDuration(parseInt(e.target.value, 10) || 20)}
+                                    onChange={(e) =>
+                                      setDuration(parseInt(e.target.value, 10) || 20)
+                                    }
                                     className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
                                   />
                                 </div>
@@ -1238,8 +1294,10 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                           quotationResult.confidenceScore >= 90
                             ? 'bg-emerald-500 text-white'
                             : 'bg-amber-500 text-slate-900'
-                        }`}>
-                        {quotationResult.confidenceScore}% Confidence | {quotationResult.premiumSource}
+                        }`}
+                      >
+                        {quotationResult.confidenceScore}% Confidence |{' '}
+                        {quotationResult.premiumSource}
                       </span>
                     </div>
 
@@ -1253,7 +1311,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     </div>
 
                     <p className="text-xs text-slate-300 mt-2">
-                      Net Monthly Equivalent: <strong>{formatINR(quotationResult.netMonthlyPremium)}</strong> | Annualized: <strong>{formatINR(quotationResult.annualizedPremium)}</strong>
+                      Net Monthly Equivalent:{' '}
+                      <strong>{formatINR(quotationResult.netMonthlyPremium)}</strong> | Annualized:{' '}
+                      <strong>{formatINR(quotationResult.annualizedPremium)}</strong>
                     </p>
                   </div>
 
@@ -1276,30 +1336,36 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     </div>
 
                     {/* Money-Back Periodic Survival Benefits Schedule */}
-                    {quotationResult.survivalBenefits && quotationResult.survivalBenefits.length > 0 && (
-                      <div className="mt-4 p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
-                            <i className="ri-hand-coin-line text-emerald-600 text-sm"></i>
-                            Periodic Survival Benefits Schedule
-                          </span>
-                        </div>
-                        <div className="space-y-1.5 text-xs">
-                          {quotationResult.survivalBenefits.map((b, idx) => (
-                            <div key={idx} className="flex justify-between items-center py-1 border-b border-emerald-100/70">
-                              <span className="text-slate-700 font-medium">{b.description}</span>
-                              <span className="font-bold text-emerald-700">{formatINR(b.amount)}</span>
-                            </div>
-                          ))}
-                          <div className="flex justify-between items-center py-2 font-bold text-slate-900 pt-2 border-t border-emerald-200">
-                            <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
-                            <span className="text-base text-(--primary-red) font-extrabold">
-                              {formatINR(quotationResult.finalMaturityPayout ?? 0)}
+                    {quotationResult.survivalBenefits &&
+                      quotationResult.survivalBenefits.length > 0 && (
+                        <div className="mt-4 p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
+                              <i className="ri-hand-coin-line text-emerald-600 text-sm"></i>
+                              Periodic Survival Benefits Schedule
                             </span>
                           </div>
+                          <div className="space-y-1.5 text-xs">
+                            {quotationResult.survivalBenefits.map((b, idx) => (
+                              <div
+                                key={idx}
+                                className="flex justify-between items-center py-1 border-b border-emerald-100/70"
+                              >
+                                <span className="text-slate-700 font-medium">{b.description}</span>
+                                <span className="font-bold text-emerald-700">
+                                  {formatINR(b.amount)}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between items-center py-2 font-bold text-slate-900 pt-2 border-t border-emerald-200">
+                              <span>Final Maturity Payout ({quotationResult.duration} yrs)</span>
+                              <span className="text-base text-(--primary-red) font-extrabold">
+                                {formatINR(quotationResult.finalMaturityPayout ?? 0)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Maturity Highlight Box */}
                     <div className="bg-linear-to-br from-amber-50 to-orange-50/50 p-5 rounded-xl border border-amber-200 text-center mt-4">
@@ -1336,9 +1402,13 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                           </span>
                         )}
                         {scheme === 'RPLI' && (
-                          <span className={`px-2 py-0.5 rounded font-semibold ${
-                            (quotationResult as RpliQuoteResult).medicalRequired ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
-                          }`}>
+                          <span
+                            className={`px-2 py-0.5 rounded font-semibold ${
+                              (quotationResult as RpliQuoteResult).medicalRequired
+                                ? 'bg-amber-100 text-amber-900'
+                                : 'bg-emerald-100 text-emerald-900'
+                            }`}
+                          >
                             {(quotationResult as RpliQuoteResult).medicalRuleStatus}
                           </span>
                         )}
@@ -1373,26 +1443,61 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
                               {(
                                 [
-                                  { label: 'Monthly', mode: 'MONTHLY', data: (quotationResult as RpliQuoteResult).modeDetails.monthly },
-                                  { label: 'Quarterly', mode: 'QUARTERLY', data: (quotationResult as RpliQuoteResult).modeDetails.quarterly },
-                                  { label: 'Half-Yearly', mode: 'HALF_YEARLY', data: (quotationResult as RpliQuoteResult).modeDetails.halfYearly },
-                                  { label: 'Yearly', mode: 'YEARLY', data: (quotationResult as RpliQuoteResult).modeDetails.yearly },
+                                  {
+                                    label: 'Monthly',
+                                    mode: 'MONTHLY',
+                                    data: (quotationResult as RpliQuoteResult).modeDetails.monthly,
+                                  },
+                                  {
+                                    label: 'Quarterly',
+                                    mode: 'QUARTERLY',
+                                    data: (quotationResult as RpliQuoteResult).modeDetails
+                                      .quarterly,
+                                  },
+                                  {
+                                    label: 'Half-Yearly',
+                                    mode: 'HALF_YEARLY',
+                                    data: (quotationResult as RpliQuoteResult).modeDetails
+                                      .halfYearly,
+                                  },
+                                  {
+                                    label: 'Yearly',
+                                    mode: 'YEARLY',
+                                    data: (quotationResult as RpliQuoteResult).modeDetails.yearly,
+                                  },
                                 ] as const
                               ).map((row, rIdx) => {
-                                const isCurrentMode = frequency === row.mode;
+                                const isCurrentMode = frequency === row.mode
                                 return (
-                                  <tr key={rIdx} className={isCurrentMode ? 'bg-emerald-50/80 font-bold text-emerald-950' : 'hover:bg-slate-100/50'}>
+                                  <tr
+                                    key={rIdx}
+                                    className={
+                                      isCurrentMode
+                                        ? 'bg-emerald-50/80 font-bold text-emerald-950'
+                                        : 'hover:bg-slate-100/50'
+                                    }
+                                  >
                                     <td className="p-2 flex items-center gap-1">
-                                      {isCurrentMode && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
+                                      {isCurrentMode && (
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                      )}
                                       {row.label}
                                     </td>
-                                    <td className="p-2 text-right">₹{row.data.ratePer1000.toFixed(2)}</td>
-                                    <td className="p-2 text-right">{formatINR(row.data.grossPremium)}</td>
-                                    <td className="p-2 text-right text-emerald-700">-{formatINR(row.data.rebate)}</td>
+                                    <td className="p-2 text-right">
+                                      ₹{row.data.ratePer1000.toFixed(2)}
+                                    </td>
+                                    <td className="p-2 text-right">
+                                      {formatINR(row.data.grossPremium)}
+                                    </td>
+                                    <td className="p-2 text-right text-emerald-700">
+                                      -{formatINR(row.data.rebate)}
+                                    </td>
                                     <td className="p-2 text-right">{formatINR(row.data.tax)}</td>
-                                    <td className="p-2 text-right font-extrabold text-slate-900">{formatINR(row.data.netPremium)}</td>
+                                    <td className="p-2 text-right font-extrabold text-slate-900">
+                                      {formatINR(row.data.netPremium)}
+                                    </td>
                                   </tr>
-                                );
+                                )
                               })}
                             </tbody>
                           </table>
@@ -1406,20 +1511,29 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     <button
                       onClick={handleCopySummary}
                       type="button"
-                      className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5">
-                      <i className={copied ? 'ri-check-line text-green-600' : 'ri-file-copy-line text-blue-600'}></i>
+                      className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5"
+                    >
+                      <i
+                        className={
+                          copied
+                            ? 'ri-check-line text-green-600'
+                            : 'ri-file-copy-line text-blue-600'
+                        }
+                      ></i>
                       {copied ? 'Copied!' : 'Copy Summary'}
                     </button>
                     <button
                       onClick={() => setIsCompareModalOpen(true)}
                       type="button"
-                      className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5">
+                      className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5"
+                    >
                       <i className="ri-scales-3-line text-amber-600"></i> Compare {scheme} Policies
                     </button>
                     <button
                       onClick={handlePrint}
                       type="button"
-                      className="flex-1 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5">
+                      className="flex-1 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5"
+                    >
                       <i className="ri-printer-line"></i> Print / PDF
                     </button>
                   </div>
@@ -1430,12 +1544,15 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                   <button
                     onClick={() => setShowBreakdown(!showBreakdown)}
                     type="button"
-                    className="w-full p-4 text-left font-bold text-sm text-(--primary-dark) flex items-center justify-between hover:bg-slate-50">
+                    className="w-full p-4 text-left font-bold text-sm text-(--primary-dark) flex items-center justify-between hover:bg-slate-50"
+                  >
                     <span className="flex items-center gap-2">
                       <i className="ri-calculator-line text-(--primary-red)"></i>
                       How was this calculated? (Auditable Trace)
                     </span>
-                    <i className={showBreakdown ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}></i>
+                    <i
+                      className={showBreakdown ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
+                    ></i>
                   </button>
 
                   {showBreakdown && (
@@ -1466,40 +1583,58 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
 
                     <div className="space-y-2.5 text-slate-700">
                       <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">1. Exact Age Determination:</span>
+                        <span className="font-bold text-slate-900 block">
+                          1. Exact Age Determination:
+                        </span>
                         <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Age = DATEDIF(DOB, StartDate, "Y") = {quotationResult.effectiveAge} Years
+                          Age = DATEDIF(DOB, StartDate, &quot;Y&quot;) ={' '}
+                          {quotationResult.effectiveAge} Years
                         </code>
                       </div>
 
                       <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">2. Sum Assured Premium Units:</span>
+                        <span className="font-bold text-slate-900 block">
+                          2. Sum Assured Premium Units:
+                        </span>
                         <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Units = {formatINR(quotationResult.sumAssured)} / 1,000 = {quotationResult.sumAssured / 1000} Units
+                          Units = {formatINR(quotationResult.sumAssured)} / 1,000 ={' '}
+                          {quotationResult.sumAssured / 1000} Units
                         </code>
                       </div>
 
                       <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">3. Mode Gross Premium Lookup:</span>
+                        <span className="font-bold text-slate-900 block">
+                          3. Mode Gross Premium Lookup:
+                        </span>
                         <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Gross = RatePer1000 × Units = {formatINR(quotationResult.frequencyPremium)}
+                          Gross = RatePer1000 × Units ={' '}
+                          {formatINR(quotationResult.frequencyPremium)}
                         </code>
                       </div>
 
                       <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">4. Mode Rebate & Net Premium:</span>
+                        <span className="font-bold text-slate-900 block">
+                          4. Mode Rebate & Net Premium:
+                        </span>
                         <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Net = Gross ({formatINR(quotationResult.frequencyPremium)}) - Rebate ({formatINR(quotationResult.rebate)}) + Tax ({formatINR(quotationResult.tax)}) = {formatINR(quotationResult.netInstallmentPremium)}
+                          Net = Gross ({formatINR(quotationResult.frequencyPremium)}) - Rebate (
+                          {formatINR(quotationResult.rebate)}) + Tax (
+                          {formatINR(quotationResult.tax)}) ={' '}
+                          {formatINR(quotationResult.netInstallmentPremium)}
                         </code>
                       </div>
 
                       <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
-                        <span className="font-bold text-slate-900 block">5. Accrued Bonus & Maturity Benefit:</span>
+                        <span className="font-bold text-slate-900 block">
+                          5. Accrued Bonus & Maturity Benefit:
+                        </span>
                         <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
-                          Total Bonus = Units × ₹{quotationResult.bonusRate} × {quotationResult.duration} yrs = {formatINR(quotationResult.totalBonus)}
+                          Total Bonus = Units × ₹{quotationResult.bonusRate} ×{' '}
+                          {quotationResult.duration} yrs = {formatINR(quotationResult.totalBonus)}
                         </code>
                         <code className="text-[0.7rem] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 block text-emerald-950 font-mono font-bold mt-1">
-                          Maturity Benefit = SA + Total Bonus = {formatINR(quotationResult.maturityAmount)}
+                          Maturity Benefit = SA + Total Bonus ={' '}
+                          {formatINR(quotationResult.maturityAmount)}
                         </code>
                       </div>
                     </div>
@@ -1526,7 +1661,8 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
               </div>
               <button
                 onClick={() => setIsCompareModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200">
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200"
+              >
                 <i className="ri-close-line text-lg"></i>
               </button>
             </div>
@@ -1550,7 +1686,9 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                       <td className="p-3 text-right font-bold text-(--primary-red)">
                         {formatINR(item.netMonthlyPremium)}
                       </td>
-                      <td className="p-3 text-right text-emerald-600">+{formatINR(item.totalBonus)}</td>
+                      <td className="p-3 text-right text-emerald-600">
+                        +{formatINR(item.totalBonus)}
+                      </td>
                       <td className="p-3 text-right font-bold text-slate-900">
                         {formatINR(item.maturityAmount)}
                       </td>
@@ -1563,5 +1701,5 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
         </div>
       )}
     </main>
-  );
+  )
 }

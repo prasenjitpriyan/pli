@@ -106,6 +106,31 @@ describe('Official Dak Sewa RPLI Calibration & Quotation Matches', () => {
     expect(yearly.modeDetails.monthly.netPremium).toBe(4150);
   });
 
+  it('matches Official RPLI Table for Gram Santosh (Age 39, Mat Age 60, Term 21, SA ₹10 Lakhs)', () => {
+    const quote39 = calculateRpliQuote({
+      policyType: 'GRAM_SANTOSH',
+      age: 39,
+      maturityAge: 60,
+      sumAssured: 1000000,
+      frequency: 'YEARLY',
+    });
+
+    expect(quote39.duration).toBe(21);
+    expect(quote39.modeDetails.yearly.ratePer1000).toBe(46.00);
+    expect(quote39.modeDetails.yearly.grossPremium).toBe(46000);
+    expect(quote39.modeDetails.yearly.rebate).toBe(600);
+    expect(quote39.modeDetails.yearly.netPremium).toBe(45400);
+
+    expect(quote39.modeDetails.monthly.ratePer1000).toBe(4.00);
+    expect(quote39.modeDetails.monthly.grossPremium).toBe(4000);
+    expect(quote39.modeDetails.monthly.rebate).toBe(50);
+    expect(quote39.modeDetails.monthly.netPremium).toBe(3950);
+
+    expect(quote39.annualBonus).toBe(48000);
+    expect(quote39.totalBonus).toBe(1008000);
+    expect(quote39.maturityAmount).toBe(2008000);
+  });
+
   // Test 2: Whole Life Assurance (Gram Suraksha) Age 40, SA ₹10 Lakhs (15, 18, 20 Years)
   it('matches Official Dak Sewa Quotation for Gram Suraksha Whole Life (15, 18, 20 Years)', () => {
     // 15 Years (Ceasing at 55)

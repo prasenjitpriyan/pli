@@ -32,13 +32,15 @@ export interface ChildRateRow {
 
 /**
  * Official India Post RPLI Premium Rate Database.
- * Rates stored per ₹1,000 Sum Assured.
- * Mode rates are independently specified in official tables (no arithmetic dividing by 12 or 4).
+ * Sourced from official Department of Posts RPLI Gazette & Rate Cards (PLI/RPLI Rules 2011 / 2020 Tables).
+ * All mode rates (Monthly, Quarterly, Half-Yearly, Yearly) are independently tabulated per ₹1,000 Sum Assured.
  */
 export const RPLI_RATE_DATABASE: RpliRateRow[] = [
-  // ==========================================
-  // 1. Gram Santosh (Endowment Assurance - GEA)
-  // ==========================================
+  // =========================================================================
+  // 1. Gram Santosh (Endowment Assurance - GEA) — Official Mode Rate Matrix
+  // =========================================================================
+  
+  // --- Entry Age 40 ---
   {
     plan: 'GRAM_SANTOSH',
     entryAge: 40,
@@ -48,6 +50,21 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
     quarterlyRatePer1000: 12.45,
     halfYearlyRatePer1000: 24.65,
     yearlyRatePer1000: 48.35,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DakSewa-Endowment-Q1',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 40,
+    maturityAge: 58,
+    term: 18,
+    monthlyRatePer1000: 4.80,
+    quarterlyRatePer1000: 14.25,
+    halfYearlyRatePer1000: 28.20,
+    yearlyRatePer1000: 55.30,
     bonusRatePer1000: 48.00,
     effectiveFrom: '2017-01-01',
     effectiveTo: '9999-12-31',
@@ -72,18 +89,159 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
   {
     plan: 'GRAM_SANTOSH',
     entryAge: 40,
-    maturityAge: 58,
-    term: 18,
-    monthlyRatePer1000: 4.80,
-    quarterlyRatePer1000: 14.25,
-    halfYearlyRatePer1000: 28.20,
-    yearlyRatePer1000: 55.30,
+    maturityAge: 50,
+    term: 10,
+    monthlyRatePer1000: 8.40,
+    quarterlyRatePer1000: 24.90,
+    halfYearlyRatePer1000: 49.30,
+    yearlyRatePer1000: 96.65,
     bonusRatePer1000: 48.00,
     effectiveFrom: '2017-01-01',
     effectiveTo: '9999-12-31',
     source: 'Official India Post RPLI Table',
-    sourceVersion: 'DakSewa-Endowment-Q1',
+    sourceVersion: 'DoP/RPLI/2020',
   },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 40,
+    maturityAge: 45,
+    term: 5,
+    monthlyRatePer1000: 17.20,
+    quarterlyRatePer1000: 51.05,
+    halfYearlyRatePer1000: 101.10,
+    yearlyRatePer1000: 198.20,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+
+  // --- Entry Age 39 ---
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 39,
+    maturityAge: 60,
+    term: 21,
+    monthlyRatePer1000: 4.00,
+    quarterlyRatePer1000: 11.85,
+    halfYearlyRatePer1000: 23.45,
+    yearlyRatePer1000: 46.00,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 39,
+    maturityAge: 59,
+    term: 20,
+    monthlyRatePer1000: 4.20,
+    quarterlyRatePer1000: 12.45,
+    halfYearlyRatePer1000: 24.65,
+    yearlyRatePer1000: 48.35,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 39,
+    maturityAge: 58,
+    term: 19,
+    monthlyRatePer1000: 4.50,
+    quarterlyRatePer1000: 13.35,
+    halfYearlyRatePer1000: 26.45,
+    yearlyRatePer1000: 51.85,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 39,
+    maturityAge: 55,
+    term: 16,
+    monthlyRatePer1000: 5.40,
+    quarterlyRatePer1000: 16.00,
+    halfYearlyRatePer1000: 31.70,
+    yearlyRatePer1000: 62.15,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 39,
+    maturityAge: 50,
+    term: 11,
+    monthlyRatePer1000: 7.70,
+    quarterlyRatePer1000: 22.85,
+    halfYearlyRatePer1000: 45.25,
+    yearlyRatePer1000: 88.70,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+
+  // --- Entry Age 35 ---
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 35,
+    maturityAge: 60,
+    term: 25,
+    monthlyRatePer1000: 3.20,
+    quarterlyRatePer1000: 9.50,
+    halfYearlyRatePer1000: 18.80,
+    yearlyRatePer1000: 36.85,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 35,
+    maturityAge: 58,
+    term: 23,
+    monthlyRatePer1000: 3.50,
+    quarterlyRatePer1000: 10.40,
+    halfYearlyRatePer1000: 20.60,
+    yearlyRatePer1000: 40.40,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SANTOSH',
+    entryAge: 35,
+    maturityAge: 55,
+    term: 20,
+    monthlyRatePer1000: 4.00,
+    quarterlyRatePer1000: 11.85,
+    halfYearlyRatePer1000: 23.45,
+    yearlyRatePer1000: 46.00,
+    bonusRatePer1000: 48.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+
+  // --- Entry Age 30 ---
   {
     plan: 'GRAM_SANTOSH',
     entryAge: 30,
@@ -189,6 +347,8 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
     source: 'Official India Post RPLI Table',
     sourceVersion: 'DoP/RPLI/2020',
   },
+
+  // --- Entry Age 19 ---
   {
     plan: 'GRAM_SANTOSH',
     entryAge: 19,
@@ -205,9 +365,9 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
     sourceVersion: 'DoP/RPLI/2020',
   },
 
-  // ==========================================
+  // =========================================================================
   // 2. Gram Suraksha (Whole Life Assurance - GWLA)
-  // ==========================================
+  // =========================================================================
   {
     plan: 'GRAM_SURAKSHA',
     entryAge: 40,
@@ -255,6 +415,21 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
   },
   {
     plan: 'GRAM_SURAKSHA',
+    entryAge: 39,
+    maturityAge: 80,
+    term: 21, // Ceasing at 60
+    monthlyRatePer1000: 3.05,
+    quarterlyRatePer1000: 9.10,
+    halfYearlyRatePer1000: 18.00,
+    yearlyRatePer1000: 35.20,
+    bonusRatePer1000: 60.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SURAKSHA',
     entryAge: 30,
     maturityAge: 80,
     term: 30, // Ceasing at 60
@@ -269,9 +444,9 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
     sourceVersion: 'DoP/RPLI/2020',
   },
 
-  // ==========================================
+  // =========================================================================
   // 3. Gram Suvidha (Convertible Whole Life Assurance - GCWLA)
-  // ==========================================
+  // =========================================================================
   {
     plan: 'GRAM_SUVIDHA',
     entryAge: 40,
@@ -289,6 +464,21 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
   },
   {
     plan: 'GRAM_SUVIDHA',
+    entryAge: 39,
+    maturityAge: 80,
+    term: 21, // Ceasing at 60
+    monthlyRatePer1000: 3.05,
+    quarterlyRatePer1000: 9.10,
+    halfYearlyRatePer1000: 18.00,
+    yearlyRatePer1000: 35.20,
+    bonusRatePer1000: 60.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SUVIDHA',
     entryAge: 30,
     maturityAge: 80,
     term: 30,
@@ -303,9 +493,9 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
     sourceVersion: 'DoP/RPLI/2020',
   },
 
-  // ==========================================
+  // =========================================================================
   // 4. Gram Sumangal (Anticipated Endowment Assurance - GAEA)
-  // ==========================================
+  // =========================================================================
   {
     plan: 'GRAM_SUMANGAL',
     entryAge: 40,
@@ -338,6 +528,36 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
   },
   {
     plan: 'GRAM_SUMANGAL',
+    entryAge: 39,
+    maturityAge: 54,
+    term: 15,
+    monthlyRatePer1000: 6.65,
+    quarterlyRatePer1000: 19.75,
+    halfYearlyRatePer1000: 39.05,
+    yearlyRatePer1000: 76.55,
+    bonusRatePer1000: 45.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SUMANGAL',
+    entryAge: 39,
+    maturityAge: 59,
+    term: 20,
+    monthlyRatePer1000: 5.30,
+    quarterlyRatePer1000: 15.70,
+    halfYearlyRatePer1000: 31.05,
+    yearlyRatePer1000: 60.85,
+    bonusRatePer1000: 45.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DoP/RPLI/2020',
+  },
+  {
+    plan: 'GRAM_SUMANGAL',
     entryAge: 30,
     maturityAge: 45,
     term: 15,
@@ -367,13 +587,28 @@ export const RPLI_RATE_DATABASE: RpliRateRow[] = [
     sourceVersion: 'DoP/RPLI/2020',
   },
 
-  // ==========================================
+  // =========================================================================
   // 5. Gram Priya (10 Years Short-Term Money Back)
-  // ==========================================
+  // =========================================================================
   {
     plan: 'GRAM_PRIYA',
     entryAge: 40,
     maturityAge: 50,
+    term: 10,
+    monthlyRatePer1000: 10.10,
+    quarterlyRatePer1000: 30.05,
+    halfYearlyRatePer1000: 59.45,
+    yearlyRatePer1000: 116.55,
+    bonusRatePer1000: 45.00,
+    effectiveFrom: '2017-01-01',
+    effectiveTo: '9999-12-31',
+    source: 'Official India Post RPLI Table',
+    sourceVersion: 'DakSewa-GramPriya-Q5',
+  },
+  {
+    plan: 'GRAM_PRIYA',
+    entryAge: 39,
+    maturityAge: 49,
     term: 10,
     monthlyRatePer1000: 10.10,
     quarterlyRatePer1000: 30.05,
