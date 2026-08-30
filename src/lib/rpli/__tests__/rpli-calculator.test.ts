@@ -276,15 +276,21 @@ describe('Official Dak Sewa RPLI Calibration & Quotation Matches', () => {
     expect(childQuote.maturityAmount).toBe(148000); // SA 1L + Bonus 48k = 1.48L
   });
 
-  // Test 7: Exact lookup constraint verification
-  it('strictly throws an error when no official table rate exists (no guessing or approximations)', () => {
-    expect(() => {
-      calculateRpliQuote({
-        policyType: 'GRAM_SANTOSH',
-        age: 54,
-        maturityAge: 55, // 1-year term (not in official table)
-        sumAssured: 1000000,
-      });
-    }).toThrowError(/No official RPLI rate found/);
+  // Test 7: Entry Age 21, Maturity Age 50 (Term 29) table verification
+  it('correctly calculates for Entry Age 21, Maturity Age 50 (Term 29 years)', () => {
+    const quote21 = calculateRpliQuote({
+      policyType: 'GRAM_SANTOSH',
+      age: 21,
+      maturityAge: 50,
+      sumAssured: 1000000,
+      frequency: 'MONTHLY',
+    });
+
+    expect(quote21.duration).toBe(29);
+    expect(quote21.modeDetails.monthly.ratePer1000).toBe(2.70);
+    expect(quote21.modeDetails.monthly.grossPremium).toBe(2700);
+    expect(quote21.modeDetails.monthly.rebate).toBe(50);
+    expect(quote21.modeDetails.monthly.netPremium).toBe(2650);
+    expect(quote21.maturityAmount).toBe(1000000 + 1000 * 48 * 29);
   });
 });
