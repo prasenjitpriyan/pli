@@ -55,9 +55,14 @@ export default function CalculatorPage() {
   const [secondLifeAge, setSecondLifeAge] = useState<number>(28);
 
   // Children Policy Inputs (Bal Jeevan Bima)
+  const [childDateOfBirth, setChildDateOfBirth] = useState<string>('2020-05-10');
   const [childAge, setChildAge] = useState<number>(5);
   const [parentAge, setParentAge] = useState<number>(35);
   const [isParentDeceased, setIsParentDeceased] = useState<boolean>(false);
+
+  // RPLI Specific Eligibility Toggles
+  const [isRuralResident, setIsRuralResident] = useState<boolean>(true);
+  const [ageProofType, setAgeProofType] = useState<'STANDARD' | 'NON-STANDARD'>('STANDARD');
 
   // Whole Life Premium Ceasing Age Option (55, 58, 60)
   const [premiumCeasingAge, setPremiumCeasingAge] = useState<number>(60);
@@ -579,6 +584,55 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                         </select>
                       </div>
                     </div>
+
+                    {/* RPLI Specific Eligibility Toggles */}
+                    {scheme === 'RPLI' && (
+                      <div className="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
+                          <label className="font-bold text-slate-800 block">Policyholder Rural Residency:</label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setIsRuralResident(true)}
+                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                isRuralResident ? 'bg-emerald-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}>
+                              YES (Rural)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsRuralResident(false)}
+                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                !isRuralResident ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}>
+                              NO (Urban)
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
+                          <label className="font-bold text-slate-800 block">Age Proof Type:</label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setAgeProofType('STANDARD')}
+                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                ageProofType === 'STANDARD' ? 'bg-emerald-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}>
+                              Standard (Max 55)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAgeProofType('NON-STANDARD')}
+                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                ageProofType === 'NON-STANDARD' ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}>
+                              Non-Std (Max 45)
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Premium Payment Mode Frequency */}
@@ -756,6 +810,33 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-(--text-dark) mb-1">
+                            Child Date of Birth (Optional)
+                          </label>
+                          <input
+                            type="date"
+                            value={childDateOfBirth}
+                            onChange={(e) => {
+                              setChildDateOfBirth(e.target.value);
+                              if (e.target.value) {
+                                const { age } = calculateAge(e.target.value, effectiveDate);
+                                setChildAge(Math.max(5, Math.min(20, age)));
+                              }
+                            }}
+                            className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium outline-none"
+                          />
+                          {new Date(childDateOfBirth) > new Date() && (
+                            <p className="text-[0.68rem] text-red-600 font-bold mt-1">
+                              ⚠️ INVALID - Child DOB is in the future.
+                            </p>
+                          )}
+                          {new Date(childDateOfBirth) > new Date(effectiveDate) && new Date(childDateOfBirth) <= new Date() && (
+                            <p className="text-[0.68rem] text-red-600 font-bold mt-1">
+                              ⚠️ INVALID - Child DOB is after Policy Start Date.
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-(--text-dark) mb-1">
                             Child Completed Age (5 – 20 Years)
                           </label>
                           <input
@@ -767,19 +848,19 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
                           />
                         </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-(--text-dark) mb-1">
-                            Parent Age (Max 45 Years)
-                          </label>
-                          <input
-                            type="number"
-                            min="19"
-                            max="45"
-                            value={parentAge}
-                            onChange={(e) => setParentAge(parseInt(e.target.value, 10) || 35)}
-                            className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
-                          />
-                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-(--text-dark) mb-1">
+                          Parent Age at Entry (Max 45 Years)
+                        </label>
+                        <input
+                          type="number"
+                          min="19"
+                          max="45"
+                          value={parentAge}
+                          onChange={(e) => setParentAge(parseInt(e.target.value, 10) || 35)}
+                          className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold outline-none"
+                        />
                       </div>
 
                       {/* Parent Death Premium Waiver Toggle for RPLI */}
@@ -1254,8 +1335,70 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                             No Surrender Option
                           </span>
                         )}
+                        {scheme === 'RPLI' && (
+                          <span className={`px-2 py-0.5 rounded font-semibold ${
+                            (quotationResult as RpliQuoteResult).medicalRequired ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
+                          }`}>
+                            {(quotationResult as RpliQuoteResult).medicalRuleStatus}
+                          </span>
+                        )}
                       </div>
                     </div>
+
+                    {/* Official Table-Driven Mode Breakdown Grid (RPLI Standard) */}
+                    {scheme === 'RPLI' && (quotationResult as RpliQuoteResult).modeDetails && (
+                      <div className="mt-4 p-4 bg-slate-50/80 border border-slate-200 rounded-xl space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                            <i className="ri-table-line text-emerald-700 text-sm"></i>
+                            Official Mode Breakdown Table (Dak Sewa Format)
+                          </span>
+                          <span className="text-[0.65rem] font-bold text-slate-500">
+                            Rate Table: {(quotationResult as RpliQuoteResult).rateTableVersion}
+                          </span>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-[0.72rem] text-left border-collapse">
+                            <thead>
+                              <tr className="bg-slate-200/70 text-slate-800 font-bold">
+                                <th className="p-2 rounded-l">Mode</th>
+                                <th className="p-2 text-right">Rate/₹1k</th>
+                                <th className="p-2 text-right">Gross (₹)</th>
+                                <th className="p-2 text-right">Rebate (₹)</th>
+                                <th className="p-2 text-right">Tax (₹)</th>
+                                <th className="p-2 text-right rounded-r">Net (₹)</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
+                              {(
+                                [
+                                  { label: 'Monthly', mode: 'MONTHLY', data: (quotationResult as RpliQuoteResult).modeDetails.monthly },
+                                  { label: 'Quarterly', mode: 'QUARTERLY', data: (quotationResult as RpliQuoteResult).modeDetails.quarterly },
+                                  { label: 'Half-Yearly', mode: 'HALF_YEARLY', data: (quotationResult as RpliQuoteResult).modeDetails.halfYearly },
+                                  { label: 'Yearly', mode: 'YEARLY', data: (quotationResult as RpliQuoteResult).modeDetails.yearly },
+                                ] as const
+                              ).map((row, rIdx) => {
+                                const isCurrentMode = frequency === row.mode;
+                                return (
+                                  <tr key={rIdx} className={isCurrentMode ? 'bg-emerald-50/80 font-bold text-emerald-950' : 'hover:bg-slate-100/50'}>
+                                    <td className="p-2 flex items-center gap-1">
+                                      {isCurrentMode && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
+                                      {row.label}
+                                    </td>
+                                    <td className="p-2 text-right">₹{row.data.ratePer1000.toFixed(2)}</td>
+                                    <td className="p-2 text-right">{formatINR(row.data.grossPremium)}</td>
+                                    <td className="p-2 text-right text-emerald-700">-{formatINR(row.data.rebate)}</td>
+                                    <td className="p-2 text-right">{formatINR(row.data.tax)}</td>
+                                    <td className="p-2 text-right font-extrabold text-slate-900">{formatINR(row.data.netPremium)}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions Toolbar */}
@@ -1312,6 +1455,56 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
                     </div>
                   )}
                 </div>
+
+                {/* Calculation Procedure Card */}
+                {scheme === 'RPLI' && (
+                  <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3 text-xs no-print">
+                    <h3 className="font-bold text-sm text-(--primary-dark) flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                      <i className="ri-functions text-emerald-700 text-base"></i>
+                      RPLI Table-Driven Calculation Procedure
+                    </h3>
+
+                    <div className="space-y-2.5 text-slate-700">
+                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
+                        <span className="font-bold text-slate-900 block">1. Exact Age Determination:</span>
+                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
+                          Age = DATEDIF(DOB, StartDate, "Y") = {quotationResult.effectiveAge} Years
+                        </code>
+                      </div>
+
+                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
+                        <span className="font-bold text-slate-900 block">2. Sum Assured Premium Units:</span>
+                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
+                          Units = {formatINR(quotationResult.sumAssured)} / 1,000 = {quotationResult.sumAssured / 1000} Units
+                        </code>
+                      </div>
+
+                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
+                        <span className="font-bold text-slate-900 block">3. Mode Gross Premium Lookup:</span>
+                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
+                          Gross = RatePer1000 × Units = {formatINR(quotationResult.frequencyPremium)}
+                        </code>
+                      </div>
+
+                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
+                        <span className="font-bold text-slate-900 block">4. Mode Rebate & Net Premium:</span>
+                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
+                          Net = Gross ({formatINR(quotationResult.frequencyPremium)}) - Rebate ({formatINR(quotationResult.rebate)}) + Tax ({formatINR(quotationResult.tax)}) = {formatINR(quotationResult.netInstallmentPremium)}
+                        </code>
+                      </div>
+
+                      <div className="p-2.5 bg-slate-50 rounded-lg space-y-1">
+                        <span className="font-bold text-slate-900 block">5. Accrued Bonus & Maturity Benefit:</span>
+                        <code className="text-[0.7rem] bg-white px-1.5 py-0.5 rounded border border-slate-200 block text-slate-800 font-mono">
+                          Total Bonus = Units × ₹{quotationResult.bonusRate} × {quotationResult.duration} yrs = {formatINR(quotationResult.totalBonus)}
+                        </code>
+                        <code className="text-[0.7rem] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 block text-emerald-950 font-mono font-bold mt-1">
+                          Maturity Benefit = SA + Total Bonus = {formatINR(quotationResult.maturityAmount)}
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
