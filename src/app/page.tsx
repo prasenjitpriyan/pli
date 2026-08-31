@@ -413,7 +413,7 @@ export default function Home() {
                 color: 'text-amber-500',
               },
               {
-                icon: 'ri-money-diamond-circle-fill',
+                icon: 'ri-money-dollar-circle-fill',
                 title: 'Lowest Premiums, Highest Bonus',
                 desc: 'Unmatched maturity yields per rupee invested due to ultra-low operational expenses.',
                 color: 'text-emerald-500',
