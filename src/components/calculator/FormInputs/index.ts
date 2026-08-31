@@ -1,0 +1,7 @@
+export { PersonalInfoInputs } from './PersonalInfoInputs'
+export { AgeAndDobInputs } from './AgeAndDobInputs'
+export { JointLifeInputs } from './JointLifeInputs'
+export { ChildPolicyInputs } from './ChildPolicyInputs'
+export { SumAssuredSelector } from './SumAssuredSelector'
+export { TermSelector } from './TermSelector'
+export { SpecialPolicyOptions } from './SpecialPolicyOptions'
