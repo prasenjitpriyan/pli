@@ -13,8 +13,6 @@ import {
   PliInput,
   PliPolicy,
   PliQuoteResult,
-  PLIInput,
-  PLIQuotationResult,
 } from './types';
 import { validatePliInput, mapToCanonicalPolicy } from './validation';
 
@@ -214,16 +212,13 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     netInstallmentPremium,
     annualizedPremium,
     totalPremiumPaid,
-
     terminalBonus,
     survivalBenefits: benefits.survivalBenefits,
     finalMaturityPayout: benefits.finalMaturityPayout,
     maturityAmount: benefits.maturityAmount,
     deathBenefitAmount: benefits.deathBenefitAmount,
-
     loanYears: policyConfig.loanYears,
     surrenderYears: policyConfig.surrenderYears,
-
     eligibility,
     isEstimated: !modelPrediction.isExactReference,
     premiumSource: modelPrediction.isExactReference ? 'OFFICIAL' : 'ESTIMATED',
@@ -231,13 +226,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     calculationMethod: modelPrediction.calculationMethod,
     calculationVersion: CALCULATION_VERSION,
     rateTableVersion: '2.0-OFFICIAL-SCHEDULE',
-
     timeline: benefits.timeline,
     breakdown,
   };
 }
-
-// Export calculatePLIQuotation for 100% backward compatibility
-export const calculatePLIQuotation = (input: PLIInput): PLIQuotationResult => {
-  return calculatePliQuote(input);
-};
