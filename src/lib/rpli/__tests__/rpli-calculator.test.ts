@@ -3,15 +3,27 @@ import { calculateRpliQuote } from '../calculator';
 import { validateRpliInput } from '../validation';
 
 describe('RPLI Policy Validation Engine', () => {
-  it('validates rural residency requirement', () => {
-    const res = validateRpliInput({
+  it('validates rural residency and operative SB account eligibility (OM No. 29-26/2024-LI)', () => {
+    // 1. Urban resident with operative SB account -> Valid
+    const resWithSB = validateRpliInput({
       policyType: 'GRAM_SANTOSH',
       age: 30,
       sumAssured: 100000,
       isRuralResident: false,
+      hasOperativeSBAccount: true,
     });
-    expect(res.valid).toBe(false);
-    expect(res.errors[0]).toContain('requires the proposer to be permanently residing in a rural area');
+    expect(resWithSB.valid).toBe(true);
+
+    // 2. Urban resident with no operative SB account -> Invalid
+    const resNoSB = validateRpliInput({
+      policyType: 'GRAM_SANTOSH',
+      age: 30,
+      sumAssured: 100000,
+      isRuralResident: false,
+      hasOperativeSBAccount: false,
+    });
+    expect(resNoSB.valid).toBe(false);
+    expect(resNoSB.errors[0]).toContain('operative Savings Bank account with Post Office Savings Bank');
   });
 
   it('validates non-standard age proof limit (45 years max)', () => {

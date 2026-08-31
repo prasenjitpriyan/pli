@@ -5,28 +5,24 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1.2fr] gap-12 pb-12 border-b border-white/10">
           {/* Brand Section */}
           <div>
-            <div className="text-3xl font-bold text-white mb-4 tracking-wider">
-              PLI & RPLI
-            </div>
+            <div className="text-3xl font-bold text-white mb-4 tracking-wider">PLI & RPLI</div>
             <p className="mb-6 leading-relaxed opacity-80">
-              Postal Life Insurance & Rural Postal Life Insurance, serving the nation since 1884. Providing
-              financial security with sovereign guarantee and GST-free premiums.
+              Postal Life Insurance & Rural Postal Life Insurance, serving the nation since 1884.
+              Providing financial security with sovereign guarantee and GST-free premiums.
             </p>
             <div className="flex gap-4">
-              {[
-                'facebook-fill',
-                'twitter-x-line',
-                'instagram-line',
-                'linkedin-fill',
-              ].map((icon) => (
-                <a
-                  key={icon}
-                  href="#"
-                  className="flex items-center justify-center w-9 h-9 bg-white/10 rounded-full text-white transition-all hover:bg-(--primary-red) hover:-translate-y-1"
-                  aria-label={icon}>
-                  <i className={`ri-${icon}`}></i>
-                </a>
-              ))}
+              {['facebook-fill', 'twitter-x-line', 'instagram-line', 'linkedin-fill'].map(
+                (icon) => (
+                  <a
+                    key={icon}
+                    href="#"
+                    className="flex items-center justify-center w-9 h-9 bg-white/10 rounded-full text-white transition-all hover:bg-(--primary-red) hover:-translate-y-1"
+                    aria-label={icon}
+                  >
+                    <i className={`ri-${icon}`}></i>
+                  </a>
+                )
+              )}
             </div>
           </div>
 
@@ -39,28 +35,32 @@ export default function Footer() {
               <li>
                 <a
                   href="#about"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
+                >
                   About Us
                 </a>
               </li>
               <li>
                 <a
                   href="#products"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
+                >
                   Our Products
                 </a>
               </li>
               <li>
                 <a
                   href="#why"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
+                >
                   Why Choose PLI
                 </a>
               </li>
               <li>
                 <a
                   href="#contact"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
+                >
                   Contact Us
                 </a>
               </li>
@@ -78,28 +78,32 @@ export default function Footer() {
                   href="https://share.google/NHDWnZ0xIYZgnilIi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-(--accent-gold) hover:underline hover:translate-x-1 transition-all inline-flex items-center gap-1 font-bold">
+                  className="text-(--accent-gold) hover:underline hover:translate-x-1 transition-all inline-flex items-center gap-1 font-bold"
+                >
                   <i className="ri-google-fill"></i> Google Business Profile
                 </a>
               </li>
               <li>
                 <a
                   href="/calculator"
-                  className="text-white hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block font-semibold">
+                  className="text-white hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block font-semibold"
+                >
                   Premium Calculator
                 </a>
               </li>
               <li>
                 <a
                   href="#rates"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
+                >
                   Declared Bonus Rates
                 </a>
               </li>
               <li>
                 <a
                   href="#eligibility"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
+                >
                   Eligibility Guidelines
                 </a>
               </li>
@@ -115,25 +119,24 @@ export default function Footer() {
               <li className="flex gap-4 items-start">
                 <i className="ri-map-pin-line text-(--accent-gold) text-xl mt-0.5"></i>
                 <span>
-                  Directorate of Postal Life Insurance,
+                  Haltu, 57, P. Majumder Road
                   <br />
-                  Chanakyapuri, New Delhi - 110021
+                  Opposite Moitre Sangha Club, Kolkata - 700078
                 </span>
               </li>
               <li className="flex gap-4 items-start">
                 <i className="ri-phone-line text-(--accent-gold) text-xl mt-0.5"></i>
-                <a
-                  href="tel:18002666868"
-                  className="hover:text-white transition-colors">
-                  1800 266 6868
+                <a href="tel:18002666868" className="hover:text-white transition-colors">
+                  9038332076 || 8620935473
                 </a>
               </li>
               <li className="flex gap-4 items-start">
                 <i className="ri-mail-line text-(--accent-gold) text-xl mt-0.5"></i>
                 <a
                   href="mailto:pli@indiapost.gov.in"
-                  className="hover:text-white transition-colors">
-                  pli@indiapost.gov.in
+                  className="hover:text-white transition-colors"
+                >
+                  prasenjitpriyan@gmail.com
                 </a>
               </li>
               <li className="flex gap-4 items-start">
@@ -142,7 +145,8 @@ export default function Footer() {
                   href="https://pli.indiapost.gov.in"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors">
+                  className="hover:text-white transition-colors"
+                >
                   pli.indiapost.gov.in
                 </a>
               </li>
@@ -152,8 +156,8 @@ export default function Footer() {
 
         <div className="py-6 flex flex-col md:flex-row justify-between items-center text-sm opacity-70 gap-4 text-center md:text-left">
           <p>
-            &copy; <span id="current-year">{new Date().getFullYear()}</span>{' '}
-            Postal Life Insurance - Government of India. All Rights Reserved.
+            &copy; <span id="current-year">{new Date().getFullYear()}</span> PLI & RPLI - PD. All
+            Rights Reserved.
           </p>
           <div className="flex gap-8">
             <a href="#" className="hover:underline">
@@ -169,5 +173,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

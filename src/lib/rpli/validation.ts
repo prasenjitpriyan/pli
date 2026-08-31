@@ -23,11 +23,12 @@ export function validateRpliInput(input: RpliInput): PliValidationResult {
 
   const age = input.age ?? 30;
   const isRural = input.isRuralResident !== false; // Default true
+  const hasOperativeSB = input.hasOperativeSBAccount !== false; // Default true if specified
   const ageProof = input.ageProofType ?? 'STANDARD';
 
-  // 1. Rural Eligibility
-  if (!isRural) {
-    errors.push('Rural Postal Life Insurance (RPLI) requires the proposer to be permanently residing in a rural area.');
+  // 1. Rural & Bank Account Eligibility (DG Postal Services OM No. 29-26/2024-LI dated 23.01.2025)
+  if (!isRural && !hasOperativeSB) {
+    errors.push('Rural Postal Life Insurance (RPLI) requires either permanent residency in a rural area OR maintaining an active, KYC-compliant operative Savings Bank account with Post Office Savings Bank (POSB) or any Scheduled Bank in India (OM No. 29-26/2024-LI dated 23.01.2025).');
   }
 
   // 2. Proposer Entry Age & Age Proof Validation

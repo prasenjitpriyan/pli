@@ -8,7 +8,12 @@ export const RPLI_ELIGIBILITY_CATEGORIES: RpliEligibilityCategory[] = [
   {
     id: 'RURAL_RESIDENTS',
     label: 'Rural Area Residents & Farmers',
-    description: 'Individuals residing in rural areas, villages, and Gram Panchayats.',
+    description: 'Individuals permanently residing in rural areas, villages, and Gram Panchayats.',
+  },
+  {
+    id: 'OPERATIVE_SB_ACCOUNT',
+    label: 'Operative SB Account Holder (POSB / Scheduled Bank)',
+    description: 'Any person maintaining an active, KYC-compliant Operative Savings Bank Account with Post Office Savings Bank (POSB) or any Scheduled Bank in India (OM No. 29-26/2024-LI dated 23.01.2025).',
   },
   {
     id: 'AGRICULTURAL_WORKERS',

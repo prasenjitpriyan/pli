@@ -62,6 +62,7 @@ export default function CalculatorPage() {
 
   // RPLI Specific Eligibility Toggles
   const [isRuralResident, setIsRuralResident] = useState<boolean>(true)
+  const [bankAccountType, setBankAccountType] = useState<'POSB' | 'SCHEDULED_BANK' | 'NONE'>('POSB')
   const [ageProofType, setAgeProofType] = useState<'STANDARD' | 'NON-STANDARD'>('STANDARD')
 
   // Whole Life Premium Ceasing Age Option (55, 58, 60)
@@ -157,9 +158,10 @@ export default function CalculatorPage() {
         policyType: canonicalRpli,
         effectiveDate,
         dateOfBirth: ageInputMode === 'DOB' ? dateOfBirth : undefined,
-        age: computedAge,
-        frequency,
-        customer: { fullName, gender, eligibilityCategory, pincode },
+        isRuralResident,
+        hasOperativeSBAccount: isRuralResident ? true : bankAccountType !== 'NONE',
+        bankAccountType,
+        ageProofType,
         childAge: canonicalRpli === 'BAL_JEEVAN_BIMA' ? childAge : undefined,
         parentAge: canonicalRpli === 'BAL_JEEVAN_BIMA' ? parentAge : undefined,
         isParentDeceased: canonicalRpli === 'BAL_JEEVAN_BIMA' ? isParentDeceased : undefined,
@@ -215,6 +217,9 @@ export default function CalculatorPage() {
     isParentDeceased,
     premiumCeasingAge,
     isConverted,
+    isRuralResident,
+    bankAccountType,
+    ageProofType,
     sumAssured,
     termInputMode,
     maturityAge,
@@ -608,64 +613,119 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
 
                     {/* RPLI Specific Eligibility Toggles */}
                     {scheme === 'RPLI' && (
-                      <div className="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                        <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
-                          <label className="font-bold text-slate-800 block">
-                            Policyholder Rural Residency:
-                          </label>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setIsRuralResident(true)}
-                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                isRuralResident
-                                  ? 'bg-emerald-700 text-white shadow-xs'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}
-                            >
-                              YES (Rural)
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setIsRuralResident(false)}
-                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                !isRuralResident
-                                  ? 'bg-red-600 text-white shadow-xs'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}
-                            >
-                              NO (Urban)
-                            </button>
+                      <div className="pt-3 border-t border-slate-200 space-y-3 text-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
+                            <label className="font-bold text-slate-800 block">
+                              Rural Residency:
+                            </label>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setIsRuralResident(true)}
+                                className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                  isRuralResident
+                                    ? 'bg-emerald-700 text-white shadow-xs'
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                }`}
+                              >
+                                YES (Rural Area)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setIsRuralResident(false)}
+                                className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                  !isRuralResident
+                                    ? 'bg-blue-700 text-white shadow-xs'
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                }`}
+                              >
+                                NO (Urban / Other)
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
+                            <label className="font-bold text-slate-800 block">Age Proof Type:</label>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setAgeProofType('STANDARD')}
+                                className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                  ageProofType === 'STANDARD'
+                                    ? 'bg-emerald-700 text-white shadow-xs'
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                }`}
+                              >
+                                Standard (Max 55)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setAgeProofType('NON-STANDARD')}
+                                className={`flex-1 py-1.5 rounded font-bold transition-all ${
+                                  ageProofType === 'NON-STANDARD'
+                                    ? 'bg-amber-600 text-white shadow-xs'
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                }`}
+                              >
+                                Non-Std (Max 45)
+                              </button>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="p-2.5 bg-white border border-slate-200 rounded-lg space-y-1.5">
-                          <label className="font-bold text-slate-800 block">Age Proof Type:</label>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setAgeProofType('STANDARD')}
-                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                ageProofType === 'STANDARD'
-                                  ? 'bg-emerald-700 text-white shadow-xs'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}
-                            >
-                              Standard (Max 55)
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setAgeProofType('NON-STANDARD')}
-                              className={`flex-1 py-1.5 rounded font-bold transition-all ${
-                                ageProofType === 'NON-STANDARD'
-                                  ? 'bg-amber-600 text-white shadow-xs'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                              }`}
-                            >
-                              Non-Std (Max 45)
-                            </button>
+                        {/* Operative Savings Bank Account Expansion (OM No. 29-26/2024-LI dt 23.01.2025) */}
+                        {!isRuralResident && (
+                          <div className="p-3 bg-blue-50/60 border border-blue-200 rounded-xl space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="font-bold text-blue-950 flex items-center gap-1.5">
+                                <i className="ri-bank-card-line text-blue-600 text-base"></i>
+                                Operative Savings Bank Account (OM No. 29-26/2024-LI)
+                              </label>
+                              <span className="text-[0.62rem] font-bold bg-blue-200 text-blue-900 px-2 py-0.5 rounded-full">
+                                RPLI Expansion 2025
+                              </span>
+                            </div>
+                            <p className="text-[0.68rem] text-blue-900 leading-normal">
+                              Per DG Postal Services Order (23.01.2025), any person maintaining an active, KYC-compliant Operative Savings Bank Account with Post Office Savings Bank (POSB) or any Scheduled Bank in India is eligible for RPLI.
+                            </p>
+                            <div className="grid grid-cols-3 gap-1.5 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setBankAccountType('POSB')}
+                                className={`py-1.5 px-2 rounded-lg font-bold text-[0.68rem] transition-all ${
+                                  bankAccountType === 'POSB'
+                                    ? 'bg-blue-700 text-white shadow-xs'
+                                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                              >
+                                🏛️ POSB Account
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setBankAccountType('SCHEDULED_BANK')}
+                                className={`py-1.5 px-2 rounded-lg font-bold text-[0.68rem] transition-all ${
+                                  bankAccountType === 'SCHEDULED_BANK'
+                                    ? 'bg-blue-700 text-white shadow-xs'
+                                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                              >
+                                🏦 Scheduled Bank
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setBankAccountType('NONE')}
+                                className={`py-1.5 px-2 rounded-lg font-bold text-[0.68rem] transition-all ${
+                                  bankAccountType === 'NONE'
+                                    ? 'bg-red-600 text-white shadow-xs'
+                                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                              >
+                                ❌ No Account
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>

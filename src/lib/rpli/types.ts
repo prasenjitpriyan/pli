@@ -21,6 +21,8 @@ export interface RpliInput {
   age?: number; // Exact completed age
 
   isRuralResident?: boolean;
+  hasOperativeSBAccount?: boolean;
+  bankAccountType?: 'POSB' | 'SCHEDULED_BANK' | 'NONE';
   ageProofType?: AgeProofType;
 
   frequency?: PremiumFrequency;

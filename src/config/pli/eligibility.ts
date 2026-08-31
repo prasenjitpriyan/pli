@@ -26,9 +26,14 @@ export const ELIGIBILITY_CATEGORIES: EligibilityCategory[] = [
     description: 'Teachers & non-teaching staff of Govt-aided & recognized private schools/universities.',
   },
   {
+    id: 'GRADUATES_DIPLOMA_HOLDERS',
+    label: 'Graduates & Diploma Holders (Govt Recognized)',
+    description: 'All Graduates & Diploma holders from Universities/Institutions recognized by Central/State Governments (Gazette Notif. F. No. 25-01/2022-LI, Rule 6(14)).',
+  },
+  {
     id: 'PROFESSIONALS',
     label: 'Qualified Professionals',
-    description: 'Doctors (MBBS/BDS), Engineers (B.Tech/BE), Chartered Accountants (CA), Architects, MBAs.',
+    description: 'Doctors (MBBS/BDS), Engineers (B.Tech/BE), Chartered Accountants (CA), Architects, MBAs, Lawyers, Banking & IT Specialists.',
   },
   {
     id: 'LOCAL_BODIES',
