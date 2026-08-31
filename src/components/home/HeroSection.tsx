@@ -22,10 +22,12 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           {/* Left Content Column */}
           <div className="lg:col-span-7 text-center lg:text-left space-y-4 lg:space-y-4.5">
-            {/* Sovereign Trust Badge */}
-            <div className="inline-flex items-center gap-2 bg-black/30 backdrop-blur-xl border border-white/20 px-3.5 py-1 rounded-full text-[0.7rem] font-bold text-amber-300 shadow-md tracking-wide">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Government of India • Ministry of Communications • Sovereign Guarantee</span>
+            {/* Official Logos & Sovereign Trust Badge */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+              <div className="inline-flex items-center gap-2 bg-black/30 backdrop-blur-xl border border-white/20 px-3.5 py-1 rounded-full text-[0.7rem] font-bold text-amber-300 shadow-md tracking-wide">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Government of India • Ministry of Communications • Sovereign Guarantee</span>
+              </div>
             </div>
 
             {/* Headline */}

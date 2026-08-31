@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PliEmblemSvg } from '../common/PliLogo'
 
 const PLI_PRODUCTS = [
   {
@@ -123,14 +124,18 @@ export function ProductsShowcaseSection() {
         {/* PLI Product Suite */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
-            <div>
-              <h3 className="text-2xl font-bold text-(--primary-dark) flex items-center gap-2">
-                <i className="ri-building-line text-(--primary-red)"></i> Postal Life Insurance
-                (PLI)
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                For Govt, PSU, Defense, Educational Staff & Professionals | Max SA ₹50 Lakhs
-              </p>
+            <div className="flex items-center gap-3.5">
+              <div className="p-1 rounded-xl bg-slate-50 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center">
+                <PliEmblemSvg variant="pli" className="w-10 h-11" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-(--primary-dark) flex items-center gap-2">
+                  Postal Life Insurance (PLI)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  For Govt, PSU, Defense, Educational Staff & Professionals | Max SA ₹50 Lakhs
+                </p>
+              </div>
             </div>
             <Link
               href="/calculator?scheme=pli"
@@ -174,13 +179,18 @@ export function ProductsShowcaseSection() {
         {/* RPLI Product Suite */}
         <div>
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
-            <div>
-              <h3 className="text-2xl font-bold text-emerald-950 flex items-center gap-2">
-                <i className="ri-plant-line text-emerald-600"></i> Rural Postal Life Insurance (RPLI)
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                For Rural Residents, Farmers, Artisans & Small Business Owners | Max SA ₹10 Lakhs
-              </p>
+            <div className="flex items-center gap-3.5">
+              <div className="p-1 rounded-xl bg-slate-50 border border-slate-200 shadow-xs shrink-0 flex items-center justify-center">
+                <PliEmblemSvg variant="rpli" className="w-10 h-11" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-emerald-950 flex items-center gap-2">
+                  Rural Postal Life Insurance (RPLI)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  For Rural Residents, Farmers, Artisans & Small Business Owners | Max SA ₹10 Lakhs
+                </p>
+              </div>
             </div>
             <Link
               href="/calculator?scheme=rpli"

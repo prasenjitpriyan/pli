@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#961b2d" />
+      <stop offset="100%" stop-color="#6b0f1d" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#d4af37" />
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Outer Rounded Crest -->
+  <rect x="2" y="2" width="96" height="96" rx="24" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="4" />
+
+  <!-- Inner High-Contrast Oval -->
+  <ellipse cx="50" cy="50" rx="36" ry="40" fill="#ffffff" filter="url(#dropShadow)" />
+
+  <!-- Official Red Hand (Abhaya Mudra) -->
+  <path
+    d="M34 76C34 76 34 82 50 82C66 82 66 76 66 76V64C66 64 74 61 74 48C74 41 71 39 69 39C67 39 66 42 66 46V25C66 21 62 21 62 25V41H59V18C59 14 55 14 55 18V41H52V14C52 10 48 10 48 14V41H45V21C45 17 41 17 41 21V53C37 49 33 51 32 55C31 59 34 64 34 76Z"
+    fill="#961b2d"
+  />
+
+  <!-- Three-Leaf Sprouting Plant in Palm -->
+  <!-- Central Stem -->
+  <path d="M50 70V56" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+  <!-- Center Leaf -->
+  <path d="M50 48C47 52 47 56 50 57C53 56 53 52 50 48Z" fill="#ffffff" />
+  <!-- Left Leaf -->
+  <path d="M48 57C42 54 39 58 41 62C45 63 47 60 48 57Z" fill="#ffffff" />
+  <!-- Right Leaf -->
+  <path d="M52 57C58 54 61 58 59 62C55 63 53 60 52 57Z" fill="#ffffff" />
+</svg>

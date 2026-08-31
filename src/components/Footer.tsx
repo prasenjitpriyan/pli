@@ -1,3 +1,5 @@
+import { PliLogo } from './common/PliLogo'
+
 export default function Footer() {
   return (
     <footer className="bg-(--primary-dark) text-[#e0e0e0] pt-16 mt-20 text-[0.95rem]">
@@ -5,7 +7,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1.2fr] gap-12 pb-12 border-b border-white/10">
           {/* Brand Section */}
           <div>
-            <div className="text-3xl font-bold text-white mb-4 tracking-wider">PLI & RPLI</div>
+            <div className="mb-4">
+              <PliLogo variant="combined" size="md" showText={true} showSubtitle={true} />
+            </div>
             <p className="mb-6 leading-relaxed opacity-80">
               Postal Life Insurance & Rural Postal Life Insurance, serving the nation since 1884.
               Providing financial security with sovereign guarantee and GST-free premiums.

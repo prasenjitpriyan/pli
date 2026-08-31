@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { PliLogo } from './common/PliLogo';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,14 +31,8 @@ export default function Navbar() {
           : 'bg-(--primary-red) py-5'
       } text-white`}>
       <div className="container-custom flex justify-between items-center">
-        <div className="logo-area flex items-center gap-2">
-          {/* Add a logo image here if available, using text for now */}
-          <Link
-            href="/"
-            className="text-2xl font-bold tracking-wider flex items-center gap-2">
-            <i className="ri-government-fill text-(--accent-gold) text-3xl"></i>
-            <span>PLI</span>
-          </Link>
+        <div className="logo-area flex items-center gap-3">
+          <PliLogo variant="combined" size="sm" showText={true} showSubtitle={true} />
         </div>
 
         {/* Mobile Menu Button */}

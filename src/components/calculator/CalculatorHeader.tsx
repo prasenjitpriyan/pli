@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PliEmblemSvg } from '../common/PliLogo'
 
 interface CalculatorHeaderProps {
   scheme: 'PLI' | 'RPLI'
@@ -47,25 +48,33 @@ export function CalculatorHeader({
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-red-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
 
         <div className="container-custom relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2.5">
-              <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[0.68rem] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Official {scheme} Table Engine v{calculationVersion}
-              </span>
-              <span className="text-[0.68rem] bg-white/10 text-slate-300 border border-white/15 px-2.5 py-1 rounded-full font-bold">
-                0% GST Exemption
-              </span>
+          <div className="flex items-start gap-4">
+            <div className="p-1.5 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/20 shadow-md shrink-0 hidden sm:flex items-center justify-center">
+              <PliEmblemSvg
+                variant={scheme === 'RPLI' ? 'rpli' : 'pli'}
+                className="w-14 h-16"
+              />
             </div>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-sm">
-              {scheme === 'RPLI'
-                ? 'Rural Postal Life Insurance (RPLI) Calculator'
-                : 'Postal Life Insurance (PLI) Calculator'}
-            </h1>
-            <p className="text-slate-300 text-sm md:text-base font-normal max-w-2xl">
-              Strict table-driven premium calculations, official mode rebates, declared bonus rates,
-              and an 11-step verifiable mathematical audit trail.
-            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2.5">
+                <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[0.68rem] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Official {scheme} Table Engine v{calculationVersion}
+                </span>
+                <span className="text-[0.68rem] bg-white/10 text-slate-300 border border-white/15 px-2.5 py-1 rounded-full font-bold">
+                  0% GST Exemption
+                </span>
+              </div>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-sm">
+                {scheme === 'RPLI'
+                  ? 'Rural Postal Life Insurance (RPLI) Calculator'
+                  : 'Postal Life Insurance (PLI) Calculator'}
+              </h1>
+              <p className="text-slate-300 text-sm md:text-base font-normal max-w-2xl">
+                Strict table-driven premium calculations, official mode rebates, declared bonus rates,
+                and an 11-step verifiable mathematical audit trail.
+              </p>
+            </div>
           </div>
           <Link
             href="/"
