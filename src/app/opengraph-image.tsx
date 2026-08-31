@@ -206,15 +206,37 @@ export default async function Image() {
 
           <div
             style={{
-              backgroundColor: '#d4af37',
-              color: '#0f172a',
-              padding: '12px 24px',
-              borderRadius: '12px',
-              fontSize: '18px',
-              fontWeight: '900',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
             }}
           >
-            Calculate Quote Online →
+            <div
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#e2e8f0',
+                padding: '10px 18px',
+                borderRadius: '10px',
+                fontSize: '15px',
+                fontWeight: '600',
+                letterSpacing: '0.5px',
+              }}
+            >
+              pli-hazel.vercel.app
+            </div>
+            <div
+              style={{
+                backgroundColor: '#d4af37',
+                color: '#0f172a',
+                padding: '10px 20px',
+                borderRadius: '10px',
+                fontSize: '16px',
+                fontWeight: '900',
+              }}
+            >
+              Calculate Quote Online →
+            </div>
           </div>
         </div>
       </div>
