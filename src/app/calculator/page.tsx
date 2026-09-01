@@ -11,6 +11,7 @@ import {
   PolicyComparisonModal,
   PolicySelector,
   PremiumSummaryCard,
+  PrintableQuotationSheet,
   SchemeSelector,
   SpecialPolicyOptions,
   SumAssuredSelector,
@@ -103,7 +104,7 @@ export default function CalculatorPage() {
       <ValidationNotice scheme={scheme} />
 
       {/* 4. Calculator Main Grid Layout */}
-      <section className="py-8 px-6">
+      <section className="py-8 px-6 calculator-main-grid">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Form Section */}
@@ -242,7 +243,7 @@ export default function CalculatorPage() {
             </div>
 
             {/* Results Section */}
-            <div className="lg:col-span-5 printable-card">
+            <div className="lg:col-span-5 no-print">
               <div className="sticky top-6 space-y-6">
                 {/* Premium & Benefits Summary Card */}
                 <PremiumSummaryCard
@@ -275,6 +276,26 @@ export default function CalculatorPage() {
           </div>
         </div>
       </section>
+
+      {/* Dedicated Vibrant A4 Printable Quotation Sheet */}
+      <PrintableQuotationSheet
+        scheme={scheme}
+        fullName={fullName}
+        gender={gender}
+        eligibilityCategory={eligibilityCategory}
+        dateOfBirth={dateOfBirth}
+        effectiveDate={effectiveDate}
+        computedAge={computedAge}
+        ageProofType={ageProofType}
+        isRuralResident={isRuralResident}
+        bankAccountType={bankAccountType}
+        policyType={policyType}
+        isConverted={isConverted}
+        premiumCeasingAge={premiumCeasingAge}
+        sumAssured={sumAssured}
+        frequency={frequency}
+        quotationResult={quotationResult}
+      />
 
       {/* Comparison Modal */}
       <PolicyComparisonModal

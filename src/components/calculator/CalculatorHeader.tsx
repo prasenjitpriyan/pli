@@ -18,23 +18,23 @@ export function CalculatorHeader({
       <style
         dangerouslySetInnerHTML={{
           __html: `
+        @page {
+          size: A4 portrait;
+          margin: 6mm;
+        }
         @media print {
-          body {
-            background: white !important;
-            color: black !important;
+          html, body {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           nav,
           footer,
-          .no-print {
+          header,
+          .no-print,
+          section.calculator-main-grid {
             display: none !important;
-          }
-          .print-only {
-            display: block !important;
-          }
-          .printable-card {
-            border: 1px solid #cbd5e1 !important;
-            box-shadow: none !important;
-            break-inside: avoid;
           }
         }
       `,

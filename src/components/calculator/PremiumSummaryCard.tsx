@@ -43,6 +43,24 @@ export function PremiumSummaryCard({
           </span>
         </div>
 
+        {/* Explicit Rebate & Gross Calculation Ribbon */}
+        <div className="mt-3 pt-3 border-t border-slate-700/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Gross Premium:</span>
+            <span className="text-slate-200 line-through font-mono">
+              {formatINR(quotationResult.frequencyPremium)}
+            </span>
+          </div>
+          {quotationResult.rebate > 0 ? (
+            <div className="flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 px-2 py-0.5 rounded-full font-bold">
+              <i className="ri-discount-percent-fill text-emerald-400"></i>
+              <span>Rebate Deducted: -{formatINR(quotationResult.rebate)}</span>
+            </div>
+          ) : (
+            <span className="text-slate-400 font-mono">Rebate: ₹0</span>
+          )}
+        </div>
+
         <p className="text-xs text-slate-300 mt-2">
           Net Monthly Equivalent: <strong>{formatINR(quotationResult.netMonthlyPremium)}</strong> |
           Annualized: <strong>{formatINR(quotationResult.annualizedPremium)}</strong>
@@ -51,6 +69,17 @@ export function PremiumSummaryCard({
 
       {/* Key Metrics Breakdown */}
       <div className="p-6 space-y-3 text-sm">
+        {/* Detailed Rebate Calculation Line */}
+        <div className="flex justify-between py-1.5 border-b border-slate-100 items-center">
+          <span className="text-(--text-light) flex items-center gap-1">
+            <i className="ri-shield-check-line text-emerald-600"></i>
+            Rebate Benefit (High SA & Frequency Discount)
+          </span>
+          <span className="font-bold text-emerald-600">
+            {quotationResult.rebate > 0 ? `-${formatINR(quotationResult.rebate)} deducted` : 'Nil'}
+          </span>
+        </div>
+
         <div className="flex justify-between py-1.5 border-b border-slate-100">
           <span className="text-(--text-light)">Declared Bonus Rate</span>
           <span className="font-semibold text-(--text-dark)">
