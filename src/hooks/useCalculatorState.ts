@@ -43,6 +43,9 @@ export function useCalculatorState() {
   const [manualAge, setManualAge] = useState<number>(30)
 
   // Joint Life Inputs (Yugal Suraksha)
+  const [jointAgeMode, setJointAgeMode] = useState<'DOB' | 'AGE'>('DOB')
+  const [firstLifeDob, setFirstLifeDob] = useState<string>('1996-05-15')
+  const [secondLifeDob, setSecondLifeDob] = useState<string>('1998-08-20')
   const [firstLifeAge, setFirstLifeAge] = useState<number>(30)
   const [secondLifeAge, setSecondLifeAge] = useState<number>(28)
 
@@ -117,13 +120,30 @@ export function useCalculatorState() {
     }
   }
 
+  // Joint Life Effective Ages (calculated from DOB or manual)
+  const firstLifeEffectiveAge = useMemo(() => {
+    if (jointAgeMode === 'DOB' && firstLifeDob) {
+      const { age } = calculateAge(firstLifeDob, effectiveDate)
+      return age
+    }
+    return firstLifeAge
+  }, [jointAgeMode, firstLifeDob, effectiveDate, firstLifeAge])
+
+  const secondLifeEffectiveAge = useMemo(() => {
+    if (jointAgeMode === 'DOB' && secondLifeDob) {
+      const { age } = calculateAge(secondLifeDob, effectiveDate)
+      return age
+    }
+    return secondLifeAge
+  }, [jointAgeMode, secondLifeDob, effectiveDate, secondLifeAge])
+
   // Derived Completed Age
   const computedAge = useMemo(() => {
     if (policyType === 'BAL_JEEVAN_BIMA') {
       return childAge
     }
     if (policyType === 'YUGAL_SURAKSHA') {
-      return Math.floor((firstLifeAge + secondLifeAge) / 2)
+      return Math.floor((firstLifeEffectiveAge + secondLifeEffectiveAge) / 2)
     }
     if (ageInputMode === 'DOB' && dateOfBirth) {
       const { age } = calculateAge(dateOfBirth, effectiveDate)
@@ -133,8 +153,8 @@ export function useCalculatorState() {
   }, [
     policyType,
     childAge,
-    firstLifeAge,
-    secondLifeAge,
+    firstLifeEffectiveAge,
+    secondLifeEffectiveAge,
     ageInputMode,
     dateOfBirth,
     effectiveDate,
@@ -177,8 +197,8 @@ export function useCalculatorState() {
       age: computedAge,
       frequency,
       customer: { fullName, gender, eligibilityCategory, pincode },
-      firstLifeAge: canonicalPli === 'YUGAL_SURAKSHA' ? firstLifeAge : undefined,
-      secondLifeAge: canonicalPli === 'YUGAL_SURAKSHA' ? secondLifeAge : undefined,
+      firstLifeAge: canonicalPli === 'YUGAL_SURAKSHA' ? firstLifeEffectiveAge : undefined,
+      secondLifeAge: canonicalPli === 'YUGAL_SURAKSHA' ? secondLifeEffectiveAge : undefined,
       childAge: canonicalPli === 'BAL_JEEVAN_BIMA' ? childAge : undefined,
       parentAge: canonicalPli === 'BAL_JEEVAN_BIMA' ? parentAge : undefined,
       premiumCeasingAge:
@@ -202,8 +222,8 @@ export function useCalculatorState() {
     gender,
     eligibilityCategory,
     pincode,
-    firstLifeAge,
-    secondLifeAge,
+    firstLifeEffectiveAge,
+    secondLifeEffectiveAge,
     childAge,
     parentAge,
     isParentDeceased,
@@ -387,10 +407,18 @@ Generated via PLI Calculator: ${window.location.origin}/calculator?scheme=${sche
     setDateOfBirth,
     manualAge,
     setManualAge,
+    jointAgeMode,
+    setJointAgeMode,
+    firstLifeDob,
+    setFirstLifeDob,
+    secondLifeDob,
+    setSecondLifeDob,
     firstLifeAge,
     setFirstLifeAge,
     secondLifeAge,
     setSecondLifeAge,
+    firstLifeEffectiveAge,
+    secondLifeEffectiveAge,
     childDateOfBirth,
     setChildDateOfBirth,
     childAge,

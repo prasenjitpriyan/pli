@@ -10,6 +10,10 @@ interface PrintableQuotationSheetProps {
   dateOfBirth: string
   effectiveDate: string
   computedAge: number
+  firstLifeDob?: string
+  secondLifeDob?: string
+  firstLifeEffectiveAge?: number
+  secondLifeEffectiveAge?: number
   ageProofType: 'STANDARD' | 'NON-STANDARD'
   isRuralResident: boolean
   bankAccountType: 'POSB' | 'SCHEDULED_BANK' | 'NONE'
@@ -29,6 +33,10 @@ export function PrintableQuotationSheet({
   dateOfBirth,
   effectiveDate,
   computedAge,
+  firstLifeDob,
+  secondLifeDob,
+  firstLifeEffectiveAge,
+  secondLifeEffectiveAge,
   ageProofType,
   isRuralResident,
   bankAccountType,
@@ -98,16 +106,31 @@ export function PrintableQuotationSheet({
                 <span className="text-slate-500 block text-[0.65rem]">Gender:</span>
                 <strong className="text-slate-900">{gender || 'Male'}</strong>
               </div>
-              <div>
+              <div className={policyType === 'YUGAL_SURAKSHA' ? 'col-span-2' : ''}>
                 <span className="text-slate-500 block text-[0.65rem]">Entry Age (ANB):</span>
                 <strong className="text-slate-900">
-                  {computedAge} Years {dateOfBirth ? `(DOB: ${dateOfBirth})` : ''}
+                  {policyType === 'YUGAL_SURAKSHA' ? (
+                    <>
+                      Joint Age: {computedAge} Yrs (First: {firstLifeEffectiveAge} yrs, Second: {secondLifeEffectiveAge} yrs)
+                    </>
+                  ) : (
+                    <>
+                      {computedAge} Years {dateOfBirth ? `(DOB: ${dateOfBirth})` : ''}
+                    </>
+                  )}
                 </strong>
               </div>
-              <div>
-                <span className="text-slate-500 block text-[0.65rem]">Age Proof:</span>
-                <strong className="text-slate-900">{ageProofType}</strong>
-              </div>
+              {policyType !== 'YUGAL_SURAKSHA' && (
+                <div>
+                  <span className="text-slate-500 block text-[0.65rem]">Age Proof:</span>
+                  <strong className="text-slate-900">{ageProofType}</strong>
+                </div>
+              )}
+              {policyType === 'YUGAL_SURAKSHA' && firstLifeDob && secondLifeDob && (
+                <div className="col-span-2 text-[0.65rem] text-slate-700">
+                  <span>First Life DOB: <strong>{firstLifeDob}</strong></span> • <span>Second Life DOB: <strong>{secondLifeDob}</strong></span>
+                </div>
+              )}
               <div className="col-span-2">
                 <span className="text-slate-500 block text-[0.65rem]">Category:</span>
                 <span className="text-slate-800 font-semibold truncate block">

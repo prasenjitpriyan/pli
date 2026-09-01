@@ -43,10 +43,18 @@ export default function CalculatorPage() {
     setDateOfBirth,
     manualAge,
     setManualAge,
+    jointAgeMode,
+    setJointAgeMode,
+    firstLifeDob,
+    setFirstLifeDob,
+    secondLifeDob,
+    setSecondLifeDob,
     firstLifeAge,
     setFirstLifeAge,
     secondLifeAge,
     setSecondLifeAge,
+    firstLifeEffectiveAge,
+    secondLifeEffectiveAge,
     childDateOfBirth,
     setChildDateOfBirth,
     childAge,
@@ -182,10 +190,18 @@ export default function CalculatorPage() {
                   {/* Dynamic Age Inputs based on Policy Type */}
                   {policyType === 'YUGAL_SURAKSHA' ? (
                     <JointLifeInputs
+                      jointAgeMode={jointAgeMode}
+                      onJointAgeModeChange={setJointAgeMode}
+                      firstLifeDob={firstLifeDob}
+                      onFirstLifeDobChange={setFirstLifeDob}
+                      secondLifeDob={secondLifeDob}
+                      onSecondLifeDobChange={setSecondLifeDob}
                       firstLifeAge={firstLifeAge}
                       onFirstLifeAgeChange={setFirstLifeAge}
                       secondLifeAge={secondLifeAge}
                       onSecondLifeAgeChange={setSecondLifeAge}
+                      firstLifeEffectiveAge={firstLifeEffectiveAge}
+                      secondLifeEffectiveAge={secondLifeEffectiveAge}
                       computedAge={computedAge}
                     />
                   ) : policyType === 'BAL_JEEVAN_BIMA' ? (
@@ -286,6 +302,10 @@ export default function CalculatorPage() {
         dateOfBirth={dateOfBirth}
         effectiveDate={effectiveDate}
         computedAge={computedAge}
+        firstLifeDob={firstLifeDob}
+        secondLifeDob={secondLifeDob}
+        firstLifeEffectiveAge={firstLifeEffectiveAge}
+        secondLifeEffectiveAge={secondLifeEffectiveAge}
         ageProofType={ageProofType}
         isRuralResident={isRuralResident}
         bankAccountType={bankAccountType}
