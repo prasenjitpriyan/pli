@@ -2,7 +2,10 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import PageTransition from '@/components/common/PageTransition';
+import AnimatedCounter from '@/components/common/AnimatedCounter';
+import { staggerContainer, fadeUpVariant } from '@/lib/animations';
 
 export default function BonusRatesPage() {
   const [demoSA, setDemoSA] = useState(1000000); // 10 Lakhs default
@@ -15,9 +18,13 @@ export default function BonusRatesPage() {
 
   return (
     <PageTransition className="min-h-screen bg-(--bg-light) pb-24">
-      {/* Hero Header */}
+      {/* Hero Header with Motion */}
       <section className="bg-linear-to-r from-(--primary-dark) via-[#242f42] to-(--primary-dark) text-white py-16 px-6 relative overflow-hidden">
-        <div className="container-custom text-center max-w-4xl mx-auto space-y-4 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="container-custom text-center max-w-4xl mx-auto space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-(--accent-gold) text-xs font-bold uppercase tracking-wider border border-white/10">
             <i className="ri-award-fill"></i>
             India&apos;s Highest Declared Insurance Bonus
@@ -28,14 +35,19 @@ export default function BonusRatesPage() {
           <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
             Postal Life Insurance offers unparalleled bonus returns backed by the Sovereign Guarantee of the Government of India with 0% GST deductions.
           </p>
-        </div>
+        </motion.div>
       </section>
 
       {/* Bonus Rates Master Cards */}
       <section className="container-custom py-12 px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* PLI Rates Card */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <span className="px-3 py-1 rounded-full bg-(--primary-red)/10 text-(--primary-red) text-xs font-bold uppercase tracking-wider">
@@ -45,16 +57,21 @@ export default function BonusRatesPage() {
                   Postal Life Insurance (PLI)
                 </h2>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-(--primary-red) text-white flex items-center justify-center text-2xl">
+              <div className="w-12 h-12 rounded-2xl bg-(--primary-red) text-white flex items-center justify-center text-2xl shadow-md">
                 <i className="ri-building-2-line"></i>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="space-y-3">
               {[
                 {
                   scheme: 'Whole Life Assurance (Suraksha / Suvidha)',
-                  bonus: '₹76',
+                  bonus: 76,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Highest Bonus in India',
                   color: 'text-(--primary-red)',
@@ -62,7 +79,7 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Endowment Assurance (Santosh)',
-                  bonus: '₹52',
+                  bonus: 52,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Most Popular',
                   color: 'text-(--accent-gold)',
@@ -70,7 +87,7 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Anticipated Endowment / Money Back (Sumangal)',
-                  bonus: '₹48',
+                  bonus: 48,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Periodic Cashbacks',
                   color: 'text-blue-600',
@@ -78,7 +95,7 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Joint Life Assurance (Yugal Suraksha)',
-                  bonus: '₹52',
+                  bonus: 52,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Husband & Wife',
                   color: 'text-purple-600',
@@ -86,16 +103,19 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Children Policy (Bal Jeevan Bima)',
-                  bonus: '₹52',
+                  bonus: 52,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Future Premium Waiver',
                   color: 'text-emerald-600',
                   bgColor: 'bg-emerald-50',
                 },
               ].map((row) => (
-                <div
+                <motion.div
                   key={row.scheme}
-                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4">
+                  variants={fadeUpVariant}
+                  whileHover={{ scale: 1.01, x: 2 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 transition-all">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                       {row.tag}
@@ -106,17 +126,22 @@ export default function BonusRatesPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className={`text-xl font-black ${row.color}`}>
-                      {row.bonus}
+                      ₹{row.bonus}
                     </div>
                     <div className="text-[10px] text-slate-500">{row.unit}</div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* RPLI Rates Card */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider">
@@ -126,16 +151,21 @@ export default function BonusRatesPage() {
                   Rural Postal Life Insurance (RPLI)
                 </h2>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-md">
                 <i className="ri-landscape-line"></i>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="space-y-3">
               {[
                 {
                   scheme: 'Gram Suraksha (Rural Whole Life)',
-                  bonus: '₹65',
+                  bonus: 65,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Top Rural Bonus',
                   color: 'text-emerald-700',
@@ -143,7 +173,7 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Gram Santosh (Rural Endowment)',
-                  bonus: '₹50',
+                  bonus: 50,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Fixed Term Savings',
                   color: 'text-(--accent-gold)',
@@ -151,7 +181,7 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Gram Suvidha (Rural Convertible Whole Life)',
-                  bonus: '₹65',
+                  bonus: 65,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Convertible at Year 5',
                   color: 'text-teal-600',
@@ -159,7 +189,7 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Gram Sumangal (Rural Money Back)',
-                  bonus: '₹45',
+                  bonus: 45,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Survival Cashbacks',
                   color: 'text-blue-600',
@@ -167,16 +197,19 @@ export default function BonusRatesPage() {
                 },
                 {
                   scheme: 'Gram Priya (10-Year Rural Policy)',
-                  bonus: '₹45',
+                  bonus: 45,
                   unit: 'per ₹1,000 SA / Year',
                   tag: 'Short 10-Year Term',
                   color: 'text-indigo-600',
                   bgColor: 'bg-indigo-50',
                 },
               ].map((row) => (
-                <div
+                <motion.div
                   key={row.scheme}
-                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4">
+                  variants={fadeUpVariant}
+                  whileHover={{ scale: 1.01, x: 2 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 transition-all">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                       {row.tag}
@@ -187,20 +220,25 @@ export default function BonusRatesPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className={`text-xl font-black ${row.color}`}>
-                      {row.bonus}
+                      ₹{row.bonus}
                     </div>
                     <div className="text-[10px] text-slate-500">{row.unit}</div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Interactive Bonus Growth Estimator */}
       <section className="container-custom py-8 px-6">
-        <div className="bg-linear-to-br from-(--primary-dark) to-[#2d3748] rounded-3xl p-8 md:p-12 text-white shadow-xl space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="bg-linear-to-br from-(--primary-dark) to-[#2d3748] rounded-3xl p-8 md:p-12 text-white shadow-xl space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h2 className="text-2xl md:text-3xl font-black text-white">
               Interactive Bonus Growth Estimator
@@ -216,7 +254,7 @@ export default function BonusRatesPage() {
               <div className="flex justify-between items-center text-sm">
                 <span className="font-semibold text-slate-200">Sum Assured</span>
                 <span className="text-lg font-black text-(--accent-gold)">
-                  ₹{demoSA.toLocaleString('en-IN')}
+                  <AnimatedCounter value={demoSA} prefix="₹" formatIndian duration={0.4} />
                 </span>
               </div>
               <input
@@ -258,52 +296,59 @@ export default function BonusRatesPage() {
             </div>
           </div>
 
-          {/* Results Comparison Grid */}
+          {/* Results Comparison Grid with Live Animated Counters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            <div className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
+            <motion.div whileHover={{ scale: 1.03 }} className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
               <span className="text-[11px] font-semibold text-slate-300">PLI Whole Life (@ ₹76)</span>
               <div className="text-xl font-black text-(--accent-gold)">
-                ₹{Math.round(calculatedPliWlBonus).toLocaleString('en-IN')}
+                <AnimatedCounter value={calculatedPliWlBonus} prefix="₹" formatIndian duration={0.6} />
               </div>
               <span className="text-[10px] text-slate-400">Bonus Accumulation</span>
-            </div>
-            <div className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
               <span className="text-[11px] font-semibold text-slate-300">PLI Endowment (@ ₹52)</span>
               <div className="text-xl font-black text-emerald-400">
-                ₹{Math.round(calculatedPliEaBonus).toLocaleString('en-IN')}
+                <AnimatedCounter value={calculatedPliEaBonus} prefix="₹" formatIndian duration={0.6} />
               </div>
               <span className="text-[10px] text-slate-400">Bonus Accumulation</span>
-            </div>
-            <div className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
               <span className="text-[11px] font-semibold text-slate-300">RPLI Whole Life (@ ₹65)</span>
               <div className="text-xl font-black text-amber-300">
-                ₹{Math.round(calculatedRpliWlBonus).toLocaleString('en-IN')}
+                <AnimatedCounter value={calculatedRpliWlBonus} prefix="₹" formatIndian duration={0.6} />
               </div>
               <span className="text-[10px] text-slate-400">Bonus Accumulation</span>
-            </div>
-            <div className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} className="bg-white/10 p-5 rounded-2xl border border-white/15 text-center space-y-1">
               <span className="text-[11px] font-semibold text-slate-300">RPLI Endowment (@ ₹50)</span>
               <div className="text-xl font-black text-cyan-300">
-                ₹{Math.round(calculatedRpliEaBonus).toLocaleString('en-IN')}
+                <AnimatedCounter value={calculatedRpliEaBonus} prefix="₹" formatIndian duration={0.6} />
               </div>
               <span className="text-[10px] text-slate-400">Bonus Accumulation</span>
-            </div>
+            </motion.div>
           </div>
 
           <div className="text-center pt-2">
-            <Link
-              href="/calculator"
-              className="btn-primary inline-flex items-center gap-2 shadow-xl">
-              <i className="ri-calculator-line"></i>
-              Calculate Full Actuarial Quote with Monthly Breakdown
-            </Link>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="inline-block">
+              <Link
+                href="/calculator"
+                className="btn-primary inline-flex items-center gap-2 shadow-xl">
+                <i className="ri-calculator-line"></i>
+                Calculate Full Actuarial Quote with Monthly Breakdown
+              </Link>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Comparison with Commercial Private Insurers */}
       <section className="container-custom py-12 px-6 max-w-4xl mx-auto">
-        <div className="bg-white rounded-3xl p-8 md:p-10 border border-slate-200 shadow-sm space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="bg-white rounded-3xl p-8 md:p-10 border border-slate-200 shadow-sm space-y-6">
           <h2 className="text-2xl font-black text-(--primary-dark) text-center">
             How PLI Compares Against Commercial Private Insurers
           </h2>
@@ -346,7 +391,7 @@ export default function BonusRatesPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       </section>
     </PageTransition>
   );

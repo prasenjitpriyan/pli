@@ -1,3 +1,8 @@
+'use client';
+
+import { motion } from 'motion/react';
+import { staggerContainer, fadeUpVariant } from '@/lib/animations';
+
 const ADVANTAGES = [
   {
     icon: 'ri-shield-check-fill',
@@ -35,33 +40,53 @@ const ADVANTAGES = [
     desc: 'Under Bal Jeevan Bima, 100% of future premiums are waived upon parent passing; policy stays active until maturity.',
     color: 'text-teal-500',
   },
-]
+];
 
 export function WhyChoosePliSection() {
   return (
-    <section className="py-20 px-6 bg-white" id="why">
+    <section className="py-20 px-6 bg-white overflow-hidden" id="why">
       <div className="container-custom">
-        <h2 className="section-title">The Unmatched PLI & RPLI Advantage</h2>
-        <p className="text-center text-slate-600 max-w-2xl mx-auto mb-16 text-sm md:text-base">
-          Discover why millions of government officers, defense personnel, and rural citizens trust
-          PLI & RPLI for life cover and long-term wealth creation.
-        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-bold text-amber-900 uppercase tracking-wider mb-3">
+            <i className="ri-medal-fill text-amber-500"></i> India Post Heritage Since 1884
+          </div>
+          <h2 className="section-title">The Unmatched PLI & RPLI Advantage</h2>
+          <p className="text-slate-600 text-sm md:text-base mt-2">
+            Discover why millions of government officers, defense personnel, and rural citizens trust
+            PLI & RPLI for life cover and long-term wealth creation.
+          </p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {ADVANTAGES.map((item, index) => (
-            <div
+            <motion.div
               key={index}
-              className="group p-8 rounded-3xl bg-(--bg-light) border border-slate-100 hover:border-(--accent-gold) hover:bg-white transition-all duration-300 shadow-xs hover:shadow-xl relative overflow-hidden animate-on-scroll"
-            >
-              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md mb-6 text-2xl group-hover:bg-(--primary-red) group-hover:text-white transition-colors duration-300">
-                <i className={`${item.icon} ${item.color} group-hover:text-white`}></i>
+              variants={fadeUpVariant}
+              whileHover={{ y: -6, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+              className="group p-8 rounded-3xl bg-(--bg-light) border border-slate-100 hover:border-(--accent-gold) hover:bg-white transition-colors duration-300 shadow-xs hover:shadow-xl relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md mb-6 text-2xl group-hover:bg-(--primary-red) group-hover:text-white transition-colors duration-300">
+                  <i className={`${item.icon} ${item.color} group-hover:text-white transition-colors`}></i>
+                </div>
+                <h3 className="text-xl font-bold text-(--primary-dark) mb-3">{item.title}</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
               </div>
-              <h3 className="text-xl font-bold text-(--primary-dark) mb-3">{item.title}</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
-  )
+  );
 }

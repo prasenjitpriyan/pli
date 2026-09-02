@@ -1,14 +1,18 @@
-import { formatINR, FREQUENCY_CONFIG, PliQuoteResult, PremiumFrequency } from '@/lib/pli'
-import { RpliQuoteResult } from '@/lib/rpli'
+'use client';
+
+import { motion } from 'motion/react';
+import { formatINR, FREQUENCY_CONFIG, PliQuoteResult, PremiumFrequency } from '@/lib/pli';
+import { RpliQuoteResult } from '@/lib/rpli';
+import AnimatedCounter from '@/components/common/AnimatedCounter';
 
 interface PremiumSummaryCardProps {
-  scheme: 'PLI' | 'RPLI'
-  frequency: PremiumFrequency
-  quotationResult: PliQuoteResult | RpliQuoteResult
-  copied: boolean
-  onCopySummary: () => void
-  onOpenCompareModal: () => void
-  onPrint: () => void
+  scheme: 'PLI' | 'RPLI';
+  frequency: PremiumFrequency;
+  quotationResult: PliQuoteResult | RpliQuoteResult;
+  copied: boolean;
+  onCopySummary: () => void;
+  onOpenCompareModal: () => void;
+  onPrint: () => void;
 }
 
 export function PremiumSummaryCard({
@@ -21,7 +25,11 @@ export function PremiumSummaryCard({
   onPrint,
 }: PremiumSummaryCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+      className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="bg-(--primary-dark) text-white p-6 relative">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
@@ -36,7 +44,12 @@ export function PremiumSummaryCard({
 
         <div className="flex items-baseline gap-2">
           <span className="text-4xl md:text-5xl font-extrabold text-(--accent-gold)">
-            {formatINR(quotationResult.netInstallmentPremium)}
+            <AnimatedCounter
+              value={quotationResult.netInstallmentPremium}
+              prefix="₹"
+              formatIndian
+              duration={0.8}
+            />
           </span>
           <span className="text-sm font-medium text-slate-300">
             / {FREQUENCY_CONFIG[frequency].label.toLowerCase().split(' ')[0]}
@@ -109,8 +122,7 @@ export function PremiumSummaryCard({
               {quotationResult.survivalBenefits.map((b, idx) => (
                 <div
                   key={idx}
-                  className="flex justify-between items-center py-1 border-b border-emerald-100/70"
-                >
+                  className="flex justify-between items-center py-1 border-b border-emerald-100/70">
                   <span className="text-slate-700 font-medium">{b.description}</span>
                   <span className="font-bold text-emerald-700">{formatINR(b.amount)}</span>
                 </div>
@@ -125,13 +137,18 @@ export function PremiumSummaryCard({
           </div>
         )}
 
-        {/* Maturity Highlight Box */}
+        {/* Maturity Highlight Box with Animated Counter */}
         <div className="bg-linear-to-br from-amber-50 to-orange-50/50 p-5 rounded-xl border border-amber-200 text-center mt-4">
           <span className="text-xs uppercase tracking-wider text-amber-800 font-bold block mb-1">
             Estimated Maturity Benefit (Age {quotationResult.maturityAge})
           </span>
           <span className="text-3xl font-extrabold text-(--primary-dark)">
-            {formatINR(quotationResult.maturityAmount)}
+            <AnimatedCounter
+              value={quotationResult.maturityAmount}
+              prefix="₹"
+              formatIndian
+              duration={0.9}
+            />
           </span>
         </div>
 
@@ -165,8 +182,7 @@ export function PremiumSummaryCard({
                   (quotationResult as RpliQuoteResult).medicalRequired
                     ? 'bg-amber-100 text-amber-900'
                     : 'bg-emerald-100 text-emerald-900'
-                }`}
-              >
+                }`}>
                 {(quotationResult as RpliQuoteResult).medicalRuleStatus}
               </span>
             )}
@@ -182,8 +198,7 @@ export function PremiumSummaryCard({
                   <i
                     className={`ri-table-line text-sm ${
                       scheme === 'RPLI' ? 'text-emerald-700' : 'text-(--primary-red)'
-                    }`}
-                  ></i>
+                    }`}></i>
                   Official {scheme} Mode Breakdown Table
                 </span>
                 <span className="text-[0.65rem] font-bold bg-slate-200 text-slate-800 px-2 py-0.5 rounded">
@@ -237,7 +252,7 @@ export function PremiumSummaryCard({
                       },
                     ] as const
                   ).map((row, rIdx) => {
-                    const isCurrentMode = frequency === row.mode
+                    const isCurrentMode = frequency === row.mode;
                     return (
                       <tr
                         key={rIdx}
@@ -247,15 +262,13 @@ export function PremiumSummaryCard({
                               ? 'bg-emerald-50/80 font-bold text-emerald-950'
                               : 'bg-red-50/80 font-bold text-red-950'
                             : 'hover:bg-slate-100/50'
-                        }
-                      >
+                        }>
                         <td className="p-2 flex items-center gap-1">
                           {isCurrentMode && (
                             <span
                               className={`w-1.5 h-1.5 rounded-full ${
                                 scheme === 'RPLI' ? 'bg-emerald-600' : 'bg-(--primary-red)'
-                              }`}
-                            ></span>
+                              }`}></span>
                           )}
                           {row.label}
                         </td>
@@ -264,8 +277,7 @@ export function PremiumSummaryCard({
                         <td
                           className={`p-2 text-right ${
                             scheme === 'RPLI' ? 'text-emerald-700' : 'text-green-700'
-                          }`}
-                        >
+                          }`}>
                           -{formatINR(row.data.rebate)}
                         </td>
                         <td className="p-2 text-right">{formatINR(row.data.tax)}</td>
@@ -273,7 +285,7 @@ export function PremiumSummaryCard({
                           {formatINR(row.data.netPremium)}
                         </td>
                       </tr>
-                    )
+                    );
                   })}
                 </tbody>
               </table>
@@ -282,31 +294,39 @@ export function PremiumSummaryCard({
         )}
       </div>
 
-      {/* Actions Toolbar */}
+      {/* Actions Toolbar with Spring Touch Feedback */}
       <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap gap-2 justify-between no-print">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onCopySummary}
           type="button"
-          className="flex-1 min-w-32.5 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer">
+          className="flex-1 min-w-32.5 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
           <i
             className={
               copied ? 'ri-check-line text-green-600' : 'ri-file-copy-line text-blue-600'
             }></i>
           {copied ? 'Copied!' : 'Copy Summary'}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onOpenCompareModal}
           type="button"
-          className="flex-1 min-w-32.5 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer">
+          className="flex-1 min-w-32.5 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
           <i className="ri-scales-3-line text-amber-600"></i> Compare
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onPrint}
           type="button"
-          className="flex-1 min-w-27.5 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5 cursor-pointer">
+          className="flex-1 min-w-27.5 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
           <i className="ri-printer-line"></i> Print / PDF
-        </button>
-        <a
+        </motion.button>
+        <motion.a
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.97 }}
           href={`https://wa.me/919038332076?text=${encodeURIComponent(
             `Hello! I calculated a quotation on the PLI portal for ${scheme} policy.\n- Sum Assured: ₹${quotationResult.sumAssured.toLocaleString('en-IN')}\n- ${FREQUENCY_CONFIG[frequency].label} Premium: ₹${quotationResult.netInstallmentPremium.toLocaleString('en-IN')}\n- Estimated Maturity Benefit: ₹${quotationResult.maturityAmount.toLocaleString('en-IN')}\nPlease assist me with the policy issuance.`
           )}`}
@@ -314,8 +334,8 @@ export function PremiumSummaryCard({
           rel="noopener noreferrer"
           className="w-full mt-1 py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs">
           <i className="ri-whatsapp-fill text-sm"></i> Send Quote to WhatsApp Advisor (+91 9038332076 / 8620935473)
-        </a>
+        </motion.a>
       </div>
-    </div>
-  )
+    </motion.div>
+  );
 }
