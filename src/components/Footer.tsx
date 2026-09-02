@@ -1,4 +1,5 @@
-import { PliLogo } from './common/PliLogo'
+import Link from 'next/link';
+import { PliLogo } from './common/PliLogo';
 
 export default function Footer() {
   return (
@@ -21,8 +22,7 @@ export default function Footer() {
                     key={icon}
                     href="#"
                     className="flex items-center justify-center w-9 h-9 bg-white/10 rounded-full text-white transition-all hover:bg-(--primary-red) hover:-translate-y-1"
-                    aria-label={icon}
-                  >
+                    aria-label={icon}>
                     <i className={`ri-${icon}`}></i>
                   </a>
                 )
@@ -33,40 +33,50 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h3 className="text-white mb-6 text-xl relative inline-block after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:w-10 after:h-0.5 after:bg-(--accent-gold)">
-              Quick Links
+              Explore Portal
             </h3>
             <ul className="space-y-3">
               <li>
-                <a
-                  href="#about"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
-                >
-                  About Us
-                </a>
+                <Link
+                  href="/"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  Home Portal
+                </Link>
               </li>
               <li>
-                <a
-                  href="#products"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
-                >
-                  Our Products
-                </a>
+                <Link
+                  href="/schemes"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  All 12 Schemes
+                </Link>
               </li>
               <li>
-                <a
-                  href="#why"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
-                >
-                  Why Choose PLI
-                </a>
+                <Link
+                  href="/bonus-rates"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  Declared Bonus Rates
+                </Link>
               </li>
               <li>
-                <a
-                  href="#contact"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
-                >
-                  Contact Us
-                </a>
+                <Link
+                  href="/calculator"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  Actuarial Calculator
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/faq"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  Frequently Asked Questions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  Contact & Support
+                </Link>
               </li>
             </ul>
           </div>
@@ -74,7 +84,7 @@ export default function Footer() {
           {/* Resources */}
           <div>
             <h3 className="text-white mb-6 text-xl relative inline-block after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:w-10 after:h-0.5 after:bg-(--accent-gold)">
-              Resources
+              Official Tools
             </h3>
             <ul className="space-y-3">
               <li>
@@ -82,34 +92,30 @@ export default function Footer() {
                   href="https://share.google/NHDWnZ0xIYZgnilIi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-(--accent-gold) hover:underline hover:translate-x-1 transition-all inline-flex items-center gap-1 font-bold"
-                >
+                  className="text-(--accent-gold) hover:underline hover:translate-x-1 transition-all inline-flex items-center gap-1 font-bold">
                   <i className="ri-google-fill"></i> Google Business Profile
                 </a>
               </li>
               <li>
-                <a
+                <Link
                   href="/calculator"
-                  className="text-white hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block font-semibold"
-                >
-                  Premium Calculator
-                </a>
+                  className="text-white hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block font-semibold">
+                  Quote Calculation Procedure
+                </Link>
               </li>
               <li>
-                <a
-                  href="#rates"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
-                >
-                  Declared Bonus Rates
-                </a>
+                <Link
+                  href="/bonus-rates"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  ₹76/₹1,000 Bonus Table
+                </Link>
               </li>
               <li>
-                <a
-                  href="#eligibility"
-                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block"
-                >
-                  Eligibility Guidelines
-                </a>
+                <Link
+                  href="/schemes"
+                  className="text-[#ccc] hover:text-(--accent-gold) hover:translate-x-1 transition-all inline-block">
+                  PLI vs RPLI Comparison
+                </Link>
               </li>
             </ul>
           </div>

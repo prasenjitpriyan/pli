@@ -51,20 +51,21 @@ export default function Navbar() {
         </button>
 
         {/* Desktop Links */}
-        <ul className="hidden md:flex gap-8 list-none items-center">
+        <ul className="hidden md:flex gap-7 list-none items-center">
           {[
-            { name: 'About', href: '/#about' },
-            { name: 'Why PLI', href: '/#why' },
-            { name: 'Products', href: '/#products' },
+            { name: 'Home', href: '/' },
+            { name: 'Schemes', href: '/schemes' },
+            { name: 'Bonus Rates', href: '/bonus-rates' },
             { name: 'Calculator', href: '/calculator' },
-            { name: 'Contact', href: '/#contact' },
+            { name: 'FAQ', href: '/faq' },
+            { name: 'Contact', href: '/contact' },
           ].map((link) => (
             <li key={link.name}>
               <Link
                 href={link.href}
-                className={`text-[0.95rem] font-medium transition-all hover:text-(--accent-gold) ${
+                className={`text-[0.92rem] font-medium transition-all hover:text-(--accent-gold) ${
                   isActive(link.href)
-                    ? 'text-(--accent-gold) font-bold'
+                    ? 'text-(--accent-gold) font-bold underline underline-offset-6 decoration-2'
                     : 'opacity-90'
                 }`}>
                 {link.name}
@@ -75,22 +76,33 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         <div
-          className={`fixed top-0 right-0 h-screen w-[70%] max-w-75 bg-(--primary-dark) shadow-[-5px_0_15px_rgba(0,0,0,0.2)] z-100 flex flex-col items-center justify-center gap-8 transition-transform duration-300 ease-in-out md:hidden ${
+          className={`fixed top-0 right-0 h-screen w-[75%] max-w-80 bg-(--primary-dark) shadow-[-5px_0_15px_rgba(0,0,0,0.3)] z-100 flex flex-col items-center justify-center gap-6 transition-transform duration-300 ease-in-out md:hidden ${
             isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}>
-          <ul className="flex flex-col gap-8 list-none text-center">
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close menu"
+            className="absolute top-6 right-6 text-white text-2xl hover:text-(--accent-gold) p-2">
+            <i className="ri-close-line"></i>
+          </button>
+          <ul className="flex flex-col gap-6 list-none text-center w-full px-6">
             {[
-              { name: 'About', href: '/#about' },
-              { name: 'Why PLI', href: '/#why' },
-              { name: 'Products', href: '/#products' },
+              { name: 'Home', href: '/' },
+              { name: 'Schemes', href: '/schemes' },
+              { name: 'Bonus Rates', href: '/bonus-rates' },
               { name: 'Calculator', href: '/calculator' },
-              { name: 'Contact', href: '/#contact' },
+              { name: 'FAQ', href: '/faq' },
+              { name: 'Contact', href: '/contact' },
             ].map((link) => (
               <li key={link.name}>
                 <Link
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-xl hover:text-(--accent-gold) text-white/90 font-medium">
+                  className={`text-lg transition-colors font-medium block py-2 rounded-xl ${
+                    isActive(link.href)
+                      ? 'bg-white/10 text-(--accent-gold) font-bold'
+                      : 'text-white/90 hover:text-(--accent-gold)'
+                  }`}>
                   {link.name}
                 </Link>
               </li>

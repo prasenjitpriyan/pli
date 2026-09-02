@@ -109,6 +109,14 @@ export interface PliValidationResult {
   warnings: string[];
 }
 
+export interface ModePremiumDetail {
+  ratePer1000: number;
+  grossPremium: number;
+  rebate: number;
+  tax: number;
+  netPremium: number;
+}
+
 export interface PliQuoteResult {
   policyType: PliPolicy;
   policyName: string;
@@ -154,6 +162,14 @@ export interface PliQuoteResult {
   netInstallmentPremium: number;
   annualizedPremium: number;
   totalPremiumPaid: number;
+
+  // Mode-wise Breakdown Grid
+  modeDetails?: {
+    monthly: ModePremiumDetail;
+    quarterly: ModePremiumDetail;
+    halfYearly: ModePremiumDetail;
+    yearly: ModePremiumDetail;
+  };
 
   // Terminal Bonus & Maturity
   terminalBonus: number;

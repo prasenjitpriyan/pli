@@ -127,6 +127,40 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
   // 12. Total Premium Paid = installment × payments per year × duration
   const totalPremiumPaid = Math.round(netInstallmentPremium * freqConfig.paymentsPerYear * duration);
 
+  // 12b. Mode-wise Breakdown Details (Monthly, Quarterly, Half-Yearly, Yearly)
+  const monthlyGross = modelPrediction.monthlyPremium;
+  const ratePer1000Monthly = monthlyGross / (input.sumAssured / 1000);
+  const modeDetails = {
+    monthly: {
+      ratePer1000: Number(ratePer1000Monthly.toFixed(2)),
+      grossPremium: Math.round(monthlyGross),
+      rebate: Math.round(rebate),
+      tax: 0,
+      netPremium: Math.round(netMonthlyPremium),
+    },
+    quarterly: {
+      ratePer1000: Number((ratePer1000Monthly * 3).toFixed(2)),
+      grossPremium: Math.round(monthlyGross * 3),
+      rebate: Math.round(rebate * 3),
+      tax: 0,
+      netPremium: Math.round(netMonthlyPremium * 3),
+    },
+    halfYearly: {
+      ratePer1000: Number((ratePer1000Monthly * 6).toFixed(2)),
+      grossPremium: Math.round(monthlyGross * 6),
+      rebate: Math.round(rebate * 6),
+      tax: 0,
+      netPremium: Math.round(netMonthlyPremium * 6),
+    },
+    yearly: {
+      ratePer1000: Number((ratePer1000Monthly * 12).toFixed(2)),
+      grossPremium: Math.round(monthlyGross * 12),
+      rebate: Math.round(rebate * 12),
+      tax: 0,
+      netPremium: Math.round(netMonthlyPremium * 12),
+    },
+  };
+
   // 13. Terminal Bonus
   const terminalBonus = calculateTerminalBonus({
     policyType: isConverted ? 'ENDOWMENT' : input.policyType,
@@ -212,6 +246,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     netInstallmentPremium,
     annualizedPremium,
     totalPremiumPaid,
+    modeDetails,
     terminalBonus,
     survivalBenefits: benefits.survivalBenefits,
     finalMaturityPayout: benefits.finalMaturityPayout,

@@ -235,6 +235,83 @@ export function PrintableQuotationSheet({
           </div>
         </div>
 
+        {/* 3b. Official Payment Frequency & Mode Breakdown Table */}
+        {quotationResult.modeDetails && (
+          <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+              <span className="font-bold text-slate-900 text-[0.7rem] flex items-center gap-1">
+                <i
+                  className={`ri-table-line ${
+                    scheme === 'RPLI' ? 'text-emerald-700' : 'text-(--primary-red)'
+                  }`}
+                ></i>
+                Official {scheme} Payment Frequency & Mode Breakdown Schedule
+              </span>
+              <span className="text-[0.6rem] bg-slate-200 text-slate-800 font-bold px-1.5 py-0.5 rounded">
+                0% GST Exempt
+              </span>
+            </div>
+            <table className="w-full text-[0.67rem] text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-200/80 text-slate-800 font-bold">
+                  <th className="p-1 pl-2 rounded-l">Payment Mode</th>
+                  <th className="p-1 text-right">Table Rate/₹1k</th>
+                  <th className="p-1 text-right">Gross Premium (₹)</th>
+                  <th className="p-1 text-right">Rebate Deducted (₹)</th>
+                  <th className="p-1 text-right">GST (₹)</th>
+                  <th className="p-1 text-right pr-2 rounded-r">Net Installment (₹)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
+                {[
+                  { label: 'Monthly', mode: 'MONTHLY', data: quotationResult.modeDetails.monthly },
+                  { label: 'Quarterly', mode: 'QUARTERLY', data: quotationResult.modeDetails.quarterly },
+                  { label: 'Half-Yearly', mode: 'HALF_YEARLY', data: quotationResult.modeDetails.halfYearly },
+                  { label: 'Yearly', mode: 'YEARLY', data: quotationResult.modeDetails.yearly },
+                ].map((row, rIdx) => {
+                  const isCurrent = frequency === row.mode
+                  return (
+                    <tr
+                      key={rIdx}
+                      className={
+                        isCurrent
+                          ? scheme === 'RPLI'
+                            ? 'bg-emerald-50/90 font-bold text-emerald-950'
+                            : 'bg-red-50/90 font-bold text-red-950'
+                          : ''
+                      }
+                    >
+                      <td className="p-1 pl-2 flex items-center gap-1">
+                        {isCurrent && (
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              scheme === 'RPLI' ? 'bg-emerald-600' : 'bg-(--primary-red)'
+                            }`}
+                          ></span>
+                        )}
+                        {row.label} {isCurrent ? '(Selected Mode)' : ''}
+                      </td>
+                      <td className="p-1 text-right">₹{row.data.ratePer1000.toFixed(2)}</td>
+                      <td className="p-1 text-right">{formatINR(row.data.grossPremium)}</td>
+                      <td
+                        className={`p-1 text-right font-semibold ${
+                          scheme === 'RPLI' ? 'text-emerald-700' : 'text-green-700'
+                        }`}
+                      >
+                        -{formatINR(row.data.rebate)}
+                      </td>
+                      <td className="p-1 text-right text-slate-500">₹0 (0%)</td>
+                      <td className="p-1 text-right pr-2 font-black text-slate-900">
+                        {formatINR(row.data.netPremium)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         {/* 4. Maturity Benefits & Bonus Accrual Illustration */}
         <div className="bg-amber-50/60 p-3 rounded-xl border border-amber-300/80 space-y-2">
           <div className="flex items-center justify-between border-b border-amber-200 pb-1">

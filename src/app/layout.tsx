@@ -1,3 +1,4 @@
+import RouteProgressBar from '@/components/common/RouteProgressBar';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import type { Metadata, Viewport } from 'next';
@@ -180,6 +181,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased font-sans flex flex-col min-h-screen">
+        <RouteProgressBar />
         <Navbar />
         <div className="grow">{children}</div>
         <Footer />

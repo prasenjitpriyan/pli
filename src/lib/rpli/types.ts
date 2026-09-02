@@ -56,13 +56,8 @@ export interface RpliInput {
   rebate?: number;
 }
 
-export interface ModePremiumDetail {
-  ratePer1000: number;
-  grossPremium: number;
-  rebate: number;
-  tax: number;
-  netPremium: number;
-}
+import type { ModePremiumDetail } from '../pli/types';
+export type { ModePremiumDetail };
 
 export interface RpliQuoteResult {
   scheme: InsuranceScheme;

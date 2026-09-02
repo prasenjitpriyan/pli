@@ -173,24 +173,24 @@ export function PremiumSummaryCard({
           </div>
         </div>
 
-        {/* Official Table-Driven Mode Breakdown Grid (RPLI Standard) */}
-        {scheme === 'RPLI' && (quotationResult as RpliQuoteResult).modeDetails && (
+        {/* Official Table-Driven Mode Breakdown Grid (PLI & RPLI Standard) */}
+        {quotationResult.modeDetails && (
           <div className="mt-4 p-4 bg-slate-50/80 border border-slate-200 rounded-xl space-y-3">
             <div className="flex flex-col gap-1 border-b border-slate-200 pb-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-                  <i className="ri-table-line text-emerald-700 text-sm"></i>
-                  Official RPLI Mode Breakdown Table
+                  <i
+                    className={`ri-table-line text-sm ${
+                      scheme === 'RPLI' ? 'text-emerald-700' : 'text-(--primary-red)'
+                    }`}
+                  ></i>
+                  Official {scheme} Mode Breakdown Table
                 </span>
                 <span className="text-[0.65rem] font-bold bg-slate-200 text-slate-800 px-2 py-0.5 rounded">
-                  {(quotationResult as RpliQuoteResult).rateTableVersion}
+                  {quotationResult.rateTableVersion || '2.0-OFFICIAL'}
                 </span>
               </div>
               <div className="text-[0.68rem] text-slate-600 space-y-0.5">
-                <p>
-                  <strong>Rate Source:</strong>{' '}
-                  {(quotationResult as RpliQuoteResult).rateSource}
-                </p>
                 <p>
                   <strong>Entry Age (ANB):</strong> {quotationResult.effectiveAge} Years |{' '}
                   <strong>Target Maturity Age:</strong> {quotationResult.maturityAge} Years |{' '}
@@ -218,22 +218,22 @@ export function PremiumSummaryCard({
                       {
                         label: 'Monthly',
                         mode: 'MONTHLY',
-                        data: (quotationResult as RpliQuoteResult).modeDetails.monthly,
+                        data: quotationResult.modeDetails.monthly,
                       },
                       {
                         label: 'Quarterly',
                         mode: 'QUARTERLY',
-                        data: (quotationResult as RpliQuoteResult).modeDetails.quarterly,
+                        data: quotationResult.modeDetails.quarterly,
                       },
                       {
                         label: 'Half-Yearly',
                         mode: 'HALF_YEARLY',
-                        data: (quotationResult as RpliQuoteResult).modeDetails.halfYearly,
+                        data: quotationResult.modeDetails.halfYearly,
                       },
                       {
                         label: 'Yearly',
                         mode: 'YEARLY',
-                        data: (quotationResult as RpliQuoteResult).modeDetails.yearly,
+                        data: quotationResult.modeDetails.yearly,
                       },
                     ] as const
                   ).map((row, rIdx) => {
@@ -243,19 +243,29 @@ export function PremiumSummaryCard({
                         key={rIdx}
                         className={
                           isCurrentMode
-                            ? 'bg-emerald-50/80 font-bold text-emerald-950'
+                            ? scheme === 'RPLI'
+                              ? 'bg-emerald-50/80 font-bold text-emerald-950'
+                              : 'bg-red-50/80 font-bold text-red-950'
                             : 'hover:bg-slate-100/50'
                         }
                       >
                         <td className="p-2 flex items-center gap-1">
                           {isCurrentMode && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                scheme === 'RPLI' ? 'bg-emerald-600' : 'bg-(--primary-red)'
+                              }`}
+                            ></span>
                           )}
                           {row.label}
                         </td>
                         <td className="p-2 text-right">₹{row.data.ratePer1000.toFixed(2)}</td>
                         <td className="p-2 text-right">{formatINR(row.data.grossPremium)}</td>
-                        <td className="p-2 text-right text-emerald-700">
+                        <td
+                          className={`p-2 text-right ${
+                            scheme === 'RPLI' ? 'text-emerald-700' : 'text-green-700'
+                          }`}
+                        >
                           -{formatINR(row.data.rebate)}
                         </td>
                         <td className="p-2 text-right">{formatINR(row.data.tax)}</td>
