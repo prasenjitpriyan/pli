@@ -73,17 +73,41 @@ export default function ContactPage() {
                 </div>
                 <div className="flex items-start gap-3">
                   <i className="ri-phone-fill text-(--primary-red) text-base mt-0.5 shrink-0"></i>
-                  <div className="space-y-1">
-                    <a
-                      href="tel:9038332076"
-                      className="text-(--primary-dark) font-bold hover:text-(--primary-red) transition-colors block">
-                      +91 9038332076
-                    </a>
-                    <a
-                      href="tel:8620935473"
-                      className="text-(--primary-dark) font-bold hover:text-(--primary-red) transition-colors block">
-                      +91 8620935473
-                    </a>
+                  <div className="space-y-2 w-full">
+                    <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Senior Advisor</span>
+                        <a
+                          href="tel:9038332076"
+                          className="text-(--primary-dark) font-bold hover:text-(--primary-red) transition-colors">
+                          +91 9038332076
+                        </a>
+                      </div>
+                      <a
+                        href="https://wa.me/919038332076?text=Hello%2C%20I%20want%20to%20consult%20regarding%20Postal%20Life%20Insurance%20policy."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-all">
+                        <i className="ri-whatsapp-fill"></i> Chat
+                      </a>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Support Desk</span>
+                        <a
+                          href="tel:8620935473"
+                          className="text-(--primary-dark) font-bold hover:text-(--primary-red) transition-colors">
+                          +91 8620935473
+                        </a>
+                      </div>
+                      <a
+                        href="https://wa.me/918620935473?text=Hello%2C%20I%20want%20to%20consult%20regarding%20Postal%20Life%20Insurance%20policy."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-all">
+                        <i className="ri-whatsapp-fill"></i> Chat
+                      </a>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">

@@ -163,6 +163,8 @@ const structuredData = {
   ],
 };
 
+import WhatsAppFloatingWidget from '@/components/common/WhatsAppFloatingWidget';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -185,6 +187,7 @@ export default function RootLayout({
         <Navbar />
         <div className="grow">{children}</div>
         <Footer />
+        <WhatsAppFloatingWidget />
       </body>
     </html>
   );

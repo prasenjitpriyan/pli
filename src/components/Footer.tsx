@@ -136,9 +136,34 @@ export default function Footer() {
               </li>
               <li className="flex gap-4 items-start">
                 <i className="ri-phone-line text-(--accent-gold) text-xl mt-0.5"></i>
-                <a href="tel:18002666868" className="hover:text-white transition-colors">
-                  9038332076 || 8620935473
-                </a>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-2">
+                    <a href="tel:9038332076" className="hover:text-white transition-colors font-bold">
+                      +91 9038332076
+                    </a>
+                    <a
+                      href="https://wa.me/919038332076?text=Hello%2C%20I%20want%20to%20know%20about%20PLI%20policies."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366] hover:text-white font-semibold transition-all inline-flex items-center gap-1"
+                      title="Chat on WhatsApp">
+                      <i className="ri-whatsapp-fill"></i> WhatsApp
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a href="tel:8620935473" className="hover:text-white transition-colors font-bold">
+                      +91 8620935473
+                    </a>
+                    <a
+                      href="https://wa.me/918620935473?text=Hello%2C%20I%20want%20to%20know%20about%20PLI%20policies."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366] hover:text-white font-semibold transition-all inline-flex items-center gap-1"
+                      title="Chat on WhatsApp">
+                      <i className="ri-whatsapp-fill"></i> WhatsApp
+                    </a>
+                  </div>
+                </div>
               </li>
               <li className="flex gap-4 items-start">
                 <i className="ri-mail-line text-(--accent-gold) text-xl mt-0.5"></i>

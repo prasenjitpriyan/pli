@@ -80,10 +80,26 @@ export default function RootError({
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
               <a
+                href="https://wa.me/919038332076?text=Hello%2C%20I%20faced%20an%20issue%20on%20the%20PLI%20portal%2C%20please%20assist%20me."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2.5 rounded-lg bg-white border border-slate-200/80 hover:border-[#25D366] flex items-center gap-2 font-medium transition-colors">
+                <i className="ri-whatsapp-fill text-[#25D366] text-base"></i>
+                <span>WhatsApp: 9038332076</span>
+              </a>
+              <a
+                href="https://wa.me/918620935473?text=Hello%2C%20I%20faced%20an%20issue%20on%20the%20PLI%20portal%2C%20please%20assist%20me."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2.5 rounded-lg bg-white border border-slate-200/80 hover:border-[#25D366] flex items-center gap-2 font-medium transition-colors">
+                <i className="ri-whatsapp-fill text-[#25D366] text-base"></i>
+                <span>WhatsApp: 8620935473</span>
+              </a>
+              <a
                 href="tel:9038332076"
                 className="p-2.5 rounded-lg bg-white border border-slate-200/80 hover:border-(--primary-red) flex items-center gap-2 font-medium transition-colors">
                 <i className="ri-phone-line text-(--primary-red) text-sm"></i>
-                9038332076 / 8620935473
+                Call: 9038332076 / 8620935473
               </a>
               <a
                 href="mailto:prasenjitpriyan@gmail.com"

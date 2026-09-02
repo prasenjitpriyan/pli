@@ -287,29 +287,34 @@ export function PremiumSummaryCard({
         <button
           onClick={onCopySummary}
           type="button"
-          className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer"
-        >
+          className="flex-1 min-w-32.5 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer">
           <i
             className={
               copied ? 'ri-check-line text-green-600' : 'ri-file-copy-line text-blue-600'
-            }
-          ></i>
+            }></i>
           {copied ? 'Copied!' : 'Copy Summary'}
         </button>
         <button
           onClick={onOpenCompareModal}
           type="button"
-          className="flex-1 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <i className="ri-scales-3-line text-amber-600"></i> Compare {scheme} Policies
+          className="flex-1 min-w-32.5 py-2.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-bold text-(--primary-dark) hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer">
+          <i className="ri-scales-3-line text-amber-600"></i> Compare
         </button>
         <button
           onClick={onPrint}
           type="button"
-          className="flex-1 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5 cursor-pointer"
-        >
+          className="flex-1 min-w-27.5 py-2.5 px-3 bg-(--primary-red) text-white rounded-lg text-xs font-bold hover:bg-red-700 flex items-center justify-center gap-1.5 cursor-pointer">
           <i className="ri-printer-line"></i> Print / PDF
         </button>
+        <a
+          href={`https://wa.me/919038332076?text=${encodeURIComponent(
+            `Hello! I calculated a quotation on the PLI portal for ${scheme} policy.\n- Sum Assured: ₹${quotationResult.sumAssured.toLocaleString('en-IN')}\n- ${FREQUENCY_CONFIG[frequency].label} Premium: ₹${quotationResult.netInstallmentPremium.toLocaleString('en-IN')}\n- Estimated Maturity Benefit: ₹${quotationResult.maturityAmount.toLocaleString('en-IN')}\nPlease assist me with the policy issuance.`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full mt-1 py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs">
+          <i className="ri-whatsapp-fill text-sm"></i> Send Quote to WhatsApp Advisor (+91 9038332076 / 8620935473)
+        </a>
       </div>
     </div>
   )
