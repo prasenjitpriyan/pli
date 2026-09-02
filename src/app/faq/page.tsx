@@ -1,5 +1,6 @@
 'use client';
 
+import GooeyInput from '@/components/common/GooeyInput';
 import PageTransition from '@/components/common/PageTransition';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -167,7 +168,7 @@ export default function FaqPage() {
 
   return (
     <PageTransition className="min-h-screen bg-(--bg-light) pb-24">
-      {/* Hero Header */}
+      {/* Hero Header with Gooey Search Input */}
       <section className="bg-linear-to-r from-(--primary-dark) via-[#242f42] to-(--primary-dark) text-white py-16 px-6 relative overflow-hidden">
         <div className="container-custom text-center max-w-3xl mx-auto space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-(--accent-gold) text-xs font-bold uppercase tracking-wider border border-white/10">
@@ -182,25 +183,23 @@ export default function FaqPage() {
             claims settlement, tax benefits under 80C & 10(10D), and online portals.
           </p>
 
-          {/* Search Input */}
-          <div className="pt-4 max-w-xl mx-auto">
-            <div className="relative">
-              <i className="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-              <input
-                type="text"
-                placeholder="Search queries (e.g. loan, bonus, surrender, tax, 80C)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-white text-slate-800 rounded-full text-sm shadow-xl focus:outline-none focus:ring-2 focus:ring-(--accent-gold)"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  <i className="ri-close-circle-fill text-lg"></i>
-                </button>
-              )}
-            </div>
+          {/* Aceternity Gooey Search Input */}
+          <div className="pt-6">
+            <GooeyInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              resultCount={filteredFaqs.length}
+              placeholder="Search topics (e.g. loan, bonus rates, surrender, 80C, claims)..."
+              suggestions={[
+                'Loan Terms',
+                'Bonus Rates',
+                'Section 80C',
+                'Maturity Claim',
+                '0% GST',
+                'Surrender Policy',
+              ]}
+              onSelectSuggestion={(suggestion) => setSearchQuery(suggestion)}
+            />
           </div>
         </div>
       </section>
