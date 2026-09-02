@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import PageTransition from '@/components/common/PageTransition';
-import { staggerContainer, fadeUpVariant } from '@/lib/animations';
+import { staggerContainer } from '@/lib/animations';
+import { SchemeCard } from '@/components/schemes/SchemeCard';
 
 interface PolicyDetail {
   id: string;
@@ -113,7 +113,7 @@ const ALL_POLICIES: PolicyDetail[] = [
     loanAfter: 'Not Applicable',
     surrenderAfter: 'Not Applicable',
     description:
-      'Periodic survival survival benefits (money-back installments) throughout policy duration + full sum assured on death irrespective of prior payouts.',
+      'Periodic survival benefits (money-back installments) throughout policy duration + full sum assured on death irrespective of prior payouts.',
     highlights: [
       'Periodic survival cashbacks: 15-year (20%, 20%, 20%, 40%) or 20-year (20%, 20%, 20%, 20%, 20%)',
       'Full Sum Assured payable on death irrespective of survival benefits already paid',
@@ -329,43 +329,43 @@ export default function SchemesPage() {
   return (
     <PageTransition className="min-h-screen bg-(--bg-light) pb-24">
       {/* Header Banner with Motion */}
-      <section className="bg-linear-to-r from-(--primary-dark) via-[#242f42] to-(--primary-dark) text-white py-16 px-6 relative overflow-hidden">
+      <section className="bg-linear-to-r from-(--primary-dark) via-[#242f42] to-(--primary-dark) text-white py-12 sm:py-16 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute -right-10 -bottom-10 w-96 h-96 bg-(--primary-red)/10 rounded-full blur-3xl pointer-events-none" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className="container-custom relative z-10 text-center max-w-4xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-(--accent-gold) text-xs font-bold uppercase tracking-wider border border-white/10">
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/10 text-(--accent-gold) text-xs font-bold uppercase tracking-wider border border-white/10">
             <i className="ri-shield-star-fill"></i>
             100% Sovereign Guaranteed Portfolio
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight">
             Official Postal Life Insurance Policies
           </h1>
-          <p className="text-sm md:text-base text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
             Choose from India Post’s sovereign portfolio offering India’s highest declared bonus rates (up to ₹76/₹1,000 SA), 0% GST on premiums, and full tax exemptions under Sections 80C & 10(10D).
           </p>
         </motion.div>
       </section>
 
       {/* Filter and Search Bar with Shared Layout Motion */}
-      <section className="sticky top-18 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 py-4 px-6 shadow-xs">
-        <div className="container-custom flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Scheme Filter Tabs */}
-          <div className="flex bg-slate-100 p-1.5 rounded-full border border-slate-200 w-full md:w-auto relative">
+      <section className="sticky top-18 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 py-3.5 sm:py-4 px-4 sm:px-6 shadow-xs">
+        <div className="container-custom flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
+          {/* Scheme Filter Tabs: Fluid responsive layout with mobile-safe padding */}
+          <div className="flex bg-slate-100 p-1 sm:p-1.5 rounded-full border border-slate-200 w-full md:w-auto relative overflow-hidden">
             {(['ALL', 'PLI', 'RPLI'] as const).map((tab) => {
               const label =
                 tab === 'ALL'
-                  ? `All Schemes (${ALL_POLICIES.length})`
+                  ? `All (${ALL_POLICIES.length})`
                   : tab === 'PLI'
-                  ? 'PLI Schemes (6)'
-                  : 'RPLI Schemes (6)';
+                  ? 'PLI (6)'
+                  : 'RPLI (6)';
               return (
                 <button
                   key={tab}
                   onClick={() => setSelectedScheme(tab)}
-                  className={`relative px-4 sm:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-colors cursor-pointer flex-1 md:flex-none z-10 ${
+                  className={`relative px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-colors cursor-pointer flex-1 md:flex-none z-10 text-center truncate ${
                     selectedScheme === tab ? 'text-white' : 'text-slate-600 hover:text-(--primary-dark)'
                   }`}>
                   {selectedScheme === tab && (
@@ -375,13 +375,13 @@ export default function SchemesPage() {
                       transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                     />
                   )}
-                  {label}
+                  <span>{label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Search Box */}
+          {/* Search Box with responsive fluid width */}
           <div className="relative w-full md:w-80">
             <i className="ri-search-line absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
             <input
@@ -389,12 +389,12 @@ export default function SchemesPage() {
               placeholder="Search policy name, term, bonus..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-xs md:text-sm focus:border-(--primary-red) outline-none transition-colors"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-full text-xs sm:text-sm focus:border-(--primary-red) focus:bg-white outline-none transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer p-1">
                 <i className="ri-close-circle-fill"></i>
               </button>
             )}
@@ -402,8 +402,8 @@ export default function SchemesPage() {
         </div>
       </section>
 
-      {/* Policy Grid with Stagger Animation */}
-      <section className="container-custom py-10 px-6">
+      {/* Policy Grid with Stagger Animation: Mobile-first responsive gap */}
+      <section className="container-custom py-8 sm:py-12 px-4 sm:px-6">
         {filteredPolicies.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 p-8">
             <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-3xl text-slate-400 mb-4">
@@ -427,112 +427,9 @@ export default function SchemesPage() {
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
             {filteredPolicies.map((policy) => (
-              <motion.div
-                key={policy.id}
-                variants={fadeUpVariant}
-                whileHover={{ y: -6, scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between overflow-hidden group">
-                {/* Card Top Banner */}
-                <div>
-                  <div className="p-6 border-b border-slate-100 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`text-[11px] font-black tracking-wider uppercase px-3 py-1 rounded-full ${
-                          policy.scheme === 'PLI'
-                            ? 'bg-(--primary-red)/10 text-(--primary-red) border border-(--primary-red)/20'
-                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        }`}>
-                        {policy.scheme} • {policy.type}
-                      </span>
-                      <span className="text-xs font-bold text-(--accent-gold) flex items-center gap-1 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/50">
-                        <i className="ri-award-fill"></i>
-                        {policy.bonusRate}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h2 className="text-xl font-black text-(--primary-dark) group-hover:text-(--primary-red) transition-colors">
-                        {policy.name}
-                      </h2>
-                      <p className="text-xs font-medium text-slate-400 mt-0.5">
-                        {policy.hindiName}
-                      </p>
-                    </div>
-
-                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-                      {policy.description}
-                    </p>
-                  </div>
-
-                  {/* Specifications Pill Grid */}
-                  <div className="p-6 bg-slate-50/50 border-b border-slate-100 grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                        Age Eligibility
-                      </span>
-                      <span className="font-bold text-(--primary-dark)">
-                        {policy.minAge} – {policy.maxAge} Years
-                      </span>
-                    </div>
-                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                        Max Sum Assured
-                      </span>
-                      <span className="font-bold text-(--primary-dark)">
-                        {policy.maxSA}
-                      </span>
-                    </div>
-                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                        Loan Facility
-                      </span>
-                      <span className="font-bold text-(--primary-dark)">
-                        {policy.loanAfter}
-                      </span>
-                    </div>
-                    <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                        Surrender Facility
-                      </span>
-                      <span className="font-bold text-(--primary-dark)">
-                        {policy.surrenderAfter}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Feature Highlights */}
-                  <div className="p-6 space-y-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                      Key Highlights
-                    </span>
-                    {policy.highlights.map((h, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-xs text-slate-600">
-                        <i className="ri-checkbox-circle-fill text-emerald-500 mt-0.5 shrink-0"></i>
-                        <span>{h}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Card Action Footer */}
-                <div className="p-6 pt-0 mt-2">
-                  <div className="mb-4 p-3 bg-amber-50/60 rounded-xl border border-amber-100 text-[11px] text-amber-900 flex items-start gap-2">
-                    <i className="ri-user-heart-line text-amber-600 mt-0.5 shrink-0"></i>
-                    <span><strong>Recommended For:</strong> {policy.recommendedFor}</span>
-                  </div>
-
-                  <Link
-                    href={`/calculator?scheme=${policy.scheme.toLowerCase()}&policy=${policy.calculatorPolicyId.toLowerCase().replace('_', '-')}`}
-                    className="w-full py-3 px-4 rounded-xl bg-linear-to-r from-(--primary-red) to-[#961b2d] hover:from-[#b01c2f] hover:to-[#7e1625] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-98">
-                    <i className="ri-calculator-line text-sm"></i>
-                    Calculate Instant Quote
-                  </Link>
-                </div>
-              </motion.div>
+              <SchemeCard key={policy.id} policy={policy} />
             ))}
           </motion.div>
         )}

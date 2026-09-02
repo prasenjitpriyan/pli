@@ -1,32 +1,78 @@
+'use client';
+
 import Link from 'next/link';
 import { PliLogo } from './common/PliLogo';
+import { FloatingDock, FloatingDockItem } from './ui/floating-dock';
+
+const DOCK_ITEMS: FloatingDockItem[] = [
+  {
+    title: 'Home Portal',
+    icon: <i className="ri-home-5-line"></i>,
+    href: '/',
+  },
+  {
+    title: 'Actuarial Calculator',
+    icon: <i className="ri-calculator-line text-(--accent-gold)"></i>,
+    href: '/calculator',
+  },
+  {
+    title: 'All 12 Schemes',
+    icon: <i className="ri-shield-star-line text-sky-400"></i>,
+    href: '/schemes',
+  },
+  {
+    title: 'WhatsApp Advisor',
+    icon: <i className="ri-whatsapp-fill text-[#25D366]"></i>,
+    href: 'https://wa.me/919038332076?text=Hello%2C%20I%20want%20to%20know%20about%20PLI%20policies.',
+    external: true,
+  },
+  {
+    title: 'Facebook Community',
+    icon: <i className="ri-facebook-fill text-blue-400"></i>,
+    href: 'https://facebook.com',
+    external: true,
+  },
+  {
+    title: 'X / Twitter Updates',
+    icon: <i className="ri-twitter-x-line text-slate-100"></i>,
+    href: 'https://x.com',
+    external: true,
+  },
+  {
+    title: 'Instagram',
+    icon: <i className="ri-instagram-line text-pink-400"></i>,
+    href: 'https://instagram.com',
+    external: true,
+  },
+  {
+    title: 'LinkedIn Network',
+    icon: <i className="ri-linkedin-fill text-sky-400"></i>,
+    href: 'https://linkedin.com',
+    external: true,
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-(--primary-dark) text-[#e0e0e0] pt-16 mt-20 text-[0.95rem]">
+    <footer className="bg-(--primary-dark) text-[#e0e0e0] pt-16 mt-20 text-[0.95rem] overflow-hidden">
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1.2fr] gap-12 pb-12 border-b border-white/10">
           {/* Brand Section */}
-          <div>
-            <div className="mb-4">
+          <div className="space-y-4">
+            <div>
               <PliLogo variant="combined" size="md" showText={true} showSubtitle={true} />
             </div>
-            <p className="mb-6 leading-relaxed opacity-80">
+            <p className="leading-relaxed opacity-80 text-sm text-slate-300">
               Postal Life Insurance & Rural Postal Life Insurance, serving the nation since 1884.
               Providing financial security with sovereign guarantee and GST-free premiums.
             </p>
-            <div className="flex gap-4">
-              {['facebook-fill', 'twitter-x-line', 'instagram-line', 'linkedin-fill'].map(
-                (icon) => (
-                  <a
-                    key={icon}
-                    href="#"
-                    className="flex items-center justify-center w-9 h-9 bg-white/10 rounded-full text-white transition-all hover:bg-(--primary-red) hover:-translate-y-1"
-                    aria-label={icon}>
-                    <i className={`ri-${icon}`}></i>
-                  </a>
-                )
-              )}
+
+            {/* Aceternity macOS Floating Dock Navigation & Social Hub */}
+            <div className="pt-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">
+                Connect & Quick Navigate
+              </span>
+              <FloatingDock items={DOCK_ITEMS} />
             </div>
           </div>
 
@@ -169,8 +215,7 @@ export default function Footer() {
                 <i className="ri-mail-line text-(--accent-gold) text-xl mt-0.5"></i>
                 <a
                   href="mailto:pli@indiapost.gov.in"
-                  className="hover:text-white transition-colors"
-                >
+                  className="hover:text-white transition-colors">
                   prasenjitpriyan@gmail.com
                 </a>
               </li>
@@ -180,8 +225,7 @@ export default function Footer() {
                   href="https://pli.indiapost.gov.in"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
+                  className="hover:text-white transition-colors">
                   pli.indiapost.gov.in
                 </a>
               </li>
@@ -208,5 +252,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
