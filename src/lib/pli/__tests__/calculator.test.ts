@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { calculateAge, calculateDurationAndMaturityAge, calculateEffectiveAge } from '../age-calculator';
 import { calculatePliQuote } from '../calculator';
 import { predictMonthlyPremium } from '../premium-model';
+import { calculateRebate } from '../rebate-calculator';
 import { validatePliInput } from '../validation';
 
 describe('PLI Age Calculator Module', () => {
@@ -9,6 +10,14 @@ describe('PLI Age Calculator Module', () => {
     const dob = '1995-06-15';
     const effectiveDate = '2025-06-15';
     const { completedAge, ageNextBirthday, age } = calculateAge(dob, effectiveDate);
+    expect(completedAge).toBe(30);
+    expect(ageNextBirthday).toBe(31);
+    expect(age).toBe(31);
+  });
+
+  it('calculates ANB consistently when current completed age is provided with isCurrentAge flag', () => {
+    const effectiveDate = '2025-06-15';
+    const { completedAge, ageNextBirthday, age } = calculateAge(undefined, effectiveDate, 30, true);
     expect(completedAge).toBe(30);
     expect(ageNextBirthday).toBe(31);
     expect(age).toBe(31);
@@ -34,8 +43,8 @@ describe('PLI Age Calculator Module', () => {
   });
 });
 
-describe('PLI Premium Surface Model Engine', () => {
-  it('returns exact official rate values for benchmark points', () => {
+describe('PLI Official Rate Table Engine', () => {
+  it('returns exact official rate values for benchmark points from Table II (Santosh)', () => {
     const res = predictMonthlyPremium({
       policyType: 'ENDOWMENT',
       effectiveAge: 31,
@@ -44,12 +53,14 @@ describe('PLI Premium Surface Model Engine', () => {
     });
     expect(res.isExactReference).toBe(true);
     expect(res.confidenceScore).toBe(100);
-    // Rate for term 20 is 5.2% -> 5200/yr -> 433/mo
-    expect(res.yearlyPremium).toBe(5200);
-    expect(res.monthlyPremium).toBe(433);
+    // Table II rate for term 20 is ₹4.00 per ₹1,000 SA -> ₹400/month
+    expect(res.monthlyRatePer1000).toBe(4.00);
+    expect(res.monthlyPremium).toBe(400);
+    // Yearly premium includes official 2% advance rebate: 400 * 12 * 0.98 = 4704
+    expect(res.yearlyPremium).toBe(4704);
   });
 
-  it('calculates official whole life rate for Suraksha by ceasing age', () => {
+  it('calculates official whole life rate for Suraksha by term to ceasing age', () => {
     const res = predictMonthlyPremium({
       policyType: 'SURAKSHA',
       effectiveAge: 31,
@@ -57,8 +68,42 @@ describe('PLI Premium Surface Model Engine', () => {
       sumAssured: 500000,
       premiumCeasingAge: 60,
     });
-    expect(res.yearlyPremium).toBe((500000 / 1000) * 34); // ₹17,000/yr
-    expect(res.monthlyPremium).toBe(Math.round(17000 / 12)); // ₹1,417/mo
+    // Term = 60 - 31 = 29. Table I rate is ₹2.15 per ₹1,000 SA -> 500 * 2.15 = ₹1,075/month
+    expect(res.yearlyRatePer1000).toBe(25.28);
+    expect(res.yearlyPremium).toBe(12640); // 25.28 * 500
+  });
+
+  it('actuarially charges higher rates for shorter terms to same maturity', () => {
+    // 25-year-old maturing at 55 (term 30) vs 45-year-old maturing at 55 (term 10)
+    const youngQuote = predictMonthlyPremium({
+      policyType: 'SANTOSH',
+      effectiveAge: 25,
+      duration: 30,
+      sumAssured: 100000,
+    });
+    const olderQuote = predictMonthlyPremium({
+      policyType: 'SANTOSH',
+      effectiveAge: 45,
+      duration: 10,
+      sumAssured: 100000,
+    });
+    // Shorter term has higher monthly rate (term 10: ₹8.25/k vs term 30: ₹2.45/k)
+    expect(olderQuote.monthlyRatePer1000).toBeGreaterThan(youngQuote.monthlyRatePer1000);
+  });
+});
+
+describe('PLI High Sum Assured Rebate Calculation', () => {
+  it('correctly applies ₹1 per ₹20,000 SA for single life policies', () => {
+    expect(calculateRebate({ policyType: 'SANTOSH', sumAssured: 20000 })).toBe(1);
+    expect(calculateRebate({ policyType: 'SANTOSH', sumAssured: 40000 })).toBe(2);
+    expect(calculateRebate({ policyType: 'SANTOSH', sumAssured: 100000 })).toBe(5);
+    expect(calculateRebate({ policyType: 'SANTOSH', sumAssured: 500000 })).toBe(25);
+    expect(calculateRebate({ policyType: 'SANTOSH', sumAssured: 1000000 })).toBe(50);
+  });
+
+  it('applies ₹1 per ₹10,000 SA for Yugal Suraksha joint life policies', () => {
+    expect(calculateRebate({ policyType: 'YUGAL_SURAKSHA', sumAssured: 100000 })).toBe(10);
+    expect(calculateRebate({ policyType: 'YUGAL_SURAKSHA', sumAssured: 500000 })).toBe(50);
   });
 });
 
@@ -104,7 +149,7 @@ describe('PLI Policy Validation System', () => {
 });
 
 describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
-  it('calculates Santosh (Endowment Assurance) quotation correctly', () => {
+  it('calculates Santosh (Endowment Assurance) quotation correctly with rebate', () => {
     const result = calculatePliQuote({
       policyType: 'SANTOSH',
       age: 30,
@@ -118,6 +163,9 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     expect(result.annualBonus).toBe(26000);
     expect(result.totalBonus).toBe(780000); // 26000 * 30
     expect(result.maturityAmount).toBe(1280000); // SA ₹5L + Bonus ₹7.80L
+    expect(result.rebate).toBe(25); // ₹1 per ₹20,000 on ₹5,00,000 = ₹25/month
+    // Gross monthly: 500 * 2.45 = 1225. Net monthly: 1225 - 25 = 1200
+    expect(result.netMonthlyPremium).toBe(1200);
     expect(result.breakdown.length).toBeGreaterThan(0);
   });
 
@@ -183,7 +231,7 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
     expect(result.eligibility.valid).toBe(true);
   });
 
-  it('calculates multi-frequency installment premiums without frequency discount', () => {
+  it('calculates multi-frequency installment premiums with official advance discount', () => {
     const monthly = calculatePliQuote({
       policyType: 'SANTOSH',
       age: 30,
@@ -200,8 +248,7 @@ describe('PLI Comprehensive 6-Policy Engine (calculatePliQuote)', () => {
       sumAssured: 100000,
     });
 
-    expect(yearly.frequencyDiscount).toBe(0);
-    expect(yearly.netInstallmentPremium).toBe(yearly.annualizedPremium);
-    expect(monthly.netInstallmentPremium * 12).toBe(yearly.annualizedPremium);
+    expect(yearly.frequencyDiscount).toBeGreaterThan(0);
+    expect(yearly.annualizedPremium).toBeLessThan(monthly.netInstallmentPremium * 12);
   });
 });

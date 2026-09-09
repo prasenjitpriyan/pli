@@ -87,7 +87,7 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     totalBonus = annualBonus * duration;
   }
 
-  // 7. Premium Rate Engine (Official India Post Formulas)
+  // 7. Premium Rate Engine (Official India Post Tables I to VI)
   const targetModelPolicy = isConverted ? 'ENDOWMENT' : input.policyType;
   const modelPrediction = predictMonthlyPremium({
     policyType: targetModelPolicy,
@@ -95,11 +95,13 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
     duration,
     sumAssured: input.sumAssured,
     premiumCeasingAge,                // For Suraksha/Suvidha ceasing age tiers
+    maturityAge,
+    childAge: input.childAge,
     isConverted,
     ageRate: input.ageRate,
   });
 
-  // 8. Policy-Aware Rebate (₹5 per ₹1L SA for single life, ₹9.7 per ₹1L for joint life)
+  // 8. Policy-Aware Rebate (₹1 per ₹20k SA for single life, ₹1 per ₹10k for joint life)
   const rebate = calculateRebate({
     policyType: canonicalPolicy,
     sumAssured: input.sumAssured,
@@ -108,58 +110,88 @@ export function calculatePliQuote(input: PliInput): PliQuoteResult {
 
   // 9. Tax Engine
   const tax = calculateTax(
-    modelPrediction.scaledGrossPremium,
+    Math.max(0, modelPrediction.scaledGrossPremium - rebate),
     input.gstRate
   );
 
-  // 10. Net Monthly Premium = Gross Monthly - Rebate + Tax
-  const netMonthlyPremium = Math.max(0, modelPrediction.monthlyPremium - rebate + tax);
+  // 10. Mode-wise Breakdown Details (Monthly, Quarterly, Half-Yearly, Yearly)
+  const monthlyTax = tax;
+  const quarterlyTax = calculateTax(Math.max(0, modelPrediction.quarterlyPremium - rebate * 3), input.gstRate);
+  const halfYearlyTax = calculateTax(Math.max(0, modelPrediction.halfYearlyPremium - rebate * 6), input.gstRate);
+  const yearlyTax = calculateTax(Math.max(0, modelPrediction.yearlyPremium - rebate * 12), input.gstRate);
+
+  const netMonthlyPremium = Math.max(0, modelPrediction.monthlyPremium - rebate + monthlyTax);
+  const netQuarterlyPremium = Math.max(0, modelPrediction.quarterlyPremium - rebate * 3 + quarterlyTax);
+  const netHalfYearlyPremium = Math.max(0, modelPrediction.halfYearlyPremium - rebate * 6 + halfYearlyTax);
+  const netYearlyPremium = Math.max(0, modelPrediction.yearlyPremium - rebate * 12 + yearlyTax);
+
+  const modeDetails = {
+    monthly: {
+      ratePer1000: modelPrediction.monthlyRatePer1000,
+      grossPremium: modelPrediction.monthlyPremium,
+      rebate: Math.round(rebate),
+      tax: monthlyTax,
+      netPremium: netMonthlyPremium,
+    },
+    quarterly: {
+      ratePer1000: modelPrediction.quarterlyRatePer1000,
+      grossPremium: modelPrediction.quarterlyPremium,
+      rebate: Math.round(rebate * 3),
+      tax: quarterlyTax,
+      netPremium: netQuarterlyPremium,
+    },
+    halfYearly: {
+      ratePer1000: modelPrediction.halfYearlyRatePer1000,
+      grossPremium: modelPrediction.halfYearlyPremium,
+      rebate: Math.round(rebate * 6),
+      tax: halfYearlyTax,
+      netPremium: netHalfYearlyPremium,
+    },
+    yearly: {
+      ratePer1000: modelPrediction.yearlyRatePer1000,
+      grossPremium: modelPrediction.yearlyPremium,
+      rebate: Math.round(rebate * 12),
+      tax: yearlyTax,
+      netPremium: netYearlyPremium,
+    },
+  };
 
   // 11. Premium Frequency Adjustment
   const frequency = input.frequency ?? 'MONTHLY';
   const freqConfig = FREQUENCY_CONFIG[frequency];
-  const monthsPerPayment = 12 / freqConfig.paymentsPerYear;
-  const rawInstallment = modelPrediction.monthlyPremium * monthsPerPayment;
-  const frequencyDiscount = 0; // Direct multiple, no advance rebate
-  const netInstallmentPremium = netMonthlyPremium * monthsPerPayment;
-  const annualizedPremium = netMonthlyPremium * 12;
+
+  let rawInstallment: number;
+  let netInstallmentPremium: number;
+  let frequencyDiscount = 0;
+
+  switch (frequency) {
+    case 'QUARTERLY':
+      rawInstallment = modeDetails.quarterly.grossPremium;
+      netInstallmentPremium = modeDetails.quarterly.netPremium;
+      frequencyDiscount = 0;
+      break;
+    case 'HALF_YEARLY':
+      rawInstallment = modeDetails.halfYearly.grossPremium;
+      netInstallmentPremium = modeDetails.halfYearly.netPremium;
+      frequencyDiscount = Math.max(0, Math.round(modelPrediction.monthlyPremium * 6 - modelPrediction.halfYearlyPremium));
+      break;
+    case 'YEARLY':
+      rawInstallment = modeDetails.yearly.grossPremium;
+      netInstallmentPremium = modeDetails.yearly.netPremium;
+      frequencyDiscount = Math.max(0, Math.round(modelPrediction.monthlyPremium * 12 - modelPrediction.yearlyPremium));
+      break;
+    case 'MONTHLY':
+    default:
+      rawInstallment = modeDetails.monthly.grossPremium;
+      netInstallmentPremium = modeDetails.monthly.netPremium;
+      frequencyDiscount = 0;
+      break;
+  }
+
+  const annualizedPremium = netInstallmentPremium * freqConfig.paymentsPerYear;
 
   // 12. Total Premium Paid = installment × payments per year × duration
   const totalPremiumPaid = Math.round(netInstallmentPremium * freqConfig.paymentsPerYear * duration);
-
-  // 12b. Mode-wise Breakdown Details (Monthly, Quarterly, Half-Yearly, Yearly)
-  const monthlyGross = modelPrediction.monthlyPremium;
-  const ratePer1000Monthly = monthlyGross / (input.sumAssured / 1000);
-  const modeDetails = {
-    monthly: {
-      ratePer1000: Number(ratePer1000Monthly.toFixed(2)),
-      grossPremium: Math.round(monthlyGross),
-      rebate: Math.round(rebate),
-      tax: 0,
-      netPremium: Math.round(netMonthlyPremium),
-    },
-    quarterly: {
-      ratePer1000: Number((ratePer1000Monthly * 3).toFixed(2)),
-      grossPremium: Math.round(monthlyGross * 3),
-      rebate: Math.round(rebate * 3),
-      tax: 0,
-      netPremium: Math.round(netMonthlyPremium * 3),
-    },
-    halfYearly: {
-      ratePer1000: Number((ratePer1000Monthly * 6).toFixed(2)),
-      grossPremium: Math.round(monthlyGross * 6),
-      rebate: Math.round(rebate * 6),
-      tax: 0,
-      netPremium: Math.round(netMonthlyPremium * 6),
-    },
-    yearly: {
-      ratePer1000: Number((ratePer1000Monthly * 12).toFixed(2)),
-      grossPremium: Math.round(monthlyGross * 12),
-      rebate: Math.round(rebate * 12),
-      tax: 0,
-      netPremium: Math.round(netMonthlyPremium * 12),
-    },
-  };
 
   // 13. Terminal Bonus
   const terminalBonus = calculateTerminalBonus({

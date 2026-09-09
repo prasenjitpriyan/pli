@@ -85,20 +85,30 @@ export function AgeAndDobInputs({
           </div>
         </div>
       ) : (
-        <div>
-          <label className="flex items-center justify-between text-xs font-semibold text-(--text-light) mb-1">
-            <span>Age on Next Birthday (ANB)</span>
-            <span className="text-[0.62rem] text-emerald-700 font-bold">19 – 55 Years</span>
-          </label>
-          <input
-            type="number"
-            min="19"
-            max="55"
-            value={manualAge}
-            onChange={(e) => onManualAgeChange(parseInt(e.target.value, 10) || 30)}
-            onWheel={(e) => e.currentTarget.blur()}
-            className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-(--primary-red) outline-none"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-(--text-light) mb-1">
+              Current Completed Age (Years)
+            </label>
+            <input
+              type="number"
+              min="18"
+              max="54"
+              value={manualAge}
+              onChange={(e) => onManualAgeChange(parseInt(e.target.value, 10) || 30)}
+              onWheel={(e) => e.currentTarget.blur()}
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-(--primary-red) outline-none"
+            />
+          </div>
+          <div>
+            <label className="flex items-center justify-between text-xs font-semibold text-(--text-light) mb-1">
+              <span>Entry Age (ANB)</span>
+              <span className="text-[0.62rem] text-emerald-700 font-bold">Official (Age + 1)</span>
+            </label>
+            <div className="p-2.5 bg-emerald-50/70 border border-emerald-300 rounded-lg text-sm font-bold text-emerald-950">
+              {computedAge} yrs
+            </div>
+          </div>
         </div>
       )}
     </div>

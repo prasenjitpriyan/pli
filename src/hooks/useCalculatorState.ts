@@ -126,7 +126,7 @@ export function useCalculatorState() {
       const { age } = calculateAge(firstLifeDob, effectiveDate)
       return age
     }
-    return firstLifeAge
+    return calculateAge(undefined, effectiveDate, firstLifeAge, true).age
   }, [jointAgeMode, firstLifeDob, effectiveDate, firstLifeAge])
 
   const secondLifeEffectiveAge = useMemo(() => {
@@ -134,7 +134,7 @@ export function useCalculatorState() {
       const { age } = calculateAge(secondLifeDob, effectiveDate)
       return age
     }
-    return secondLifeAge
+    return calculateAge(undefined, effectiveDate, secondLifeAge, true).age
   }, [jointAgeMode, secondLifeDob, effectiveDate, secondLifeAge])
 
   // Derived Completed Age
@@ -149,7 +149,7 @@ export function useCalculatorState() {
       const { age } = calculateAge(dateOfBirth, effectiveDate)
       return age
     }
-    return manualAge
+    return calculateAge(undefined, effectiveDate, manualAge, true).age
   }, [
     policyType,
     childAge,

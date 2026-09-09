@@ -9,7 +9,8 @@ import { mapToCanonicalPolicy } from './validation';
 export function calculateAge(
   dateOfBirth?: string,
   effectiveDateStr?: string,
-  providedAge?: number
+  providedAge?: number,
+  isCurrentAge?: boolean
 ): {
   completedAge: number;
   ageNextBirthday: number;
@@ -47,10 +48,13 @@ export function calculateAge(
   }
 
   const baseAge = Math.max(0, providedAge ?? 20);
+  const completedAge = isCurrentAge ? baseAge : Math.max(0, baseAge - 1);
+  const ageNextBirthday = isCurrentAge ? baseAge + 1 : baseAge;
+
   return {
-    completedAge: baseAge,
-    ageNextBirthday: baseAge,
-    age: baseAge,
+    completedAge,
+    ageNextBirthday,
+    age: ageNextBirthday,
     effectiveDate: formattedEffectiveDate,
   };
 }
