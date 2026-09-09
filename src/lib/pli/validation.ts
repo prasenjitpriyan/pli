@@ -46,6 +46,9 @@ export function validatePliInput(input: PliInput): PliValidationResult {
     }
   } else if (canonicalPolicy === 'SUMANGAL') {
     const duration = input.duration ?? 20;
+    if (duration !== 15 && duration !== 20) {
+      errors.push('Sumangal (Anticipated Endowment Assurance) only permits policy terms of 15 or 20 years.');
+    }
     if (duration === 15 && age > 45) {
       errors.push('Maximum entry age for 15-year Sumangal (Anticipated Endowment) is 45 years.');
     }
@@ -80,12 +83,19 @@ export function validatePliInput(input: PliInput): PliValidationResult {
   }
 
   // 3. Maturity Age / Term Validation
-  if (canonicalPolicy === 'SANTOSH' || canonicalPolicy === 'SURAKSHA' || (canonicalPolicy === 'SUVIDHA' && input.isConverted)) {
-    if (input.maturityAge) {
-      const term = input.maturityAge - age;
-      if (term < config.minTerm) {
-        errors.push(`Calculated policy term (${term} years) is less than the minimum required term of ${config.minTerm} years.`);
-      }
+  if (input.duration !== undefined && input.duration !== null) {
+    if (input.duration < config.minTerm) {
+      errors.push(`Calculated policy term (${input.duration} years) is less than the minimum required term of ${config.minTerm} years.`);
+    }
+  } else if (input.maturityAge) {
+    const term = input.maturityAge - age;
+    if (term < config.minTerm) {
+      errors.push(`Calculated policy term (${term} years) is less than the minimum required term of ${config.minTerm} years.`);
+    }
+  } else if (input.premiumCeasingAge) {
+    const term = input.premiumCeasingAge - age;
+    if (term < config.minTerm) {
+      errors.push(`Calculated policy term (${term} years) is less than the minimum required term of ${config.minTerm} years.`);
     }
   }
 
