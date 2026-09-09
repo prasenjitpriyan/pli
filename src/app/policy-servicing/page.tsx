@@ -15,6 +15,7 @@ export default function PolicyServicingPage() {
   const [policyTermYears, setPolicyTermYears] = useState<number>(20);
   const [yearsPaid, setYearsPaid] = useState<number>(5);
   const [monthsPaid, setMonthsPaid] = useState<number>(0);
+  const [loanTenureYears, setLoanTenureYears] = useState<number>(2);
 
   // Policy options
   const currentRegistry = scheme === 'PLI' ? POLICY_REGISTRY : RPLI_POLICY_REGISTRY;
@@ -288,6 +289,53 @@ export default function PolicyServicingPage() {
                       <span className="font-bold text-emerald-700">✓ Yes, Full Bonus</span>
                     </div>
                   </div>
+
+                  {/* Interactive Loan Repayment Simulator */}
+                  <div className="p-3 bg-emerald-100/60 rounded-xl border border-emerald-200/80 space-y-2.5">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-emerald-950">Repayment Horizon:</span>
+                      <span className="font-extrabold text-emerald-900 bg-emerald-200/80 px-2 py-0.5 rounded-md">
+                        {loanTenureYears} {loanTenureYears === 1 ? 'Year' : 'Years'} ({loanTenureYears * 2} Installments)
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="5"
+                      step="1"
+                      value={loanTenureYears}
+                      onChange={(e) => setLoanTenureYears(Number(e.target.value))}
+                      className="w-full accent-emerald-700 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-emerald-800 font-semibold">
+                      <span>1 Year</span>
+                      <span>3 Years</span>
+                      <span>5 Years</span>
+                    </div>
+
+                    {/* Amortization calculation */}
+                    {(() => {
+                      const totalPeriods = loanTenureYears * 2;
+                      const halfYearlyPrincipal = Math.round(servicingResult.maxLoanAmount / totalPeriods);
+                      const halfYearlyTotal = halfYearlyPrincipal + servicingResult.halfYearlyInterestPayment;
+                      return (
+                        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-200/70 text-[11px]">
+                          <div className="bg-white/80 p-2 rounded-lg border border-emerald-200/60">
+                            <span className="text-slate-500 block text-[10px]">Half-Yearly Interest:</span>
+                            <span className="font-extrabold text-amber-900">
+                              {formatINR(servicingResult.halfYearlyInterestPayment)}
+                            </span>
+                          </div>
+                          <div className="bg-white/80 p-2 rounded-lg border border-emerald-200/60">
+                            <span className="text-slate-500 block text-[10px]">Principal + Interest:</span>
+                            <span className="font-extrabold text-emerald-950">
+                              {formatINR(halfYearlyTotal)}/6-mo
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               ) : (
                 <div className="p-5 bg-amber-50/70 rounded-xl border border-amber-200 text-amber-900 text-xs space-y-2">
@@ -513,6 +561,104 @@ export default function PolicyServicingPage() {
             </div>
           </motion.div>
         </div>
+
+        {/* Side-by-Side Callout: Cash Surrender vs Retain Paid-Up */}
+        {(servicingResult.isSurrenderEligible || servicingResult.isPaidUpEligible) && (
+          <div className="bg-linear-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-6 rounded-2xl border border-slate-700/80 shadow-lg space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700/80 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center text-lg">
+                  <i className="ri-scales-3-line"></i>
+                </span>
+                <div>
+                  <h3 className="text-base font-extrabold text-white">
+                    Actuarial Head-to-Head: Immediate Cash Surrender vs Retain Paid-Up
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    Compare what happens if you cash out today versus letting your policy mature with ₹0 further premiums.
+                  </p>
+                </div>
+              </div>
+              {immediateSurrenderLoss > 0 && (
+                <span className="self-start sm:self-auto px-3 py-1 bg-amber-400/20 border border-amber-400/40 text-amber-300 rounded-full text-xs font-bold">
+                  +{formatINR(immediateSurrenderLoss)} Extra by Staying Paid-Up
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Option A: Immediate Surrender */}
+              <div className="p-4 bg-rose-950/40 border border-rose-500/30 rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i className="ri-close-circle-line text-rose-400"></i> Option A: Cash Surrender Now
+                  </span>
+                  <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-bold">
+                    Permanent Loss
+                  </span>
+                </div>
+                <div className="text-2xl font-black text-rose-200">
+                  {formatINR(servicingResult.estimatedSurrenderValue)}
+                  <span className="text-xs font-normal text-rose-300/80 block mt-0.5">Cash in hand today</span>
+                </div>
+                <ul className="space-y-1.5 text-xs text-rose-200/90 border-t border-rose-500/20 pt-2.5">
+                  <li className="flex items-center gap-1.5">
+                    <i className="ri-close-line text-rose-400"></i> Life insurance cover terminated immediately
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <i className="ri-close-line text-rose-400"></i> Maturity payout at end of term: <strong>₹0</strong>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <i className="ri-close-line text-rose-400"></i> Actuarial penalty discount:{' '}
+                    <strong>{100 - servicingResult.surrenderFactorPercentage}%</strong>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <i className="ri-close-line text-rose-400"></i> Zero sovereign protection for family
+                  </li>
+                </ul>
+              </div>
+
+              {/* Option B: Retain as Paid-Up */}
+              <div className="p-4 bg-blue-950/40 border border-blue-500/30 rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i className="ri-checkbox-circle-line text-blue-400"></i> Option B: Retain as Paid-Up
+                  </span>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold">
+                    Recommended
+                  </span>
+                </div>
+                <div className="text-2xl font-black text-emerald-300">
+                  {formatINR(potentialPaidUpMaturity)}
+                  <span className="text-xs font-normal text-emerald-200/80 block mt-0.5">
+                    Guaranteed at maturity ({policyTermYears} Yrs)
+                  </span>
+                </div>
+                <ul className="space-y-1.5 text-xs text-blue-200/90 border-t border-blue-500/20 pt-2.5">
+                  <li className="flex items-center gap-1.5 text-emerald-300">
+                    <i className="ri-check-line text-emerald-400"></i> Future premiums required:{' '}
+                    <strong>₹0 (No more payments)</strong>
+                  </li>
+                  <li className="flex items-center gap-1.5 text-emerald-300">
+                    <i className="ri-check-line text-emerald-400"></i> Proportionate sum assured:{' '}
+                    <strong>{formatINR(servicingResult.paidUpSumAssured)}</strong>
+                  </li>
+                  <li className="flex items-center gap-1.5 text-emerald-300">
+                    <i className="ri-check-line text-emerald-400"></i> Accrued bonus preserved:{' '}
+                    <strong>
+                      +{formatINR(servicingResult.totalMonthsPaid >= 60 ? servicingResult.accruedBonusTotal : 0)}
+                    </strong>
+                  </li>
+                  <li className="flex items-center gap-1.5 text-emerald-300">
+                    <i className="ri-check-line text-emerald-400"></i> Saves{' '}
+                    <strong className="text-amber-300">{formatINR(immediateSurrenderLoss)}</strong> in hard-earned
+                    wealth!
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Smart Advisory Decision Matrix */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">

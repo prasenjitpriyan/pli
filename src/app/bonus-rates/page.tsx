@@ -76,6 +76,7 @@ export default function BonusRatesPage() {
                   tag: 'Highest Bonus in India',
                   color: 'text-(--primary-red)',
                   bgColor: 'bg-rose-50',
+                  calcLink: '/calculator?scheme=PLI&policy=SURAKSHA',
                 },
                 {
                   scheme: 'Endowment Assurance (Santosh)',
@@ -84,6 +85,7 @@ export default function BonusRatesPage() {
                   tag: 'Most Popular',
                   color: 'text-(--accent-gold)',
                   bgColor: 'bg-amber-50',
+                  calcLink: '/calculator?scheme=PLI&policy=SANTOSH',
                 },
                 {
                   scheme: 'Anticipated Endowment / Money Back (Sumangal)',
@@ -92,6 +94,7 @@ export default function BonusRatesPage() {
                   tag: 'Periodic Cashbacks',
                   color: 'text-blue-600',
                   bgColor: 'bg-blue-50',
+                  calcLink: '/calculator?scheme=PLI&policy=SUMANGAL_15',
                 },
                 {
                   scheme: 'Joint Life Assurance (Yugal Suraksha)',
@@ -100,6 +103,7 @@ export default function BonusRatesPage() {
                   tag: 'Husband & Wife',
                   color: 'text-purple-600',
                   bgColor: 'bg-purple-50',
+                  calcLink: '/calculator?scheme=PLI&policy=YUGAL_SURAKSHA',
                 },
                 {
                   scheme: 'Children Policy (Bal Jeevan Bima)',
@@ -108,6 +112,7 @@ export default function BonusRatesPage() {
                   tag: 'Future Premium Waiver',
                   color: 'text-emerald-600',
                   bgColor: 'bg-emerald-50',
+                  calcLink: '/calculator?scheme=PLI&policy=BAL_JEEVAN_BIMA',
                 },
               ].map((row) => (
                 <motion.div
@@ -115,7 +120,7 @@ export default function BonusRatesPage() {
                   variants={fadeUpVariant}
                   whileHover={{ scale: 1.01, x: 2 }}
                   whileTap={{ scale: 0.99 }}
-                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 transition-all">
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 transition-all group">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                       {row.tag}
@@ -123,6 +128,11 @@ export default function BonusRatesPage() {
                     <h3 className="text-sm font-bold text-(--primary-dark)">
                       {row.scheme}
                     </h3>
+                    <Link
+                      href={row.calcLink}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-(--primary-red) hover:underline mt-1">
+                      Calculate Quote <i className="ri-arrow-right-s-line"></i>
+                    </Link>
                   </div>
                   <div className="text-right shrink-0">
                     <div className={`text-xl font-black ${row.color}`}>
@@ -170,6 +180,7 @@ export default function BonusRatesPage() {
                   tag: 'Top Rural Bonus',
                   color: 'text-emerald-700',
                   bgColor: 'bg-emerald-50',
+                  calcLink: '/calculator?scheme=RPLI&policy=GRAM_SURAKSHA',
                 },
                 {
                   scheme: 'Gram Santosh (Rural Endowment)',
@@ -178,6 +189,7 @@ export default function BonusRatesPage() {
                   tag: 'Fixed Term Savings',
                   color: 'text-(--accent-gold)',
                   bgColor: 'bg-amber-50',
+                  calcLink: '/calculator?scheme=RPLI&policy=GRAM_SANTOSH',
                 },
                 {
                   scheme: 'Gram Suvidha (Rural Convertible Whole Life)',
@@ -186,6 +198,7 @@ export default function BonusRatesPage() {
                   tag: 'Convertible at Year 5',
                   color: 'text-teal-600',
                   bgColor: 'bg-teal-50',
+                  calcLink: '/calculator?scheme=RPLI&policy=GRAM_SUVIDHA',
                 },
                 {
                   scheme: 'Gram Sumangal (Rural Money Back)',
@@ -194,6 +207,7 @@ export default function BonusRatesPage() {
                   tag: 'Survival Cashbacks',
                   color: 'text-blue-600',
                   bgColor: 'bg-blue-50',
+                  calcLink: '/calculator?scheme=RPLI&policy=GRAM_SUMANGAL_15',
                 },
                 {
                   scheme: 'Gram Priya (10-Year Rural Policy)',
@@ -202,6 +216,7 @@ export default function BonusRatesPage() {
                   tag: 'Short 10-Year Term',
                   color: 'text-indigo-600',
                   bgColor: 'bg-indigo-50',
+                  calcLink: '/calculator?scheme=RPLI&policy=GRAM_PRIYA',
                 },
               ].map((row) => (
                 <motion.div
@@ -209,7 +224,7 @@ export default function BonusRatesPage() {
                   variants={fadeUpVariant}
                   whileHover={{ scale: 1.01, x: 2 }}
                   whileTap={{ scale: 0.99 }}
-                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 transition-all">
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 transition-all group">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                       {row.tag}
@@ -217,6 +232,11 @@ export default function BonusRatesPage() {
                     <h3 className="text-sm font-bold text-(--primary-dark)">
                       {row.scheme}
                     </h3>
+                    <Link
+                      href={row.calcLink}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:underline mt-1">
+                      Calculate Quote <i className="ri-arrow-right-s-line"></i>
+                    </Link>
                   </div>
                   <div className="text-right shrink-0">
                     <div className={`text-xl font-black ${row.color}`}>

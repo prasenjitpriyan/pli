@@ -217,6 +217,9 @@ export default function Navbar() {
                     />
                   )}
                   <span>Actuarial Tools</span>
+                  {isToolsActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block ml-0.5" />
+                  )}
                   <i
                     className={cn(
                       'ri-arrow-down-s-line text-sm transition-transform duration-200',

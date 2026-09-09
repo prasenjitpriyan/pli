@@ -13,6 +13,7 @@ interface WealthGrowthChartProps {
   maturityAmount: number;
   durationYears: number;
   sumAssured: number;
+  adjustInflation?: boolean;
 }
 
 function WealthGrowthChart({
@@ -22,7 +23,10 @@ function WealthGrowthChart({
   maturityAmount,
   durationYears,
   sumAssured,
+  adjustInflation = false,
 }: WealthGrowthChartProps) {
+  const [hoverYear, setHoverYear] = useState<number | null>(null);
+
   const width = 320;
   const height = 110;
   const padX = 14;
@@ -54,20 +58,66 @@ function WealthGrowthChart({
 
   const areaCorpusPath = `${corpusPath} L ${getX(durationYears).toFixed(1)} ${(padTop + plotH).toFixed(1)} L ${getX(0).toFixed(1)} ${(padTop + plotH).toFixed(1)} Z`;
 
+  // Pointer scrubbing handler
+  const handlePointer = (clientX: number, rect: DOMRect) => {
+    const relX = clientX - rect.left;
+    const clampedRelX = Math.max(padX, Math.min(width - padX, (relX / rect.width) * width));
+    const ratio = (clampedRelX - padX) / plotW;
+    const year = Math.round(ratio * durationYears);
+    setHoverYear(Math.max(0, Math.min(durationYears, year)));
+  };
+
+  const activeYear = hoverYear !== null ? hoverYear : null;
+  const activePaid = activeYear !== null ? Math.round((totalPaid / Math.max(1, durationYears)) * activeYear) : 0;
+  const activeCorpus =
+    activeYear !== null
+      ? activeYear === 0
+        ? sumAssured
+        : Math.round(sumAssured + ((maturityAmount - sumAssured) / Math.max(1, durationYears)) * activeYear)
+      : 0;
+  const activeProfit = Math.max(0, activeCorpus - activePaid);
+  const activeReal =
+    adjustInflation && activeYear !== null && activeYear > 0
+      ? Math.round(activeCorpus / Math.pow(1.06, activeYear))
+      : null;
+
   return (
     <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-white select-none">
-      <div className="flex items-center justify-between text-[10px] mb-1 font-semibold text-slate-300">
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
-          Guaranteed Maturity
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>
-          Cumulative Premium Outflow
-        </span>
-      </div>
+      {activeYear === null ? (
+        <div className="flex items-center justify-between text-[10px] mb-1 font-semibold text-slate-300">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+            Guaranteed Maturity
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>
+            Cumulative Outflow
+          </span>
+          <span className="text-[9px] text-slate-500 hidden sm:inline">Drag to scrub</span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between text-[10px] mb-1 font-bold bg-slate-800/90 px-2 py-0.5 rounded-lg border border-slate-700 text-slate-200">
+          <span className="text-amber-300">Yr {activeYear}:</span>
+          <span className="text-blue-300">Out: {formatINR(activePaid)}</span>
+          <span className="text-emerald-300">Cover: {formatINR(activeCorpus)}</span>
+          <span className="text-amber-400">Profit: +{formatINR(activeProfit)}</span>
+          {activeReal !== null && (
+            <span className="text-cyan-300 text-[9px] hidden sm:inline">Real: {formatINR(activeReal)}</span>
+          )}
+        </div>
+      )}
 
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-24 overflow-visible">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full h-24 overflow-visible cursor-crosshair touch-none"
+        onMouseMove={(e) => handlePointer(e.clientX, e.currentTarget.getBoundingClientRect())}
+        onMouseLeave={() => setHoverYear(null)}
+        onTouchMove={(e) => {
+          if (e.touches[0]) {
+            handlePointer(e.touches[0].clientX, e.currentTarget.getBoundingClientRect());
+          }
+        }}
+        onTouchEnd={() => setHoverYear(null)}>
         <defs>
           <linearGradient id={`gradCorpus-${id}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
@@ -94,23 +144,56 @@ function WealthGrowthChart({
         {/* Maturity Corpus line (Emerald solid) */}
         <path d={corpusPath} fill="none" stroke="#34d399" strokeWidth="2.5" />
 
-        {/* End points */}
-        <circle
-          cx={getX(durationYears)}
-          cy={getY(maturityAmount)}
-          r="3.5"
-          fill="#34d399"
-          stroke="#064e3b"
-          strokeWidth="1.5"
-        />
-        <circle
-          cx={getX(durationYears)}
-          cy={getY(totalPaid)}
-          r="3"
-          fill="#60a5fa"
-          stroke="#1e3a8a"
-          strokeWidth="1.5"
-        />
+        {/* Dynamic scrubber line & points */}
+        {activeYear !== null ? (
+          <g>
+            <line
+              x1={getX(activeYear)}
+              y1={padTop}
+              x2={getX(activeYear)}
+              y2={padTop + plotH}
+              stroke="#fbbf24"
+              strokeWidth="1.5"
+              strokeDasharray="2 2"
+            />
+            <circle
+              cx={getX(activeYear)}
+              cy={getY(activeCorpus)}
+              r="4"
+              fill="#34d399"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx={getX(activeYear)}
+              cy={getY(activePaid)}
+              r="3.5"
+              fill="#60a5fa"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+            />
+          </g>
+        ) : (
+          /* End points */
+          <>
+            <circle
+              cx={getX(durationYears)}
+              cy={getY(maturityAmount)}
+              r="3.5"
+              fill="#34d399"
+              stroke="#064e3b"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx={getX(durationYears)}
+              cy={getY(totalPaid)}
+              r="3"
+              fill="#60a5fa"
+              stroke="#1e3a8a"
+              strokeWidth="1.5"
+            />
+          </>
+        )}
 
         {/* Axis Labels */}
         <text x={padX} y={height - 4} fill="#94a3b8" fontSize="9" fontWeight="600">
@@ -132,6 +215,7 @@ export default function GoalPlannerPage() {
   const [currentAge, setCurrentAge] = useState<number>(32);
   const [horizonYears, setHorizonYears] = useState<number>(25);
   const [schemePreference, setSchemePreference] = useState<'PLI' | 'RPLI' | 'ANY'>('ANY');
+  const [adjustInflation, setAdjustInflation] = useState<boolean>(false);
 
   // Proposal modal state
   const [selectedPlanForProposal, setSelectedPlanForProposal] = useState<ProposalModalProps['proposalData'] | null>(null);
@@ -260,17 +344,42 @@ export default function GoalPlannerPage() {
               </div>
             </div>
 
-            {/* Scheme Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-700">Scheme Eligibility:</span>
-              <select
-                value={schemePreference}
-                onChange={(e) => setSchemePreference(e.target.value as 'PLI' | 'RPLI' | 'ANY')}
-                className="text-xs font-bold p-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900">
-                <option value="ANY">All Schemes (PLI & RPLI)</option>
-                <option value="PLI">PLI Only (Govt / PSUs / Professionals)</option>
-                <option value="RPLI">RPLI Only (Rural / All Citizens)</option>
-              </select>
+            {/* Controls Right Group: Scheme Filter & Inflation Toggle */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Scheme Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-700">Scheme Eligibility:</span>
+                <select
+                  value={schemePreference}
+                  onChange={(e) => setSchemePreference(e.target.value as 'PLI' | 'RPLI' | 'ANY')}
+                  className="text-xs font-bold p-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900">
+                  <option value="ANY">All Schemes (PLI & RPLI)</option>
+                  <option value="PLI">PLI Only (Govt / PSUs / Professionals)</option>
+                  <option value="RPLI">RPLI Only (Rural / All Citizens)</option>
+                </select>
+              </div>
+
+              {/* Inflation Toggle */}
+              <button
+                type="button"
+                onClick={() => setAdjustInflation(!adjustInflation)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                  adjustInflation
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200'
+                }`}
+                title="Discount future returns at 6% annual inflation to estimate real purchasing power in today's money">
+                <i className={`ri-funds-box-line ${adjustInflation ? 'text-slate-950' : 'text-amber-600'}`}></i>
+                Inflation Adjusted (6% p.a.)
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                    adjustInflation
+                      ? 'bg-amber-950/20 text-slate-950 font-black'
+                      : 'bg-slate-200 text-slate-600 font-bold'
+                  }`}>
+                  {adjustInflation ? 'ON' : 'OFF'}
+                </span>
+              </button>
             </div>
           </div>
 
@@ -431,11 +540,26 @@ export default function GoalPlannerPage() {
                         <span className="text-slate-500 font-medium">Total Accrued Bonus</span>
                         <span className="font-bold text-emerald-700">+{formatINR(plan.totalBonusAccrued)}</span>
                       </div>
-                      <div className="flex justify-between items-center pt-2 bg-amber-50/70 p-2 rounded-lg">
-                        <span className="font-bold text-amber-900">Estimated Maturity Benefit</span>
-                        <span className="font-black text-amber-950 text-sm">
-                          {formatINR(plan.estimatedMaturityAmount)}
-                        </span>
+                      <div className="flex justify-between items-center pt-2 bg-amber-50/70 p-2.5 rounded-lg">
+                        <div>
+                          <span className="font-bold text-amber-900 block text-xs">Estimated Maturity Benefit</span>
+                          {adjustInflation && (
+                            <span className="text-[10px] font-semibold text-amber-800/80 block mt-0.5">
+                              Real Purchasing Power (at 6% inflation):
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <span className="font-black text-amber-950 text-sm block">
+                            {formatINR(plan.estimatedMaturityAmount)}
+                          </span>
+                          {adjustInflation && (
+                            <span className="text-xs font-black text-emerald-800 block">
+                              {formatINR(Math.round(plan.estimatedMaturityAmount / Math.pow(1.06, horizonYears)))}
+                              <span className="text-[9px] font-medium text-slate-500 ml-1">(Today&apos;s ₹)</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between items-center pt-1.5">
                         <span className="text-slate-500 font-medium">Annual 80C Tax Savings</span>
@@ -487,6 +611,7 @@ export default function GoalPlannerPage() {
                       maturityAmount={plan.estimatedMaturityAmount}
                       durationYears={horizonYears}
                       sumAssured={plan.recommendedSumAssured}
+                      adjustInflation={adjustInflation}
                     />
 
                     {/* Milestones Preview */}

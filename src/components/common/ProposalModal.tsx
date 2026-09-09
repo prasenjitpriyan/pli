@@ -145,6 +145,22 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
     window.print();
   };
 
+  const handleShareWhatsApp = () => {
+    const text = encodeURIComponent(
+      `*POSTAL LIFE INSURANCE PROPOSAL SUMMARY*\n` +
+        `Ref: ${referenceNumber}\n` +
+        `Client: ${clientName}\n` +
+        `Plan: ${policyName} (${scheme})\n` +
+        `Sum Assured: ${formatINR(sumAssured)}\n` +
+        `Net Monthly Outflow: ${formatINR(netMonthlyPremium)}/mo\n` +
+        `Total Estimated Maturity: ${formatINR(estimatedMaturityAmount)}\n` +
+        `Term: ${durationYears} Years (Maturity Age ${maturityAge})\n` +
+        `100% Sovereign Guarantee under Section 24.\n\n` +
+        `Senior Advisor: Prasenjit Das (+91 9038332076)`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
   return (
     <div className="fixed inset-0 z-110 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
       {/* Universal Print Styles for A4 Page Breaks */}
@@ -183,6 +199,37 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
               }
+              .sovereign-watermark {
+                position: absolute !important;
+                top: 48% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-30deg) !important;
+                font-size: 32px !important;
+                font-weight: 900 !important;
+                letter-spacing: 0.15em !important;
+                color: rgba(185, 28, 28, 0.05) !important;
+                pointer-events: none !important;
+                white-space: nowrap !important;
+                user-select: none !important;
+                z-index: 0 !important;
+                text-transform: uppercase !important;
+                display: block !important;
+              }
+            }
+            .sovereign-watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-30deg);
+              font-size: 28px;
+              font-weight: 900;
+              letter-spacing: 0.15em;
+              color: rgba(185, 28, 28, 0.04);
+              pointer-events: none;
+              white-space: nowrap;
+              user-select: none;
+              z-index: 0;
+              text-transform: uppercase;
             }
           `,
         }}
@@ -199,9 +246,14 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={handleShareWhatsApp}
+              className="px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
+              <i className="ri-whatsapp-fill text-sm"></i> Share WhatsApp
+            </button>
+            <button
               onClick={handlePrint}
-              className="px-4 py-1.5 rounded-lg bg-(--primary-red) hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
-              <i className="ri-printer-line text-sm"></i> Print / Download PDF
+              className="px-3 py-1.5 rounded-lg bg-(--primary-red) hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
+              <i className="ri-printer-line text-sm"></i> Print / PDF
             </button>
             <button
               onClick={onClose}
@@ -212,7 +264,11 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
         </div>
 
         {/* Printable Proposal Document Body */}
-        <div className="p-6 sm:p-8 overflow-y-auto print:p-0 print:overflow-visible text-slate-800 text-xs">
+        <div className="relative p-6 sm:p-8 overflow-y-auto print:p-0 print:overflow-visible text-slate-800 text-xs">
+          {/* Sovereign Watermark */}
+          <div className="sovereign-watermark hidden sm:block">
+            OFFICIAL ACTUARIAL ILLUSTRATION • GOVT OF INDIA GUARANTEED
+          </div>
           {/* Government Header */}
           <div className="border-b-2 border-red-800 pb-4 flex items-center justify-between avoid-break">
             <div className="flex items-center gap-3">
