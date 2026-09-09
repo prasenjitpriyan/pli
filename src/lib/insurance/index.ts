@@ -21,3 +21,5 @@ export function calculateQuote(input: UniversalInsuranceInput): UniversalQuoteRe
 
 export * from '../pli';
 export * from '../rpli';
+export * from './servicing-engine';
+export * from './goal-engine';

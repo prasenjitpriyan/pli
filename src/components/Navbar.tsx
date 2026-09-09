@@ -16,9 +16,10 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { name: 'Home', href: '/', icon: 'ri-home-4-line' },
   { name: 'Schemes', href: '/schemes', icon: 'ri-shield-star-line' },
+  { name: 'Compare', href: '/compare', icon: 'ri-scales-3-line' },
+  { name: 'Goal Planner', href: '/goal-planner', icon: 'ri-compass-3-line' },
+  { name: 'Loan & Servicing', href: '/policy-servicing', icon: 'ri-customer-service-2-line' },
   { name: 'Bonus Rates', href: '/bonus-rates', icon: 'ri-percent-line' },
-  { name: 'FAQ', href: '/faq', icon: 'ri-questionnaire-line' },
-  { name: 'Contact', href: '/contact', icon: 'ri-customer-service-line' },
 ]
 
 export default function Navbar() {

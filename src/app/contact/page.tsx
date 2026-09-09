@@ -200,7 +200,7 @@ export default function ContactPage() {
                 <motion.a
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
-                  href="https://wa.me/919038332076?text=Hello%20Prasenjit%20Dey%2C%20I%20would%20like%20to%20consult%20regarding%20PLI%20policy%20options."
+                  href="https://wa.me/919038332076?text=Hello%20Prasenjit%20Das%2C%20I%20would%20like%20to%20consult%20regarding%20PLI%20policy%20options."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors"

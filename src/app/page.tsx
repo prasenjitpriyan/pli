@@ -7,6 +7,7 @@ import {
   EligibilitySection,
   HeroSection,
   OfficeLocationSection,
+  PowerToolsSection,
   ProductsShowcaseSection,
   WhyChoosePliSection,
 } from '@/components/home'
@@ -21,7 +22,10 @@ export default function Home() {
       {/* 1. Hero Section + Quick Calculator Widget */}
       <HeroSection />
 
-      {/* 2. About & Sovereign Heritage Section */}
+      {/* 2. Actuarial Power Tools Suite */}
+      <PowerToolsSection />
+
+      {/* 3. About & Sovereign Heritage Section */}
       <AboutSection />
 
       {/* 3. Advantages & Key Features Grid */}

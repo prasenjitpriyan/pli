@@ -66,6 +66,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
+  manifest: '/manifest.json',
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -164,6 +165,7 @@ const structuredData = {
 };
 
 import WhatsAppFloatingWidget from '@/components/common/WhatsAppFloatingWidget';
+import { OfflineIndicator } from '@/components/common/OfflineIndicator';
 
 export default function RootLayout({
   children,
@@ -188,6 +190,7 @@ export default function RootLayout({
         <div className="grow">{children}</div>
         <Footer />
         <WhatsAppFloatingWidget />
+        <OfflineIndicator />
       </body>
     </html>
   );

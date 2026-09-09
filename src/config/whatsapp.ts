@@ -10,7 +10,7 @@ export const WHATSAPP_CONTACTS: WhatsAppContact[] = [
   {
     phone: '9038332076',
     formattedNumber: '+91 9038332076',
-    name: 'Prasenjit Dey',
+    name: 'Prasenjit Das',
     role: 'Senior Insurance Advisor & Officer',
     isPrimary: true,
   },

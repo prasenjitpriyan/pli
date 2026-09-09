@@ -1,0 +1,54 @@
+{
+  "name": "Postal Life Insurance (PLI) & RPLI Portal",
+  "short_name": "PLI Portal",
+  "description": "India’s Most Trusted Actuarial Premium & Maturity Calculation Suite with Sovereign Guarantee.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#991b1b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Actuarial Calculator",
+      "short_name": "Calculator",
+      "description": "Calculate exact monthly premium and maturity payouts",
+      "url": "/calculator",
+      "icons": [{ "src": "/icon", "sizes": "96x96" }]
+    },
+    {
+      "name": "Compare Policies",
+      "short_name": "Compare",
+      "description": "Side-by-side comparison across PLI and RPLI schemes",
+      "url": "/compare",
+      "icons": [{ "src": "/icon", "sizes": "96x96" }]
+    },
+    {
+      "name": "Goal Planner",
+      "short_name": "Planner",
+      "description": "Reverse-solve retirement and child education targets",
+      "url": "/goal-planner",
+      "icons": [{ "src": "/icon", "sizes": "96x96" }]
+    },
+    {
+      "name": "Policy Servicing",
+      "short_name": "Servicing",
+      "description": "Loan eligibility and surrender value forecaster",
+      "url": "/policy-servicing",
+      "icons": [{ "src": "/icon", "sizes": "96x96" }]
+    }
+  ]
+}
