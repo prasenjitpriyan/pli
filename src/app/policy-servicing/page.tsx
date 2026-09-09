@@ -48,6 +48,18 @@ export default function PolicyServicingPage() {
     });
   }, [scheme, policyType, sumAssured, entryAge, policyTermYears, yearsPaid, monthsPaid]);
 
+  const potentialPaidUpMaturity =
+    servicingResult.paidUpSumAssured +
+    (servicingResult.totalMonthsPaid >= 60 ? servicingResult.accruedBonusTotal : 0);
+  const immediateSurrenderLoss = Math.max(
+    0,
+    potentialPaidUpMaturity - servicingResult.estimatedSurrenderValue
+  );
+  const lossRatio =
+    potentialPaidUpMaturity > 0
+      ? Math.round((immediateSurrenderLoss / potentialPaidUpMaturity) * 100)
+      : 0;
+
   return (
     <div className="min-h-screen bg-slate-50/70 py-10 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -125,41 +137,14 @@ export default function PolicyServicingPage() {
               />
               <div className="flex justify-between text-[10px] text-slate-400">
                 <span>₹50K</span>
-                <span>{scheme === 'RPLI' ? '₹5 Lakhs' : '₹25 Lakhs'}</span>
                 <span>{scheme === 'RPLI' ? '₹10 Lakhs' : '₹50 Lakhs'}</span>
               </div>
             </div>
 
-            {/* Total Policy Term */}
+            {/* Entry Age */}
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
-                Total Policy Term: <span className="text-(--primary-red) font-extrabold">{policyTermYears} Yrs</span>
-              </label>
-              <input
-                type="range"
-                min="5"
-                max="40"
-                value={policyTermYears}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  setPolicyTermYears(val);
-                  if (yearsPaid > val) setYearsPaid(val);
-                }}
-                className="w-full accent-red-700 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400">
-                <span>5 Yrs</span>
-                <span>20 Yrs</span>
-                <span>40 Yrs</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Duration & Age Paid Slider */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Entry Age at Issue: <span className="text-(--primary-red) font-extrabold">{entryAge} Yrs</span>
+                Entry Age: <span className="text-(--primary-red) font-extrabold">{entryAge} Years</span>
               </label>
               <input
                 type="range"
@@ -171,15 +156,35 @@ export default function PolicyServicingPage() {
               />
               <div className="flex justify-between text-[10px] text-slate-400">
                 <span>19 Yrs</span>
-                <span>35 Yrs</span>
                 <span>55 Yrs</span>
               </div>
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-100">
+            {/* Policy Term */}
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
-                Completed Years Paid:{' '}
-                <span className="text-emerald-700 font-extrabold">{yearsPaid} Years</span> (out of {policyTermYears} Yrs)
+                Total Policy Term: <span className="text-(--primary-red) font-extrabold">{policyTermYears} Years</span>
+              </label>
+              <input
+                type="range"
+                min="5"
+                max="40"
+                value={policyTermYears}
+                onChange={(e) => setPolicyTermYears(Number(e.target.value))}
+                className="w-full accent-red-700 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>5 Yrs</span>
+                <span>40 Yrs</span>
+              </div>
+            </div>
+
+            {/* Completed Years Paid */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">
+                Completed Years Paid: <span className="text-emerald-700 font-extrabold">{yearsPaid} Years</span>
               </label>
               <input
                 type="range"
@@ -190,12 +195,12 @@ export default function PolicyServicingPage() {
                 className="w-full accent-emerald-700 cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-400">
-                <span>0 Yrs (New)</span>
-                <span>{Math.floor(policyTermYears / 2)} Yrs</span>
-                <span>{policyTermYears} Yrs (Matured)</span>
+                <span>0 Yrs</span>
+                <span>{policyTermYears} Yrs</span>
               </div>
             </div>
 
+            {/* Additional Months Paid */}
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
                 Additional Months Paid: <span className="text-emerald-700 font-extrabold">{monthsPaid} Months</span>
@@ -210,7 +215,6 @@ export default function PolicyServicingPage() {
               />
               <div className="flex justify-between text-[10px] text-slate-400">
                 <span>0 Mo</span>
-                <span>6 Mo</span>
                 <span>11 Mo</span>
               </div>
             </div>
@@ -219,14 +223,14 @@ export default function PolicyServicingPage() {
 
         {/* Valuation Hero Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Loan Facility */}
+          {/* Card 1: Loan Facility (Traffic Light: Emerald / Safe) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`p-6 rounded-2xl border-2 flex flex-col justify-between shadow-md bg-white ${
+            className={`p-6 rounded-2xl border-2 flex flex-col justify-between shadow-md transition-all ${
               servicingResult.isLoanEligible
-                ? 'border-emerald-400 ring-2 ring-emerald-300/30'
-                : 'border-slate-200'
+                ? 'border-emerald-500 ring-2 ring-emerald-300/40 bg-linear-to-b from-emerald-50/30 to-white'
+                : 'border-slate-200 bg-white'
             }`}>
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -234,10 +238,13 @@ export default function PolicyServicingPage() {
                   <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg">
                     <i className="ri-bank-card-line"></i>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900">Loan Facility</h3>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">1. Loan Facility</h3>
+                    <span className="text-[10px] text-emerald-700 font-bold block">Recommended Alternative</span>
+                  </div>
                 </div>
                 {servicingResult.isLoanEligible ? (
-                  <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 rounded-full text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 rounded-full text-[10px] font-extrabold">
                     ✓ Eligible Now
                   </span>
                 ) : (
@@ -249,7 +256,7 @@ export default function PolicyServicingPage() {
 
               {servicingResult.isLoanEligible ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+                  <div className="p-4 bg-emerald-50/80 rounded-xl border border-emerald-200 text-center">
                     <span className="text-[10px] uppercase font-bold text-emerald-800 block">
                       Maximum Loan Quantum Available
                     </span>
@@ -305,15 +312,15 @@ export default function PolicyServicingPage() {
             </div>
           </motion.div>
 
-          {/* Card 2: Paid-Up Valuation */}
+          {/* Card 2: Paid-Up Valuation (Traffic Light: Blue / Retain Wealth) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className={`p-6 rounded-2xl border-2 flex flex-col justify-between shadow-md bg-white ${
+            className={`p-6 rounded-2xl border-2 flex flex-col justify-between shadow-md transition-all ${
               servicingResult.isPaidUpEligible
-                ? 'border-blue-400 ring-2 ring-blue-300/30'
-                : 'border-slate-200'
+                ? 'border-blue-500 ring-2 ring-blue-300/40 bg-linear-to-b from-blue-50/30 to-white'
+                : 'border-slate-200 bg-white'
             }`}>
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -321,10 +328,13 @@ export default function PolicyServicingPage() {
                   <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center text-lg">
                     <i className="ri-shield-check-line"></i>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900">Paid-Up Policy Value</h3>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">2. Paid-Up Policy Value</h3>
+                    <span className="text-[10px] text-blue-700 font-bold block">Zero Future Premiums</span>
+                  </div>
                 </div>
                 {servicingResult.isPaidUpEligible ? (
-                  <span className="px-2.5 py-0.5 bg-blue-100 text-blue-900 rounded-full text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 bg-blue-100 text-blue-900 rounded-full text-[10px] font-extrabold">
                     ✓ Paid-Up Ready
                   </span>
                 ) : (
@@ -336,7 +346,7 @@ export default function PolicyServicingPage() {
 
               {servicingResult.isPaidUpEligible ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 text-center">
+                  <div className="p-4 bg-blue-50/80 rounded-xl border border-blue-200 text-center">
                     <span className="text-[10px] uppercase font-bold text-blue-800 block">
                       Guaranteed Paid-Up Maturity Payout
                     </span>
@@ -384,50 +394,82 @@ export default function PolicyServicingPage() {
             </div>
           </motion.div>
 
-          {/* Card 3: Surrender Valuation */}
+          {/* Card 3: Surrender Valuation (Traffic Light: Crimson / Warning) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={`p-6 rounded-2xl border-2 flex flex-col justify-between shadow-md bg-white ${
-              servicingResult.isSurrenderEligible ? 'border-amber-300' : 'border-slate-200'
+            className={`p-6 rounded-2xl border-2 flex flex-col justify-between shadow-md transition-all ${
+              servicingResult.isSurrenderEligible
+                ? 'border-rose-400 ring-2 ring-rose-200/50 bg-linear-to-b from-rose-50/40 to-white'
+                : 'border-slate-200 bg-white'
             }`}>
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-lg">
+                  <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-lg">
                     <i className="ri-logout-box-r-line"></i>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900">Surrender Valuation</h3>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">3. Surrender Valuation</h3>
+                    <span className="text-[10px] text-rose-700 font-bold block">Permanent Exit</span>
+                  </div>
                 </div>
                 {servicingResult.isSurrenderEligible ? (
-                  <span className="px-2.5 py-0.5 bg-amber-100 text-amber-900 rounded-full text-[10px] font-bold">
-                    Allowed (Min 3 Yrs)
+                  <span className="px-2.5 py-0.5 bg-rose-100 text-rose-900 rounded-full text-[10px] font-extrabold">
+                    Permitted (High Loss)
                   </span>
                 ) : (
                   <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">
-                    Not Allowed
+                    Not Allowed (&lt;3 Yrs)
                   </span>
                 )}
               </div>
 
               {servicingResult.isSurrenderEligible ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-amber-800 block">
+                <div className="space-y-3.5">
+                  <div className="p-4 bg-rose-50/80 rounded-xl border border-rose-200 text-center">
+                    <span className="text-[10px] uppercase font-bold text-rose-800 block">
                       Immediate Cash Surrender Payout
                     </span>
-                    <span className="text-3xl font-black text-amber-950">
+                    <span className="text-3xl font-black text-rose-950">
                       {formatINR(servicingResult.estimatedSurrenderValue)}
                     </span>
-                    <span className="text-[10px] text-amber-800 block mt-0.5">
-                      Actuarial Factor: {servicingResult.surrenderFactorPercentage}%
+                    <span className="text-[10px] text-rose-800 block mt-0.5 font-semibold">
+                      Actuarial Factor Applied: {servicingResult.surrenderFactorPercentage}%
                     </span>
                   </div>
 
+                  {/* Immediate Financial Loss Meter & Recommendation */}
+                  {immediateSurrenderLoss > 0 && (
+                    <div className="p-3.5 bg-rose-100/70 border border-rose-300 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-black uppercase text-rose-900 flex items-center gap-1.5">
+                          <i className="ri-alarm-warning-fill text-rose-600 text-base"></i> Immediate Loss on Surrender
+                        </span>
+                        <span className="px-2 py-0.5 bg-rose-200 text-rose-950 rounded-full text-[10px] font-extrabold">
+                          -{lossRatio}% Value Lost
+                        </span>
+                      </div>
+                      <p className="text-xs text-rose-950 leading-snug">
+                        Surrendering now permanently forfeits <span className="font-extrabold text-rose-950">{formatINR(immediateSurrenderLoss)}</span> compared to keeping your policy as <strong>Paid-Up</strong> until maturity!
+                      </p>
+                      {/* Visual Penalty Bar */}
+                      <div className="h-2 w-full bg-rose-200/80 rounded-full overflow-hidden">
+                        <div
+                          className="bg-rose-600 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min(100, Math.max(8, lossRatio))}%` }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-rose-900 font-medium leading-relaxed">
+                        💡 <strong>Actuarial Tip:</strong> Avoid surrendering. Either take a 10% loan (up to {formatINR(servicingResult.maxLoanAmount)}) or convert to Paid-Up with ₹0 future payments.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Warning on Bonus Forfeiture if < 5 years */}
                   {servicingResult.isBonusForfeitedOnSurrender && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-900 space-y-1">
+                    <div className="p-3 bg-red-100/80 border border-red-300 rounded-xl text-[11px] text-red-950 space-y-1">
                       <p className="font-bold flex items-center gap-1">
                         <i className="ri-error-warning-line text-red-600"></i> 100% Bonus Forfeiture Rule!
                       </p>

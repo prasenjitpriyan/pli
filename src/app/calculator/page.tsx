@@ -20,8 +20,10 @@ import {
 } from '@/components/calculator'
 import { useCalculatorState } from '@/hooks/useCalculatorState'
 import { RpliQuoteResult } from '@/lib/rpli'
+import { useState } from 'react'
 
 export default function CalculatorPage() {
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
   const {
     scheme,
     handleSchemeChange,
@@ -135,7 +137,7 @@ export default function CalculatorPage() {
                 </div>
 
                 <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                  {/* Policy Selection Cards */}
+                  {/* 1. Policy Selection Cards */}
                   <PolicySelector
                     scheme={scheme}
                     policyType={policyType}
@@ -143,51 +145,7 @@ export default function CalculatorPage() {
                     onSelectPolicy={setPolicyType}
                   />
 
-                  {/* Customer Information & Category */}
-                  <PersonalInfoInputs
-                    scheme={scheme}
-                    fullName={fullName}
-                    onFullNameChange={setFullName}
-                    gender={gender}
-                    onGenderChange={setGender}
-                    eligibilityCategory={eligibilityCategory}
-                    onCategoryChange={setEligibilityCategory}
-                    isRuralResident={isRuralResident}
-                    onRuralResidentChange={setIsRuralResident}
-                    ageProofType={ageProofType}
-                    onAgeProofTypeChange={setAgeProofType}
-                    bankAccountType={bankAccountType}
-                    onBankAccountTypeChange={setBankAccountType}
-                  />
-
-                  {/* Special Policy Options (Frequency, Suvidha Conversion, Ceasing Age) */}
-                  <SpecialPolicyOptions
-                    scheme={scheme}
-                    policyType={policyType}
-                    frequency={frequency}
-                    onFrequencyChange={setFrequency}
-                    isConverted={isConverted}
-                    onToggleConverted={setIsConverted}
-                    premiumCeasingAge={premiumCeasingAge}
-                    onPremiumCeasingAgeChange={setPremiumCeasingAge}
-                    computedAge={computedAge}
-                  />
-
-                  {/* Effective Date of Quotation */}
-                  <div>
-                    <label className="block text-sm font-semibold text-(--text-dark) mb-2">
-                      Effective Date of Quotation / Policy Commencement Date
-                    </label>
-                    <input
-                      type="date"
-                      value={effectiveDate}
-                      suppressHydrationWarning
-                      onChange={(e) => setEffectiveDate(e.target.value)}
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-(--primary-red) outline-none"
-                    />
-                  </div>
-
-                  {/* Dynamic Age Inputs based on Policy Type */}
+                  {/* 2. Dynamic Age Inputs based on Policy Type */}
                   {policyType === 'YUGAL_SURAKSHA' ? (
                     <JointLifeInputs
                       jointAgeMode={jointAgeMode}
@@ -230,7 +188,7 @@ export default function CalculatorPage() {
                     />
                   )}
 
-                  {/* Sum Assured Input */}
+                  {/* 3. Sum Assured Input with Steppers */}
                   <SumAssuredSelector
                     scheme={scheme}
                     policyType={policyType}
@@ -240,7 +198,7 @@ export default function CalculatorPage() {
                     onCustomSumAssuredChange={handleCustomSumAssuredChange}
                   />
 
-                  {/* Policy Term / Maturity Duration Controls */}
+                  {/* 4. Policy Term / Maturity Duration Controls */}
                   <TermSelector
                     policyType={policyType}
                     isConverted={isConverted}
@@ -254,6 +212,66 @@ export default function CalculatorPage() {
                     calculatedDuration={quotationResult.duration}
                     calculatedMaturityAge={quotationResult.maturityAge}
                   />
+
+                  {/* 5. Special Policy Options (Frequency & Conversion) */}
+                  <SpecialPolicyOptions
+                    scheme={scheme}
+                    policyType={policyType}
+                    frequency={frequency}
+                    onFrequencyChange={setFrequency}
+                    isConverted={isConverted}
+                    onToggleConverted={setIsConverted}
+                    premiumCeasingAge={premiumCeasingAge}
+                    onPremiumCeasingAgeChange={setPremiumCeasingAge}
+                    computedAge={computedAge}
+                  />
+
+                  {/* 6. Advanced Proposer Details Accordion */}
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                      className="w-full p-4 flex items-center justify-between text-left font-bold text-xs text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        <i className="ri-user-settings-line text-(--primary-red) text-base"></i>
+                        <span>Proposer Identity & Commencement Details (Optional)</span>
+                      </div>
+                      <i className={`ri-arrow-down-s-line text-lg transition-transform duration-200 ${showAdvancedOptions ? 'rotate-180' : ''}`}></i>
+                    </button>
+
+                    {showAdvancedOptions && (
+                      <div className="p-4 pt-2 border-t border-slate-200/80 space-y-4 bg-white">
+                        <PersonalInfoInputs
+                          scheme={scheme}
+                          fullName={fullName}
+                          onFullNameChange={setFullName}
+                          gender={gender}
+                          onGenderChange={setGender}
+                          eligibilityCategory={eligibilityCategory}
+                          onCategoryChange={setEligibilityCategory}
+                          isRuralResident={isRuralResident}
+                          onRuralResidentChange={setIsRuralResident}
+                          ageProofType={ageProofType}
+                          onAgeProofTypeChange={setAgeProofType}
+                          bankAccountType={bankAccountType}
+                          onBankAccountTypeChange={setBankAccountType}
+                        />
+
+                        <div>
+                          <label className="block text-xs font-semibold text-(--text-dark) mb-1.5">
+                            Effective Date of Quotation / Policy Commencement Date
+                          </label>
+                          <input
+                            type="date"
+                            value={effectiveDate}
+                            suppressHydrationWarning
+                            onChange={(e) => setEffectiveDate(e.target.value)}
+                            className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:border-(--primary-red) outline-none"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </form>
               </div>
             </div>

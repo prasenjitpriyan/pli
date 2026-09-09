@@ -6,6 +6,124 @@ import { motion } from 'motion/react';
 import { solveGoalPlan, GoalType, TargetMode, formatINR } from '@/lib/insurance';
 import { ProposalModal, ProposalModalProps } from '@/components/common/ProposalModal';
 
+interface WealthGrowthChartProps {
+  id: string;
+  milestones: { year: number; cumulativePaid: number; accruedCorpus: number }[];
+  totalPaid: number;
+  maturityAmount: number;
+  durationYears: number;
+  sumAssured: number;
+}
+
+function WealthGrowthChart({
+  id,
+  milestones,
+  totalPaid,
+  maturityAmount,
+  durationYears,
+  sumAssured,
+}: WealthGrowthChartProps) {
+  const width = 320;
+  const height = 110;
+  const padX = 14;
+  const padTop = 14;
+  const padBottom = 22;
+  const plotW = width - padX * 2;
+  const plotH = height - padTop - padBottom;
+
+  const maxY = Math.max(maturityAmount, totalPaid, 1) * 1.05;
+
+  const pointsData = [
+    { year: 0, paid: 0, corpus: sumAssured },
+    ...milestones.map((m) => ({ year: m.year, paid: m.cumulativePaid, corpus: m.accruedCorpus })),
+    { year: durationYears, paid: totalPaid, corpus: maturityAmount },
+  ];
+  const uniquePoints = pointsData
+    .filter((p, i, self) => i === self.findIndex((t) => t.year === p.year))
+    .sort((a, b) => a.year - b.year);
+
+  const getX = (yr: number) => padX + (yr / Math.max(1, durationYears)) * plotW;
+  const getY = (val: number) => padTop + plotH - (val / maxY) * plotH;
+
+  const paidPath = uniquePoints
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(p.year).toFixed(1)} ${getY(p.paid).toFixed(1)}`)
+    .join(' ');
+  const corpusPath = uniquePoints
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(p.year).toFixed(1)} ${getY(p.corpus).toFixed(1)}`)
+    .join(' ');
+
+  const areaCorpusPath = `${corpusPath} L ${getX(durationYears).toFixed(1)} ${(padTop + plotH).toFixed(1)} L ${getX(0).toFixed(1)} ${(padTop + plotH).toFixed(1)} Z`;
+
+  return (
+    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-white select-none">
+      <div className="flex items-center justify-between text-[10px] mb-1 font-semibold text-slate-300">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+          Guaranteed Maturity
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>
+          Cumulative Premium Outflow
+        </span>
+      </div>
+
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-24 overflow-visible">
+        <defs>
+          <linearGradient id={`gradCorpus-${id}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
+
+        {/* Base Grid line */}
+        <line
+          x1={padX}
+          y1={padTop + plotH}
+          x2={width - padX}
+          y2={padTop + plotH}
+          stroke="#334155"
+          strokeWidth="1"
+        />
+
+        {/* Area fill */}
+        <path d={areaCorpusPath} fill={`url(#gradCorpus-${id})`} />
+
+        {/* Cumulative Outflow line (Blue dashed) */}
+        <path d={paidPath} fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="3 2" />
+
+        {/* Maturity Corpus line (Emerald solid) */}
+        <path d={corpusPath} fill="none" stroke="#34d399" strokeWidth="2.5" />
+
+        {/* End points */}
+        <circle
+          cx={getX(durationYears)}
+          cy={getY(maturityAmount)}
+          r="3.5"
+          fill="#34d399"
+          stroke="#064e3b"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx={getX(durationYears)}
+          cy={getY(totalPaid)}
+          r="3"
+          fill="#60a5fa"
+          stroke="#1e3a8a"
+          strokeWidth="1.5"
+        />
+
+        {/* Axis Labels */}
+        <text x={padX} y={height - 4} fill="#94a3b8" fontSize="9" fontWeight="600">
+          Yr 0 (₹0)
+        </text>
+        <text x={width - padX} y={height - 4} fill="#34d399" fontSize="9" fontWeight="700" textAnchor="end">
+          Yr {durationYears} ({formatINR(maturityAmount)})
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 export default function GoalPlannerPage() {
   const [goalType, setGoalType] = useState<GoalType>('RETIREMENT');
   const [targetMode, setTargetMode] = useState<TargetMode>('CORPUS');
@@ -324,6 +442,52 @@ export default function GoalPlannerPage() {
                         <span className="font-bold text-emerald-800">~{formatINR(plan.annualTaxSavings80C)}/yr</span>
                       </div>
                     </div>
+
+                    {/* Principal vs Bonus Ratio Pill */}
+                    {(() => {
+                      const investedPct = Math.min(
+                        100,
+                        Math.max(
+                          0,
+                          Math.round((plan.totalPremiumsPaid / Math.max(1, plan.estimatedMaturityAmount)) * 100)
+                        )
+                      );
+                      const bonusPct = Math.max(0, 100 - investedPct);
+                      return (
+                        <div className="space-y-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200/70">
+                          <div className="flex justify-between text-[11px] font-bold">
+                            <span className="text-slate-600">Principal Invested ({investedPct}%)</span>
+                            <span className="text-emerald-700">Accrued Bonus Profit ({bonusPct}%)</span>
+                          </div>
+                          <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden flex">
+                            <div
+                              className="bg-blue-600 h-full transition-all duration-500"
+                              style={{ width: `${investedPct}%` }}
+                              title={`Principal: ${formatINR(plan.totalPremiumsPaid)}`}
+                            />
+                            <div
+                              className="bg-emerald-500 h-full transition-all duration-500"
+                              style={{ width: `${bonusPct}%` }}
+                              title={`Accrued Bonus: ${formatINR(plan.totalBonusAccrued)}`}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px] text-slate-500 font-medium">
+                            <span>{formatINR(plan.totalPremiumsPaid)} Outflow</span>
+                            <span className="text-emerald-600 font-semibold">+{formatINR(plan.totalBonusAccrued)} Growth</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Visual Wealth Accumulation Curve */}
+                    <WealthGrowthChart
+                      id={`${plan.policyType}-${idx}`}
+                      milestones={plan.milestones}
+                      totalPaid={plan.totalPremiumsPaid}
+                      maturityAmount={plan.estimatedMaturityAmount}
+                      durationYears={horizonYears}
+                      sumAssured={plan.recommendedSumAssured}
+                    />
 
                     {/* Milestones Preview */}
                     <div className="p-3 bg-slate-50 rounded-xl space-y-1.5 text-[10px] border border-slate-200/60">

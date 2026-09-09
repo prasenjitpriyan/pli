@@ -24,6 +24,9 @@ export default function PolicyComparisonPage() {
     { scheme: 'RPLI', policyType: 'GRAM_SANTOSH' },
   ]);
 
+  // Mobile active slot filter
+  const [activeMobileSlot, setActiveMobileSlot] = useState<number | 'ALL'>('ALL');
+
   // Proposal modal state
   const [selectedProposalIndex, setSelectedProposalIndex] = useState<number | null>(null);
 
@@ -213,12 +216,57 @@ export default function PolicyComparisonPage() {
           </div>
         </div>
 
+        {/* Mobile Slot Switcher Tabs (< md) */}
+        <div className="flex md:hidden items-center justify-center p-1 bg-slate-200/80 rounded-xl gap-1 text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setActiveMobileSlot('ALL')}
+            className={`flex-1 py-2 rounded-lg transition-all text-center cursor-pointer ${
+              activeMobileSlot === 'ALL'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}>
+            Show All
+          </button>
+          {slots.map((s, sIdx) => {
+            const label =
+              s.scheme === 'PLI'
+                ? (POLICY_REGISTRY[s.policyType as keyof typeof POLICY_REGISTRY]?.name?.split(' ')[0] || `Slot ${sIdx + 1}`)
+                : (RPLI_POLICY_REGISTRY[s.policyType as keyof typeof RPLI_POLICY_REGISTRY]?.name?.split(' ')[0] || `Slot ${sIdx + 1}`);
+            return (
+              <button
+                key={sIdx}
+                type="button"
+                onClick={() => setActiveMobileSlot(sIdx)}
+                className={`flex-1 py-2 rounded-lg transition-all text-center cursor-pointer truncate px-1 ${
+                  activeMobileSlot === sIdx
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}>
+                #{sIdx + 1} {label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Comparison Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {slots.map((slot, idx) => {
             const comp = computedSlots[idx];
             const isLowest = lowestPremiumIdx === idx;
             const isHighestMaturity = highestMaturityIdx === idx;
+            const isMobileHidden = activeMobileSlot !== 'ALL' && activeMobileSlot !== idx;
+
+            const slot1Comp = computedSlots[0];
+            const slot1Quote = slot1Comp?.valid ? slot1Comp.quote : null;
+            const monthlyDelta =
+              idx > 0 && comp.valid && comp.quote && slot1Quote
+                ? comp.quote.netMonthlyPremium - slot1Quote.netMonthlyPremium
+                : null;
+            const maturityDelta =
+              idx > 0 && comp.valid && comp.quote && slot1Quote
+                ? comp.quote.maturityAmount - slot1Quote.maturityAmount
+                : null;
 
             return (
               <motion.div
@@ -226,9 +274,9 @@ export default function PolicyComparisonPage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.1 }}
-                className={`bg-white rounded-2xl border-2 flex flex-col justify-between shadow-md transition-all overflow-hidden ${
+                className={`bg-white rounded-2xl border-2 flex-col justify-between shadow-md transition-all overflow-hidden ${
                   isHighestMaturity ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-slate-200'
-                }`}>
+                } ${isMobileHidden ? 'hidden md:flex' : 'flex'}`}>
                 {/* Column Selector Header */}
                 <div className="p-4 bg-slate-50 border-b border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
@@ -318,6 +366,29 @@ export default function PolicyComparisonPage() {
                         <span className="text-[10px] text-slate-400 block mt-0.5">
                           (₹{(comp.quote.netMonthlyPremium * 12).toLocaleString('en-IN')}/year • 0% GST)
                         </span>
+
+                        {/* Relative Delta Badges */}
+                        {idx === 0 ? (
+                          <span className="inline-block mt-2 px-2.5 py-0.5 bg-slate-200 text-slate-700 rounded-full text-[10px] font-bold">
+                            📌 Slot #1 Baseline Reference
+                          </span>
+                        ) : monthlyDelta !== null ? (
+                          <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+                            {monthlyDelta < 0 ? (
+                              <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">
+                                📉 -{formatINR(Math.abs(monthlyDelta))}/mo cheaper vs #1
+                              </span>
+                            ) : monthlyDelta > 0 ? (
+                              <span className="px-2.5 py-0.5 bg-rose-100 text-rose-800 rounded-full text-[10px] font-bold">
+                                📈 +{formatINR(monthlyDelta)}/mo vs #1
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">
+                                Equal monthly cost to #1
+                              </span>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className="space-y-2.5 text-xs text-slate-700 divide-y divide-slate-100">
@@ -337,9 +408,25 @@ export default function PolicyComparisonPage() {
                           <span className="text-slate-500 font-medium">Total Premiums Paid</span>
                           <span className="font-bold text-slate-900">{formatINR(comp.totalPaid!)}</span>
                         </div>
-                        <div className="flex justify-between items-center pt-2 bg-amber-50/60 p-2 rounded-lg">
-                          <span className="font-bold text-amber-900">Estimated Maturity</span>
-                          <span className="font-black text-amber-950 text-sm">{formatINR(comp.quote.maturityAmount)}</span>
+                        <div className="flex justify-between items-center pt-2 bg-amber-50/60 p-2.5 rounded-lg">
+                          <div>
+                            <span className="font-bold text-amber-900 block text-xs">Estimated Maturity</span>
+                            {idx > 0 && maturityDelta !== null ? (
+                              <span
+                                className={`text-[10px] font-extrabold ${
+                                  maturityDelta > 0 ? 'text-emerald-700' : maturityDelta < 0 ? 'text-rose-700' : 'text-slate-500'
+                                }`}>
+                                {maturityDelta > 0
+                                  ? `+${formatINR(maturityDelta)} vs #1`
+                                  : maturityDelta < 0
+                                    ? `-${formatINR(Math.abs(maturityDelta))} vs #1`
+                                    : 'Identical payout'}
+                              </span>
+                            ) : null}
+                          </div>
+                          <span className="font-black text-amber-950 text-sm sm:text-base">
+                            {formatINR(comp.quote.maturityAmount)}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center pt-1.5">
                           <span className="text-slate-500 font-medium">Net Profit / Wealth Gain</span>

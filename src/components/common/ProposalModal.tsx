@@ -42,6 +42,60 @@ export interface ProposalModalProps {
   };
 }
 
+function OfficialVerificationQr({ refNumber }: { refNumber: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center p-1.5 bg-slate-50 border border-slate-300 rounded-lg shadow-2xs">
+      <svg
+        className="w-12 h-12"
+        viewBox="0 0 33 33"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        {/* Top-Left Finder */}
+        <rect x="1" y="1" width="9" height="9" fill="#1e293b" />
+        <rect x="2.5" y="2.5" width="6" height="6" fill="#ffffff" />
+        <rect x="4" y="4" width="3" height="3" fill="#1e293b" />
+
+        {/* Top-Right Finder */}
+        <rect x="23" y="1" width="9" height="9" fill="#1e293b" />
+        <rect x="24.5" y="2.5" width="6" height="6" fill="#ffffff" />
+        <rect x="26" y="4" width="3" height="3" fill="#1e293b" />
+
+        {/* Bottom-Left Finder */}
+        <rect x="1" y="23" width="9" height="9" fill="#1e293b" />
+        <rect x="2.5" y="24.5" width="6" height="6" fill="#ffffff" />
+        <rect x="4" y="26" width="3" height="3" fill="#1e293b" />
+
+        {/* Timing pattern & modules */}
+        <rect x="12" y="2" width="2" height="2" fill="#1e293b" />
+        <rect x="16" y="2" width="2" height="2" fill="#1e293b" />
+        <rect x="19" y="2" width="2" height="2" fill="#1e293b" />
+        <rect x="2" y="12" width="2" height="2" fill="#1e293b" />
+        <rect x="2" y="16" width="2" height="2" fill="#1e293b" />
+        <rect x="2" y="19" width="2" height="2" fill="#1e293b" />
+
+        {/* Data points */}
+        <rect x="12" y="12" width="3" height="3" fill="#991b1b" />
+        <rect x="18" y="12" width="3" height="3" fill="#1e293b" />
+        <rect x="14" y="17" width="4" height="2" fill="#1e293b" />
+        <rect x="12" y="22" width="2" height="4" fill="#1e293b" />
+        <rect x="17" y="22" width="4" height="2" fill="#1e293b" />
+        <rect x="24" y="12" width="2" height="3" fill="#1e293b" />
+        <rect x="28" y="14" width="3" height="2" fill="#1e293b" />
+        <rect x="23" y="18" width="4" height="2" fill="#1e293b" />
+        <rect x="24" y="23" width="3" height="3" fill="#1e293b" />
+        <rect x="29" y="25" width="2" height="5" fill="#1e293b" />
+        <rect x="24" y="28" width="3" height="2" fill="#1e293b" />
+        <rect x="12" y="28" width="4" height="2" fill="#1e293b" />
+        <rect x="18" y="27" width="2" height="3" fill="#1e293b" />
+      </svg>
+      <span className="text-[7px] font-bold text-slate-700 mt-0.5 uppercase tracking-tight text-center">
+        Scan to Verify
+      </span>
+      <span className="text-[6px] font-mono text-slate-400">{refNumber.slice(0, 12)}</span>
+    </div>
+  );
+}
+
 export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalProps) {
   if (!isOpen) return null;
 
@@ -93,7 +147,50 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
 
   return (
     <div className="fixed inset-0 z-110 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col">
+      {/* Universal Print Styles for A4 Page Breaks */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media print {
+              @page {
+                size: A4 portrait;
+                margin: 8mm;
+              }
+              body * {
+                visibility: hidden !important;
+              }
+              #printable-proposal-modal,
+              #printable-proposal-modal * {
+                visibility: visible !important;
+              }
+              #printable-proposal-modal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+              }
+              .no-print {
+                display: none !important;
+              }
+              tr {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+              }
+              .avoid-break {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+              }
+            }
+          `,
+        }}
+      />
+
+      <div
+        id="printable-proposal-modal"
+        className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col">
         {/* Modal Top Bar */}
         <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between no-print">
           <div className="flex items-center gap-2">
@@ -117,9 +214,9 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
         {/* Printable Proposal Document Body */}
         <div className="p-6 sm:p-8 overflow-y-auto print:p-0 print:overflow-visible text-slate-800 text-xs">
           {/* Government Header */}
-          <div className="border-b-2 border-red-800 pb-4 flex items-center justify-between">
+          <div className="border-b-2 border-red-800 pb-4 flex items-center justify-between avoid-break">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12">
+              <div className="w-12 h-12 shrink-0">
                 <PliEmblemSvg />
               </div>
               <div>
@@ -134,16 +231,20 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <span className="inline-block px-2.5 py-0.5 bg-red-100 text-red-900 rounded font-mono font-bold text-[11px]">
-                {referenceNumber}
-              </span>
-              <p className="text-[10px] text-slate-400 mt-1">Generated: {new Date().toLocaleDateString('en-IN')}</p>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <span className="inline-block px-2.5 py-0.5 bg-red-100 text-red-900 rounded font-mono font-bold text-[11px]">
+                  {referenceNumber}
+                </span>
+                <p className="text-[10px] text-slate-400 mt-1">Generated: {new Date().toLocaleDateString('en-IN')}</p>
+                <p className="text-[9px] text-emerald-800 font-bold mt-0.5">Official Quote</p>
+              </div>
+              <OfficialVerificationQr refNumber={referenceNumber} />
             </div>
           </div>
 
           {/* Proposal Meta Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl avoid-break">
             <div>
               <span className="text-[10px] text-slate-500 block uppercase font-medium">Proposed Insured</span>
               <span className="font-bold text-slate-900 text-sm">{clientName}</span>
@@ -167,7 +268,7 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
           </div>
 
           {/* Financial Summary Highlight Banner */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-center avoid-break">
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
               <span className="text-[10px] uppercase font-bold text-red-800 block">Sum Assured</span>
               <span className="text-base font-black text-red-950">{formatINR(sumAssured)}</span>
@@ -190,7 +291,7 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
           </div>
 
           {/* Facilities Summary */}
-          <div className="flex flex-wrap items-center gap-2 mb-4 text-[11px]">
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-[11px] avoid-break">
             <span className="font-bold text-slate-700">Official Policy Facilities:</span>
             {loanEligibleYears ? (
               <span className="px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded font-semibold">
@@ -210,7 +311,7 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
           </div>
 
           {/* Detailed Year-by-Year Cashflow Table */}
-          <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center justify-between">
+          <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2 flex items-center justify-between avoid-break">
             <span>Actuarial Cashflow & Coverage Schedule</span>
             <span className="text-[10px] text-slate-500 font-normal">All amounts in Indian Rupees (₹)</span>
           </h3>
@@ -218,7 +319,7 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
             <div className="max-h-72 overflow-y-auto print:max-h-none">
               <table className="w-full text-left text-[11px] border-collapse">
                 <thead className="bg-slate-100 text-slate-700 font-bold sticky top-0 print:static">
-                  <tr>
+                  <tr className="avoid-break">
                     <th className="p-2 border-b border-slate-200">Year</th>
                     <th className="p-2 border-b border-slate-200">Age</th>
                     <th className="p-2 border-b border-slate-200 text-right">Annual Premium</th>
@@ -232,7 +333,7 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-mono">
                   {schedule.map((row) => (
-                    <tr key={row.year} className="hover:bg-slate-50">
+                    <tr key={row.year} className="hover:bg-slate-50 avoid-break">
                       <td className="p-2 font-bold text-slate-900">Yr {row.year}</td>
                       <td className="p-2 text-slate-600">{row.age} yrs</td>
                       <td className="p-2 text-right text-slate-700">{formatINR(row.premiumPaid)}</td>
@@ -252,7 +353,7 @@ export function ProposalModal({ isOpen, onClose, proposalData }: ProposalModalPr
           </div>
 
           {/* Tax & Sovereign Guarantee Footer */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-600">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-600 avoid-break">
             <div>
               <h4 className="font-bold text-slate-900 mb-1 flex items-center gap-1">
                 <i className="ri-shield-check-line text-emerald-700 text-xs"></i> Tax Deductions & Guarantees
