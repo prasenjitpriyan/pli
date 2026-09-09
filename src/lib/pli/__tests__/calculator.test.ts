@@ -41,6 +41,13 @@ describe('1. Age Calculator & Next Birthday (ANB) Derivation', () => {
     expect(res.duration).toBe(30);
     expect(res.maturityAge).toBe(60);
   });
+
+  it('resiliently handles invalid or malformed date strings without throwing', () => {
+    const res = calculateAge('not-a-valid-date', 'also-invalid', 28, true);
+    expect(res.completedAge).toBe(28);
+    expect(res.ageNextBirthday).toBe(29);
+    expect(res.effectiveDate).toBeDefined();
+  });
 });
 
 describe('2. Boundary Entry Age Validations (TDD)', () => {

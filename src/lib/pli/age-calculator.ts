@@ -17,7 +17,7 @@ export function calculateAge(
   age: number; // Returns ageNextBirthday for official PLI/RPLI calculation
   effectiveDate: string;
 } {
-  const effectiveDate = effectiveDateStr
+  const effectiveDate = effectiveDateStr && !isNaN(new Date(effectiveDateStr).getTime())
     ? new Date(effectiveDateStr)
     : new Date();
   
@@ -25,26 +25,28 @@ export function calculateAge(
 
   if (dateOfBirth) {
     const dob = new Date(dateOfBirth);
-    let completed = effectiveDate.getFullYear() - dob.getFullYear();
-    const monthDiff = effectiveDate.getMonth() - dob.getMonth();
-    
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && effectiveDate.getDate() < dob.getDate())
-    ) {
-      completed--;
+    if (!isNaN(dob.getTime())) {
+      let completed = effectiveDate.getFullYear() - dob.getFullYear();
+      const monthDiff = effectiveDate.getMonth() - dob.getMonth();
+      
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && effectiveDate.getDate() < dob.getDate())
+      ) {
+        completed--;
+      }
+
+      const completedAge = Math.max(0, completed);
+      // Under India Post PLI & RPLI rules, entry age is Age as on Next Birthday (ANB)
+      const ageNextBirthday = completedAge + 1;
+
+      return {
+        completedAge,
+        ageNextBirthday,
+        age: ageNextBirthday,
+        effectiveDate: formattedEffectiveDate,
+      };
     }
-
-    const completedAge = Math.max(0, completed);
-    // Under India Post PLI & RPLI rules, entry age is Age as on Next Birthday (ANB)
-    const ageNextBirthday = completedAge + 1;
-
-    return {
-      completedAge,
-      ageNextBirthday,
-      age: ageNextBirthday,
-      effectiveDate: formattedEffectiveDate,
-    };
   }
 
   const baseAge = Math.max(0, providedAge ?? 20);
